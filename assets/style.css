@@ -1,0 +1,150 @@
+:root {
+  --bg-primary: #0D0D0D;
+  --bg-secondary: #1A1A1A;
+  --bg-tertiary: #242424;
+  --accent-green: #00FF87;
+  --accent-red: #FF3131;
+  --accent-blue: #00A3FF;
+  --accent-yellow: #FFD600;
+  --text-primary: #F0F0F0;
+  --text-secondary: #8A8A8A;
+  --border-color: #2E2E2E;
+  --font-main: 'Inter', 'Roboto', sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body, .block-container, .main, .stApp {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-main) !important;
+}
+
+.stApp {
+  background: var(--bg-primary) !important;
+}
+
+[data-testid="stSidebar"] {
+  background: var(--bg-secondary) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+[data-testid="stMetric"] {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+}
+
+[data-testid="stButton"] > button {
+  background: var(--accent-green) !important;
+  color: var(--bg-primary) !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 4px !important;
+}
+
+[data-testid="stNumberInput"] input {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-baseweb="tab"][aria-selected="true"] {
+  border-bottom: 2px solid var(--accent-green) !important;
+  color: var(--accent-green) !important;
+}
+
+[data-testid="stExpander"] {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+}
+
+.pitwall-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.pitwall-tire-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  min-width: 100px;
+  text-align: center;
+}
+
+.tire-optimal {
+  border-color: var(--accent-green);
+  background: rgba(0, 255, 135, 0.05);
+}
+
+.tire-hot {
+  border-color: var(--accent-red);
+  background: rgba(255, 49, 49, 0.05);
+}
+
+.tire-cold {
+  border-color: var(--accent-blue);
+  background: rgba(0, 163, 255, 0.05);
+}
+
+.tire-warning {
+  border-color: var(--accent-yellow);
+  background: rgba(255, 214, 0, 0.05);
+}
+
+.pitwall-engineer-report {
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-green);
+  border-radius: 0 8px 8px 0;
+  padding: 24px;
+  font-family: var(--font-main);
+}
+
+.data-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.data-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-online {
+  background: rgba(0, 255, 135, 0.15);
+  color: var(--accent-green);
+}
+
+.status-offline {
+  background: rgba(255, 49, 49, 0.15);
+  color: var(--accent-red);
+}
+
+/* Divider override per stile PitWall */
+.stDivider {
+  border-color: var(--border-color) !important;
+}

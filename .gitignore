@@ -1,0 +1,24 @@
+# Variabili d'ambiente — API keys
+.env
+
+# Database SQLite locale — dati di sessione
+database/pitwall.db
+backend/database.db
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Ambienti virtuali
+venv/
+.venv/
+env/
+
+# File di sistema
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
