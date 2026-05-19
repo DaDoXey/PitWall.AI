@@ -126,44 +126,45 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
 
     analyze_clicked = st.button("🔍 ANALIZZA SESSIONE", use_container_width=True)
     if analyze_clicked:
-            invalid_pressure = [
-                p for p in pressures.values()
-                if not ACCPhysicsEngine.validate_pressure_context(p, ctx)
-            ]
-            invalid_temp = [t for t in temperatures.values() if not validate_temperature(t)]
+        invalid_pressure = [
+            p for p in pressures.values()
+            if not ACCPhysicsEngine.validate_pressure_context(p, ctx)
+        ]
+        invalid_temp = [t for t in temperatures.values() if not validate_temperature(t)]
 
-            if invalid_pressure:
-                range_name = "freddo" if ctx == "cold" else "caldo"
-                st.error(
-                    f"Verifica le pressioni: alcuni valori non rientrano nel range "
-                    f"consentito per la pressione a {range_name}."
-                )
-                return
-            if invalid_temp:
-                st.error(
-                    "Verifica le temperature: alcuni valori non rientrano nel range "
-                    "operativo previsto per le gomme.")
-                return
-            if not pilot_feedback.strip():
-                st.error("Inserisci il feedback del pilota prima di avviare l'analisi.")
-                return
+        if invalid_pressure:
+            range_name = "freddo" if ctx == "cold" else "caldo"
+            st.error(
+                f"Verifica le pressioni: alcuni valori non rientrano nel range "
+                f"consentito per la pressione a {range_name}."
+            )
+            return
+        if invalid_temp:
+            st.error(
+                "Verifica le temperature: alcuni valori non rientrano nel range "
+                "operativo previsto per le gomme."
+            )
+            return
+        if not pilot_feedback.strip():
+            st.error("Inserisci il feedback del pilota prima di avviare l'analisi.")
+            return
 
-            with st.spinner("Analisi in corso — Race Engineer al lavoro..."):
-                session_payload = {
-                    "car": sidebar_data.get("car"),
-                    "track": sidebar_data.get("track"),
-                    "conditions": sidebar_data.get("conditions"),
-                    "ambient_temp": sidebar_data.get("ambient_temp"),
-                    "track_temp": sidebar_data.get("track_temp"),
-                    "pressures": pressures,
-                    "temperatures": temperatures,
-                }
-                engine = ClaudeEngine()
-                try:
-                    markdown_response = engine.generate_commentary(session_payload, pilot_feedback)
-                except Exception as exc:
-                    st.error(f"Errore durante la chiamata AI: {exc}")
-                    return
+        with st.spinner("Analisi in corso — Race Engineer al lavoro..."):
+            session_payload = {
+                "car": sidebar_data.get("car"),
+                "track": sidebar_data.get("track"),
+                "conditions": sidebar_data.get("conditions"),
+                "ambient_temp": sidebar_data.get("ambient_temp"),
+                "track_temp": sidebar_data.get("track_temp"),
+                "pressures": pressures,
+                "temperatures": temperatures,
+            }
+            engine = ClaudeEngine()
+            try:
+                markdown_response = engine.generate_commentary(session_payload, pilot_feedback)
+            except Exception as exc:
+                st.error(f"Errore durante la chiamata AI: {exc}")
+                return
 
         target = (
             ACCPhysicsEngine.CONSTANTS.TARGET_PRESSURE_COLD
@@ -172,6 +173,7 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
         )
         delta_target = sum(p - target for p in pressures.values()) / 4
         max_delta = max(abs(p - target) for p in pressures.values())
+        status = (
             "OTTIMALE"
             if max_delta <= 0.3
             else "ATTENZIONE"
@@ -194,7 +196,10 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
 
             render_engineer_report(markdown_response, physics_data)
         except ImportError:
-            st.error("Componente report non disponibile. Controlla la fase 6.")
+            st.error(
+                "Componente report non disponibile. Verificare che components/engineer_report.py "
+                "sia presente e importabile nel progetto."
+            )
 
     with st.expander("⚙️ Parametri Avanzati — Tweaker Mode", expanded=False):
         col1, col2, col3 = st.columns(3)
