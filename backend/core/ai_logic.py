@@ -11,6 +11,7 @@ class ClaudeEngine:
     MODEL = "claude-opus-4-7"
     ENDPOINT = "https://api.anthropic.com/v1/messages"
     DEFAULT_API_VERSION = "2023-06-01"
+    REQUEST_TIMEOUT = 60
 
     def __init__(self, system_prompt_path: Optional[str] = None):
         root = Path(__file__).resolve().parents[2]
@@ -100,7 +101,12 @@ class ClaudeEngine:
 
     def _post_with_fallback(self, body: Dict[str, Any]) -> requests.Response:
         headers = self._build_headers(True)
-        response = requests.post(self.ENDPOINT, headers=headers, json=body, timeout=30)
+        response = requests.post(
+            self.ENDPOINT,
+            headers=headers,
+            json=body,
+            timeout=self.REQUEST_TIMEOUT,
+        )
         if response.status_code == 400:
             try:
                 error_detail = response.json().get("error", {})
@@ -116,6 +122,6 @@ class ClaudeEngine:
                         "Anthropic-Version": self.DEFAULT_API_VERSION,
                     },
                     json=body,
-                    timeout=30,
+                    timeout=self.REQUEST_TIMEOUT,
                 )
         return response
