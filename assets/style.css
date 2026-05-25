@@ -182,8 +182,8 @@ body, .block-container, .main, .stApp {
         linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
         linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
         linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
-    background-size: 18px 18px;
-    background-position: 0 0, 0 9px, 9px -9px, -9px 0px;
+    background-size: 48px 48px;
+    background-position: 0 0, 0 24px, 24px -24px, -24px 0px;
     opacity: 0.13;
     border-radius: 0 12px 12px 0;
 }
