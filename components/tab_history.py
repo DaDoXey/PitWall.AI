@@ -40,8 +40,12 @@ def render_tab_history() -> None:
         fetch_sessions.clear()
 
     sessions = fetch_sessions()
-    cars = ["Tutte"] + sorted({session["car"] for session in sessions if session.get("car")})
-    tracks = ["Tutti"] + sorted({session["track"] for session in sessions if session.get("track")})
+    cars = ["Tutte"] + sorted(
+        {session["car"] for session in sessions if session.get("car") is not None}
+    )
+    tracks = ["Tutti"] + sorted(
+        {session["track"] for session in sessions if session.get("track") is not None}
+    )
 
     filter_cols = st.columns(3)
     with filter_cols[0]:

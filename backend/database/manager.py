@@ -9,7 +9,11 @@ class SessionDatabase:
     """Gestisce lo storico delle sessioni ACC in SQLite."""
 
     def __init__(self, db_path: Optional[Path] = None):
-        self.db_path = Path(db_path or Path(__file__).resolve().parents[1] / "database.db")
+        if db_path:
+            self.db_path = Path(db_path)
+        else:
+            # Costruisci il percorso assoluto: backend/database.db (uno livello sopra)
+            self.db_path = Path(__file__).resolve().parent.parent / "database.db"
         self.connection = sqlite3.connect(self.db_path)
         self.connection.row_factory = sqlite3.Row
 

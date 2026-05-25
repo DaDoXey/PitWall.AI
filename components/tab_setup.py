@@ -10,6 +10,7 @@ from backend.core import (
     validate_pressure,
     validate_temperature,
 )
+from backend.database.manager import SessionDatabase
 from backend.parser.csv_parser import CSVParseError, parse_session_csv
 from components.tire_display import render_tire_grid
 from components.temp_chart import render_temperature_chart
@@ -90,6 +91,32 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
         "rr": "optimal" if abs(temp_rr - 85) <= 10 else "hot" if temp_rr > 95 else "cold",
     }
     render_tire_grid(pressures, tire_status)
+
+    st.markdown("#### AVANZATA — Parametri Tweaker Mode")
+    with st.expander("⚙️ Parametri Avanzati — Tweaker Mode", expanded=False):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            camber_front = st.number_input(
+                "Camber Ant. (°)", min_value=-4.0, max_value=-1.0, value=-2.0, step=0.1
+            )
+            camber_rear = st.number_input(
+                "Camber Post. (°)", min_value=-3.5, max_value=-0.5, value=-1.8, step=0.1
+            )
+        with col2:
+            brake_bias = st.slider("Brake Bias (%)", 50, 70, 56, step=1)
+            diff_preload = st.number_input(
+                "Precarico Diff. (Nm)", min_value=20, max_value=100, value=65, step=5
+            )
+        with col3:
+            tc1 = st.select_slider("TC1", options=list(range(0, 12)), value=3)
+            tc2 = st.select_slider("TC2", options=list(range(0, 12)), value=2)
+            abs_level = st.select_slider("ABS", options=list(range(0, 12)), value=4)
+
+        st.caption(
+            "Questi parametri vengono raccolti per lo storico, ma non vengono inviati "
+            "all'LLM nell'MVP. In una versione successiva possono essere persistiti "
+            "nella tabella sessions del database."
+        )
 
     st.markdown("#### C — Feedback Pilota")
     pilot_feedback = st.text_area(
@@ -195,33 +222,28 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
             from components.engineer_report import render_engineer_report
 
             render_engineer_report(markdown_response, physics_data)
+            
+            # Salva la sessione nel database per lo storico
+            db = SessionDatabase()
+            try:
+                db.init_db()
+                db.save_session({
+                    "timestamp": physics_data["timestamp"],
+                    "car": sidebar_data.get("car"),
+                    "track": sidebar_data.get("track"),
+                    "psi_input": pressures,
+                    "psi_suggested": None,  # MVP: non calcolato, aggiungere in futuro
+                    "temp_ambient": sidebar_data.get("ambient_temp"),
+                    "temp_track": sidebar_data.get("track_temp"),
+                    "feedback_text": pilot_feedback,
+                    "llm_response": markdown_response,
+                })
+            except Exception as exc:
+                st.warning(f"Impossibile salvare la sessione nello storico: {exc}")
+            finally:
+                db.close()
         except ImportError:
             st.error(
                 "Componente report non disponibile. Verificare che components/engineer_report.py "
                 "sia presente e importabile nel progetto."
             )
-
-    with st.expander("⚙️ Parametri Avanzati — Tweaker Mode", expanded=False):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            camber_front = st.number_input(
-                "Camber Ant. (°)", min_value=-4.0, max_value=-1.0, value=-2.0, step=0.1
-            )
-            camber_rear = st.number_input(
-                "Camber Post. (°)", min_value=-3.5, max_value=-0.5, value=-1.8, step=0.1
-            )
-        with col2:
-            brake_bias = st.slider("Brake Bias (%)", 50, 70, 56, step=1)
-            diff_preload = st.number_input(
-                "Precarico Diff. (Nm)", min_value=20, max_value=100, value=65, step=5
-            )
-        with col3:
-            tc1 = st.select_slider("TC1", options=list(range(0, 12)), value=3)
-            tc2 = st.select_slider("TC2", options=list(range(0, 12)), value=2)
-            abs_level = st.select_slider("ABS", options=list(range(0, 12)), value=4)
-
-        st.caption(
-            "Questi parametri vengono raccolti per lo storico, ma non vengono inviati "
-            "all'LLM nell'MVP. In una versione successiva possono essere persistiti "
-            "nella tabella sessions del database."
-        )
