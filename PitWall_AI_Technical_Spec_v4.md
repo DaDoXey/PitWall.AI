@@ -474,11 +474,11 @@ pytest>=8.0.0
 | TC-01 | "Ho troppo sottosterzo a centro curva sulla BMW M4 GT3 a Monza" (no CSV) | Diagnosi + causa tra diff/ARB/camber + modifica numerica nei range | Funzionale | Da verificare |
 | TC-02 | "L'auto scivola dietro in accelerazione" + CSV: `tire_temp_rr: 102°C`, `tire_press_rr: 26.8` | Diagnosi con CSV integrati, causa su pressioni/temp posteriori, correzione numerica | Integrazione | Da verificare |
 | TC-03 | "Come regolo il turbo?" | Risposta di rifiuto: parametro non regolabile in ACC | Anti-allucinazione | Da verificare |
-| TC-04 | "L'auto va male" | Richiesta di chiarimento sulla fase della curva, no diagnosi prematura | RF-06 | Da verificare |
-| TC-05 | CSV con colonne mancanti o intestazioni errate | Messaggio di errore formato, no crash | Gestione errori | Da verificare |
-| TC-06 | "Gara 20 min, consumo 3.2 L/giro, tempo giro medio 1:52" | Calcolo: ceil(20/1.867) × 3.2 × 1.05 ≈ 36.1 L | RF-04 | Da verificare |
-| TC-07 | Pilota: "troppo caldo" + CSV: `tire_temp_fl: 72°C` | Segnalazione incongruenza esplicita in sezione Diagnosi | RF-05 | Da verificare |
-| TC-08 | PSI a caldo: 26.7 — contesto selezionato "a caldo" | Sistema classifica come "cold" (sotto finestra 28.5–30.0) — NO "ottimale" | RF-07 | Da verificare |
+| TC-04 | "L'auto va male" | Richiesta di chiarimento sulla fase della curva, no diagnosi prematura | RF-06 | Verificato |
+| TC-05 | CSV con colonne mancanti o intestazioni errate | Messaggio di errore formato, no crash | Gestione errori | Verificato |
+| TC-06 | "Gara 20 min, consumo 3.2 L/giro, tempo giro medio 1:52" | Calcolo: ceil(20/1.867) × 3.2 × 1.05 ≈ 36.1 L | RF-04 | Verificato |
+| TC-07 | Pilota: "troppo caldo" + CSV: `tire_temp_fl: 72°C` | Segnalazione incongruenza esplicita in sezione Diagnosi | RF-05 | Verificato |
+| TC-08 | PSI a caldo: 26.7 — contesto selezionato "a caldo" | Sistema classifica come "cold" (sotto finestra 28.5–30.0) — NO "ottimale" | RF-07 | Verificato |
 
 > TC-08 è il test case aggiunto in v4 per validare il fix INC-002.
 
@@ -493,7 +493,7 @@ pytest>=8.0.0
 | Prompt iniziale sottoposto | System Prompt v3 sezione 6 della spec |
 | Output utile ottenuto | Struttura 4 sezioni, CoT obbligatoria, range parametri GT3 |
 | Modifiche apportate dopo il confronto | Distinzione pressioni freddo/caldo; max_tokens 1500→2500; blocco PRESSIONI nel prompt |
-| Scenari di test eseguiti | TC-01 (sottosterzo Monza), TC-02 (CSV), TC-03 (parametro inesistente) |
+| Scenari di test eseguiti | TC-01 (sottosterzo Monza), TC-02 (CSV), TC-03 (parametro inesistente), TC-04 (input vago), TC-05 (schema CSV), TC-06 (carburante), TC-07 (temperature gomme), TC-08 (pressione a caldo) |
 | Bug rilevati durante il building | INC-001 (risposta troncata), INC-002 (confusione freddo/caldo) |
 | Riferimento completo iterazioni | PROMPT_LOG.md |
 | Riferimento completo bug | INCIDENTS.md |
