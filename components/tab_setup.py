@@ -12,7 +12,10 @@ from backend.core import (
 )
 from backend.database.manager import SessionDatabase
 from backend.parser.csv_parser import CSVParseError, parse_session_csv
-from components.tire_display import render_tire_grid
+from components.tire_display import (
+    render_pressure_gauges,
+    render_temperature_gauges,
+)
 from components.temp_chart import render_temperature_chart
 
 
@@ -82,15 +85,62 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
         )
 
     temperatures = {"fl": temp_fl, "fr": temp_fr, "rl": temp_rl, "rr": temp_rr}
+    csv_data = st.session_state.get("csv_data")
 
     st.markdown("#### B bis — Visualizzazione Live Gomme")
-    tire_status = {
-        "fl": "optimal" if abs(temp_fl - 85) <= 10 else "hot" if temp_fl > 95 else "cold",
-        "fr": "optimal" if abs(temp_fr - 85) <= 10 else "hot" if temp_fr > 95 else "cold",
-        "rl": "optimal" if abs(temp_rl - 85) <= 10 else "hot" if temp_rl > 95 else "cold",
-        "rr": "optimal" if abs(temp_rr - 85) <= 10 else "hot" if temp_rr > 95 else "cold",
-    }
-    render_tire_grid(pressures, tire_status)
+    pressure_values = (
+        csv_data.get("pressures")
+        if csv_data and csv_data.get("pressures")
+        else pressures
+    )
+    temperature_values = (
+        csv_data.get("temperatures")
+        if csv_data and csv_data.get("temperatures")
+        else None
+    )
+
+    pressure_html = render_pressure_gauges(
+        pressure_values["fl"],
+        pressure_values["fr"],
+        pressure_values["rl"],
+        pressure_values["rr"],
+    )
+
+    if temperature_values:
+        temperature_html = render_temperature_gauges(
+            temperature_values["fl"],
+            temperature_values["fr"],
+            temperature_values["rl"],
+            temperature_values["rr"],
+            csv_loaded=True,
+        )
+    else:
+        temperature_html = render_temperature_gauges(
+            88.0,
+            90.0,
+            95.0,
+            102.0,
+            csv_loaded=False,
+        )
+
+    st.markdown(
+        "<div class='pitwall-live-gomme-card'>"
+        "<div class='pitwall-live-gomme-header'>🏁 LIVE GOMME</div>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    gauge_columns = st.columns(2)
+    with gauge_columns[0]:
+        st.markdown(
+            f"<div class='pitwall-live-gomme-panel'>{pressure_html}</div>",
+            unsafe_allow_html=True,
+        )
+    with gauge_columns[1]:
+        st.markdown(
+            f"<div class='pitwall-live-gomme-panel'>{temperature_html}</div>",
+            unsafe_allow_html=True,
+        )
 
     st.markdown("#### AVANZATA — Parametri Tweaker Mode")
     with st.expander("⚙️ Parametri Avanzati — Tweaker Mode", expanded=False):
@@ -131,7 +181,7 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
 
     st.markdown("#### D — Upload CSV (opzionale)")
     csv_file = st.file_uploader("📂 Carica CSV Sessione ACC (opzionale)", type=["csv"])
-    csv_data: Optional[Dict[str, Any]] = None
+    csv_data = st.session_state.get("csv_data")
 
     if csv_file is not None:
         try:
