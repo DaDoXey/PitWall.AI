@@ -11,7 +11,7 @@ from backend.core import (
     validate_pressure,
     validate_temperature,
 )
-from backend.database.manager import SessionDatabase, extract_suggested_psi
+from backend.database.manager import SessionDatabase, extract_suggested_psi, backfill_suggested_psi
 from backend.parser.csv_parser import CSVParseError, parse_session_csv
 from components.tire_display import (
     render_pressure_gauges,
@@ -178,9 +178,9 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
     # I due widget affiancati dentro st.columns
     gauge_columns = st.columns(2)
     with gauge_columns[0]:
-        components.html(pressure_html, height=300)
+        components.html(pressure_html, height=340)
     with gauge_columns[1]:
-        components.html(temperature_html, height=300)
+        components.html(temperature_html, height=320)
 
     # Chiusura visiva della card (sottile linea inferiore)
     st.markdown(

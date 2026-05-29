@@ -83,7 +83,7 @@ def render_pressure_gauges(fl: float, fr: float, rl: float, rr: float, hot_mode:
     delta_rr, color_rr = _pressure_delta_text(rr, ref_pressure)
     return (
         "<link href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap' rel='stylesheet'>"
-        "<div style='background:#111;padding:16px;border-radius:8px;border:1px solid #333;font-family:&quot;Orbitron&quot;,monospace;'>"
+        "<div style='background:#111;padding:16px;border-radius:8px;border:1px solid #333;font-family:&quot;Orbitron&quot;,monospace;overflow:visible;padding-bottom:20px;'>"
         "<div style='color:#fff;font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>🏁 PRESSIONI GOMME</div>"
         "<div style='display:flex;align-items:flex-end;justify-content:center;gap:12px;'>"
         "<div style='display:flex;flex-direction:row;gap:12px;'>"
@@ -115,7 +115,7 @@ def render_temperature_gauges(
         )
     return (
         "<link href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap' rel='stylesheet'>"
-        "<div style='background:#111;padding:16px;border-radius:8px;border:1px solid #333;font-family:&quot;Orbitron&quot;,monospace;'>"
+        "<div style='background:#111;padding:16px;border-radius:8px;border:1px solid #333;font-family:&quot;Orbitron&quot;,monospace;overflow:visible;padding-bottom:20px;'>"
         "<div style='color:#fff;font-size:1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>🌡️ TEMPERATURE GOMME</div>"
         "<div style='display:flex;align-items:flex-end;justify-content:center;gap:12px;'>"
         "<div style='display:flex;flex-direction:row;gap:12px;'>"

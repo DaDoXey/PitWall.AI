@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-from backend.database.manager import SessionDatabase
+from backend.database.manager import SessionDatabase, backfill_suggested_psi
 from components.sidebar import render_sidebar
 from components.tab_fuel import render_tab_fuel
 from components.tab_history import render_tab_history
@@ -421,6 +421,7 @@ def main() -> None:
     db = SessionDatabase()
     try:
         db.init_db()
+        backfill_suggested_psi(db.connection)
     except Exception:
         db_status = False
     finally:

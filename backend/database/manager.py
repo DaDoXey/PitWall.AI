@@ -36,6 +36,44 @@ def extract_suggested_psi(report_text: str) -> float | None:
     return round(sum(values) / len(values), 2) if values else None
 
 
+def backfill_suggested_psi(conn: sqlite3.Connection) -> None:
+    """
+    Aggiorna i record esistenti che hanno psi_suggested NULL o 'N/A'
+    estraendo il valore dal campo llm_response già salvato.
+    Eseguire solo una volta all'avvio dell'app per backfill dati storici.
+    """
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            "SELECT session_id, llm_response FROM sessions "
+            "WHERE psi_suggested IS NULL OR psi_suggested = '\"N/A\"' OR psi_suggested = 'null'"
+        )
+        rows = cursor.fetchall()
+    except Exception:
+        return  # Colonna non esistente o altro errore, skip silenzioso
+
+    updated = 0
+    for row in rows:
+        session_id = row[0]
+        report_text = row[1]
+        if not report_text:
+            continue
+
+        try:
+            psi = extract_suggested_psi(report_text)
+            if psi is not None:
+                cursor.execute(
+                    "UPDATE sessions SET psi_suggested = ? WHERE session_id = ?",
+                    (json.dumps(psi), session_id),
+                )
+                updated += 1
+        except Exception:
+            continue
+
+    conn.commit()
+
+
 class SessionDatabase:
     """Gestisce lo storico delle sessioni ACC in SQLite."""
 
