@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, Optional
@@ -10,7 +11,7 @@ from backend.core import (
     validate_pressure,
     validate_temperature,
 )
-from backend.database.manager import SessionDatabase
+from backend.database.manager import SessionDatabase, extract_suggested_psi
 from backend.parser.csv_parser import CSVParseError, parse_session_csv
 from components.tire_display import (
     render_pressure_gauges,
@@ -25,9 +26,21 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
     Questo componente gestisce i controlli di input, la validazione fisica tramite
     backend/core/physics.py e la chiamata all'LLM tramite backend/core/ai_logic.py.
     """
-    st.markdown("## Analisi Setup")
+    st.markdown(
+        '<h2 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'Analisi Setup</h2>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown("#### A — Input Pressioni")
+    st.markdown(
+        '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'A — Input Pressioni</h3>',
+        unsafe_allow_html=True
+    )
 
     pressure_context = st.radio(
         "I valori PSI che stai inserendo sono:",
@@ -44,105 +57,145 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
 
     # Converti la selezione nel formato atteso da physics.py
     ctx = "cold" if "freddo" in pressure_context else "hot"
+    hot_mode = ctx == "hot"
 
     row1 = st.columns([1, 1])
     with row1[0]:
         psi_fl = st.number_input(
             "Pressione FL (PSI)", min_value=20.0, max_value=35.0, value=26.7,
-            step=0.1, format="%.1f"
+            step=0.1, format="%.1f", key="press_fl"
         )
         psi_rl = st.number_input(
             "Pressione RL (PSI)", min_value=20.0, max_value=35.0, value=26.7,
-            step=0.1, format="%.1f"
+            step=0.1, format="%.1f", key="press_rl"
         )
     with row1[1]:
         psi_fr = st.number_input(
             "Pressione FR (PSI)", min_value=20.0, max_value=35.0, value=26.7,
-            step=0.1, format="%.1f"
+            step=0.1, format="%.1f", key="press_fr"
         )
         psi_rr = st.number_input(
             "Pressione RR (PSI)", min_value=20.0, max_value=35.0, value=26.7,
-            step=0.1, format="%.1f"
+            step=0.1, format="%.1f", key="press_rr"
         )
 
     pressures = {"fl": psi_fl, "fr": psi_fr, "rl": psi_rl, "rr": psi_rr}
 
-    st.markdown("#### B — Input Temperature Gomme")
+    st.markdown(
+        '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'B — Input Temperature Gomme</h3>',
+        unsafe_allow_html=True
+    )
     row2 = st.columns([1, 1])
     with row2[0]:
         temp_fl = st.number_input(
-            "Temp. FL (°C)", min_value=0, max_value=150, value=85, step=1
+            "Temp. FL (°C)", min_value=0, max_value=150, value=85, step=1, key="temp_fl"
         )
         temp_rl = st.number_input(
-            "Temp. RL (°C)", min_value=0, max_value=150, value=85, step=1
+            "Temp. RL (°C)", min_value=0, max_value=150, value=85, step=1, key="temp_rl"
         )
     with row2[1]:
         temp_fr = st.number_input(
-            "Temp. FR (°C)", min_value=0, max_value=150, value=85, step=1
+            "Temp. FR (°C)", min_value=0, max_value=150, value=85, step=1, key="temp_fr"
         )
         temp_rr = st.number_input(
-            "Temp. RR (°C)", min_value=0, max_value=150, value=85, step=1
+            "Temp. RR (°C)", min_value=0, max_value=150, value=85, step=1, key="temp_rr"
         )
 
     temperatures = {"fl": temp_fl, "fr": temp_fr, "rl": temp_rl, "rr": temp_rr}
     csv_data = st.session_state.get("csv_data")
 
-    st.markdown("#### B bis — Visualizzazione Live Gomme")
-    pressure_values = (
-        csv_data.get("pressures")
-        if csv_data and csv_data.get("pressures")
-        else pressures
-    )
-    temperature_values = (
-        csv_data.get("temperatures")
-        if csv_data and csv_data.get("temperatures")
-        else None
-    )
-
-    pressure_html = render_pressure_gauges(
-        pressure_values["fl"],
-        pressure_values["fr"],
-        pressure_values["rl"],
-        pressure_values["rr"],
-    )
-
-    if temperature_values:
-        temperature_html = render_temperature_gauges(
-            temperature_values["fl"],
-            temperature_values["fr"],
-            temperature_values["rl"],
-            temperature_values["rr"],
-            csv_loaded=True,
-        )
-    else:
-        temperature_html = render_temperature_gauges(
-            88.0,
-            90.0,
-            95.0,
-            102.0,
-            csv_loaded=False,
-        )
-
     st.markdown(
-        "<div class='pitwall-live-gomme-card'>"
-        "<div class='pitwall-live-gomme-header'>🏁 LIVE GOMME</div>"
-        "</div>",
-        unsafe_allow_html=True,
+        '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'B bis — Visualizzazione Live Gomme</h3>',
+        unsafe_allow_html=True
     )
 
+    # FIX 2: Estrai pressioni dal CSV se disponibile, altrimenti usa input manuale
+    def _pressure_value(key: str, csv_key: str, default: float) -> float:
+        current = float(st.session_state.get(key, default))
+        if (
+            current == default
+            and csv_data is not None
+            and csv_data.get("pressures")
+        ):
+            csv_val = csv_data["pressures"].get(csv_key)
+            if isinstance(csv_val, dict) and "avg" in csv_val:
+                return float(csv_val["avg"])
+            if isinstance(csv_val, (int, float)):
+                return float(csv_val)
+        return current
+
+    def _temperature_value(key: str, csv_key: str, default: float) -> float:
+        current = float(st.session_state.get(key, default))
+        if (
+            current == default
+            and csv_data is not None
+            and csv_data.get("temperatures")
+        ):
+            csv_val = csv_data["temperatures"].get(csv_key)
+            if isinstance(csv_val, dict) and "avg" in csv_val:
+                return float(csv_val["avg"])
+            if isinstance(csv_val, (int, float)):
+                return float(csv_val)
+        return current
+
+    fl_p = _pressure_value("press_fl", "fl", 26.7)
+    fr_p = _pressure_value("press_fr", "fr", 26.7)
+    rl_p = _pressure_value("press_rl", "rl", 26.7)
+    rr_p = _pressure_value("press_rr", "rr", 26.7)
+
+    tfl = _temperature_value("temp_fl", "fl", 88.0)
+    tfr = _temperature_value("temp_fr", "fr", 90.0)
+    trl = _temperature_value("temp_rl", "rl", 95.0)
+    trr = _temperature_value("temp_rr", "rr", 102.0)
+
+    # Renderizza HTML pressioni e temperature
+    pressure_html = render_pressure_gauges(fl_p, fr_p, rl_p, rr_p, hot_mode=hot_mode)
+    temperature_html = render_temperature_gauges(
+        float(tfl),
+        float(tfr),
+        float(trl),
+        float(trr),
+        csv_loaded=(csv_data is not None and csv_data.get("temperatures") is not None),
+    )
+
+    # FIX 4: Card LIVE GOMME strutturata con header e footer visivi
+    st.markdown(
+        """<div style="background:#0f0f0f;border:1px solid #333;border-radius:8px;
+        padding:16px 16px 4px 16px;margin-bottom:18px;">
+            <div style="font-family:'Orbitron',monospace;font-size:1rem;
+            font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+            color:#fff;margin-bottom:12px;">🏁 LIVE GOMME</div>
+        </div>""",
+        unsafe_allow_html=True
+    )
+
+    # I due widget affiancati dentro st.columns
     gauge_columns = st.columns(2)
     with gauge_columns[0]:
-        st.markdown(
-            f"<div class='pitwall-live-gomme-panel'>{pressure_html}</div>",
-            unsafe_allow_html=True,
-        )
+        components.html(pressure_html, height=300)
     with gauge_columns[1]:
-        st.markdown(
-            f"<div class='pitwall-live-gomme-panel'>{temperature_html}</div>",
-            unsafe_allow_html=True,
-        )
+        components.html(temperature_html, height=300)
 
-    st.markdown("#### AVANZATA — Parametri Tweaker Mode")
+    # Chiusura visiva della card (sottile linea inferiore)
+    st.markdown(
+        '<div style="border-top:1px solid #222;margin-top:4px;'
+        'margin-bottom:18px;"></div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'AVANZATA — Parametri Tweaker Mode</h3>',
+        unsafe_allow_html=True
+    )
     with st.expander("⚙️ Parametri Avanzati — Tweaker Mode", expanded=False):
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -168,7 +221,13 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
             "nella tabella sessions del database."
         )
 
-    st.markdown("#### C — Feedback Pilota")
+    st.markdown(
+        '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'C — Feedback Pilota</h3>',
+        unsafe_allow_html=True
+    )
     pilot_feedback = st.text_area(
         "📻 Descrivi il problema in pista",
         placeholder=(
@@ -179,7 +238,13 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
         height=120,
     )
 
-    st.markdown("#### D — Upload CSV (opzionale)")
+    st.markdown(
+        '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'D — Upload CSV (opzionale)</h3>',
+        unsafe_allow_html=True
+    )
     csv_file = st.file_uploader("📂 Carica CSV Sessione ACC (opzionale)", type=["csv"])
     csv_data = st.session_state.get("csv_data")
 
@@ -192,7 +257,13 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
                 pd.read_csv(BytesIO(raw_bytes)).head(5),
                 height=150,
             )
-            st.markdown("#### Andamento Temperature per Giro")
+            st.markdown(
+                '<h3 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+                'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+                'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+                'Andamento Temperature per Giro</h3>',
+                unsafe_allow_html=True
+            )
             render_temperature_chart(csv_data)
         except CSVParseError as exc:
             st.warning(f"CSV non valido: {exc}")
@@ -272,7 +343,8 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
             from components.engineer_report import render_engineer_report
 
             render_engineer_report(markdown_response, physics_data)
-            
+            suggested_psi = extract_suggested_psi(markdown_response)
+
             # Salva la sessione nel database per lo storico
             db = SessionDatabase()
             try:
@@ -282,7 +354,7 @@ def render_tab_setup(sidebar_data: Dict[str, Any]) -> None:
                     "car": sidebar_data.get("car"),
                     "track": sidebar_data.get("track"),
                     "psi_input": pressures,
-                    "psi_suggested": None,  # MVP: non calcolato, aggiungere in futuro
+                    "psi_suggested": suggested_psi,
                     "temp_ambient": sidebar_data.get("ambient_temp"),
                     "temp_track": sidebar_data.get("track_temp"),
                     "feedback_text": pilot_feedback,

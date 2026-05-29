@@ -29,7 +29,13 @@ def render_tab_fuel() -> None:
     Questo componente non invoca l'LLM: sfrutta esclusivamente la funzione
     `calculate_fuel_load` in backend/core/physics.py.
     """
-    st.markdown("## Strategia Carburante")
+    st.markdown(
+        '<h2 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'Strategia Carburante</h2>',
+        unsafe_allow_html=True
+    )
 
     col1, col2, col3 = st.columns(3)
     with col1:

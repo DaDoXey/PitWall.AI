@@ -1,8 +1,39 @@
 import json
+import re
 import sqlite3
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+
+def extract_suggested_psi(report_text: str) -> float | None:
+    """
+    Cerca pattern numerici PSI nella sezione Correzione del report LLM.
+    Restituisce la media dei valori trovati, o None se nessun match.
+    """
+    section_match = re.search(
+        r'##\s*Correzione[^\n]*\n(.*?)(?=##|\Z)',
+        report_text,
+        re.DOTALL | re.IGNORECASE,
+    )
+    search_text = section_match.group(1) if section_match else report_text
+
+    matches = re.findall(
+        r'\b(\d{2}(?:[.,]\d{1,2})?)\s*(?:psi|PSI)\b',
+        search_text,
+    )
+    if not matches:
+        return None
+
+    values = []
+    for m in matches:
+        try:
+            values.append(float(m.replace(',', '.')))
+        except ValueError:
+            continue
+
+    values = [v for v in values if 24.0 <= v <= 32.0]
+    return round(sum(values) / len(values), 2) if values else None
 
 
 class SessionDatabase:

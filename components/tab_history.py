@@ -18,9 +18,11 @@ def fetch_sessions() -> List[Dict[str, Any]]:
     return sessions
 
 
-def _average_pressure(pressure_data: Optional[Dict[str, Any]]) -> Optional[float]:
-    if not pressure_data:
+def _average_pressure(pressure_data: Optional[Dict[str, Any] | float]) -> Optional[float]:
+    if pressure_data is None:
         return None
+    if isinstance(pressure_data, (int, float)):
+        return float(pressure_data)
     values = [v for v in pressure_data.values() if isinstance(v, (int, float))]
     if not values:
         return None
@@ -33,7 +35,13 @@ def render_tab_history() -> None:
     La query al database è memorizzata con @st.cache_data(ttl=30) per evitare
     chiamate ripetute su reload rapido, ma può essere invalidata manualmente.
     """
-    st.markdown("## Storico Sessioni")
+    st.markdown(
+        '<h2 style="font-family:\'Orbitron\',monospace;font-weight:700;'
+        'letter-spacing:0.08em;text-transform:uppercase;color:#fff;'
+        'border-left:3px solid #E10600;padding-left:12px;margin-bottom:16px;">'
+        'Storico Sessioni</h2>',
+        unsafe_allow_html=True
+    )
 
     refresh_button = st.button("🔄 Aggiorna")
     if refresh_button:
