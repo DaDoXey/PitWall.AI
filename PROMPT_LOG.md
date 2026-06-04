@@ -81,6 +81,99 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 
 ---
 
+## Entry #004 — MVP v2 — Bug Fix & UI Redesign (04/06/2026)
+
+| Campo | Valore |
+|---|---|
+| Data | 04/06/2026 |
+| Modello testato | claude-haiku-4-5-20251001 via VS Code GitHub Copilot |
+| Versione app | v0.2.0 MVP |
+| Contesto | Fix kritika (BUG-01 storico non persiste, BUG-02 visualizzatori gomme) + UI redesign completo |
+
+**Modifiche apportate:**
+
+**BUG-01 — Storico Sessioni: Database Persistence**
+- Aggiornato `backend/database/manager.py`:
+  - Aggiunto supporto per `PITWALL_DB_PATH` env var (default: `./pitwall_sessions.db`)
+  - Espanso schema tabella `sessions` con campi: `conditions`, `csv_present`
+  - Implementati metodi `get_sessions_filtered()`, `get_unique_cars()`, `get_unique_tracks()` per query avanzate
+- Aggiornato `app.py`:
+  - Inizializzazione database tramite `SessionDatabase` class (cached via `@st.cache_resource`)
+  - Session save usa nuovo schema completo con feedback, condizioni, temp, CSV flag
+  - Tab "Storico Sessioni" completamente riprogettata con:
+    - Filtri dinamici su Auto e Tracciato (pull-down live da DB)
+    - Expander per sessione con dettagli expandibili
+    - Mostra completo: timestamp, condizioni, temperature, PSI input, feedback, risposta AI
+    - Pulsante "Aggiorna" per reload live
+
+**Motivazione:** Storico non persisteva tra riavvi app a causa di schema inconsistente e hardcoded SQL queries. Adesso utilizza class method centralizzato.
+
+**Risultato osservato:** ✅
+- Sessioni salvate persitono dopo riavvio app
+- Filtri funzionano correttamente
+- Database creato automaticamente se non esiste
+- UI storico intuitiva e ordinata
+
+**BUG-02 — Visualizzatori Gomme: HTML Rendering**
+- Verificato e confermato che il rendering dei visualizzatori gomme (pressioni e temperature) utilizza correttamente:
+  - `st.markdown(..., unsafe_allow_html=True)` per ogni barra gomma
+  - Colori condizionali: verde (#00C853) se OK, giallo (#FFD600) se fuori range, rosso (#E8002D) se critico
+  - Delta rispetto a target mostrato in colore appropriato
+- Il widget renderizza correttamente senza esporre HTML al user
+
+**Motivazione:** Rapporto iniziale indicava HTML grezzo visibile. Verificato — codice era già corretto, issue era persa in review iniziale.
+
+**Risultato osservato:** ✅
+- Visualizzatori gomme rendono correttamente con barre colorate
+- Nessun HTML visibile all'utente
+- Barre responsive a dati CSV
+
+**UI-01 — Sidebar Redesign**
+- Sidebar ora organizzata in 2 macro sezioni visibili:
+  - ▸ CONFIGURAZIONE: Auto, Tracciato, Condizioni, Temp Ambiente/Pista con spinner ±
+  - ▸ DATI SESSIONE: CSV uploader, Screenshot parser
+- Separatori di sezione visivi (`section-separator` div)
+- Label uppercase monospace con letter-spacing  
+- Spacing standardizzato tra elementi (margin-bottom: 1rem)
+- Aggiunto footer con versione e GitHub link
+
+**UI-02 — Slider Redesign**
+- Ogni slider ora mostra:
+  - Label in uppercase monospace 11px grigio scuro
+  - Valore corrente in box evidenziato sopra lo slider (`.slider-value-display`)
+  - Tooltip 💡 italic 11px grigio sotto slider
+  - Layout responsive con colonne affiancare (FL/FR + RL/RR per gomme)
+- Eliminati `st.write()` generici — solo markdown strutturato
+- `render_param_slider()` aggiornata per display automatico valore
+
+**UI-03 — Fuel Strategy Tab**
+- Layout 3 colonne con:
+  - Durata Gara: spinner ±5 min, display valore
+  - Tempo Giro: input text con format validation mm:ss
+    - Aggiunta funzione `parse_mm_ss()` che valida e converte formato
+    - Errore inline se formato non valido
+  - Consumo/Giro: spinner ±0.1 L, display valore
+- Bottone "⛽ CALCOLA" ridimensionato
+- Risultato mostra in box:
+  - Headline grande rosso con carico consigliato (L)
+  - Dettagli calcolati: giri, consumo base, margine sicurezza 5%
+  - Visualmente evidente con bordo double #E8002D
+
+**Motivazione:** Migliorare usabilità e leggibilità — sidebar confusa, slider poco leggibili, fuel tab poco intuitivo.
+
+**Risultato osservato:** ✅
+- Sidebar pulita e logicamente organizzata
+- Slider facili da leggere con valore in evidenza
+- Fuel strategy intuitiva con validazione mm:ss live
+- Risultato calcolo carburante ben visibile
+
+**Decisione:** Mantenuto. Tutti i fix testati funzionano correttamente. Nessun rollback necessario.
+
+**Note per next iteration:**
+- CSV parsing risultati integrati nel visualizzatore gomme (attualmente usa valori hardcoded se CSV non caricato)
+- Possibile aggiungere pulsante "Esporta sessione" per salvare PDF report
+- Dark mode UX potrebbe beneficiare di contrasto leggermente maggiore (test WCAG AA)
+
 <!-- TEMPLATE — copia e incolla per ogni nuova entry
 
 ## Entry #XXX — [titolo breve]
@@ -98,3 +191,4 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 **Decisione:** ☐ Mantenuto  ☐ Modificato ulteriormente  ☐ Rollback  
 
 -->
+| 2026-06-04 08:27 UTC | BMW | Monza | ~100 | 2048 | claude |
