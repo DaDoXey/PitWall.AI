@@ -203,7 +203,7 @@ class SessionDatabase:
                     "feedback_text": row["feedback_text"],
                     "llm_response": row["llm_response"],
                     "csv_present": bool(row["csv_present"]),
-                    "screenshot_presente": bool(row.get("screenshot_presente", 0)),
+                    "screenshot_presente": bool(row["screenshot_presente"]),
                 }
             )
         return sessions
@@ -235,15 +235,15 @@ class SessionDatabase:
                         "timestamp": row["timestamp"],
                         "car": row["car"],
                         "track": row["track"],
-                        "conditions": row.get("conditions"),
-                        "temp_ambient": row.get("temp_ambient"),
-                        "temp_track": row.get("temp_track"),
-                        "psi_input": json.loads(row["psi_input"]) if row.get("psi_input") else None,
-                        "psi_suggested": json.loads(row["psi_suggested"]) if row.get("psi_suggested") else None,
-                        "feedback_text": row.get("feedback_text"),
-                        "llm_response": row.get("llm_response"),
-                        "csv_present": bool(row.get("csv_present", 0)),
-                        "screenshot_presente": bool(row.get("screenshot_presente", 0)),
+                        "conditions": row["conditions"],
+                        "temp_ambient": row["temp_ambient"],
+                        "temp_track": row["temp_track"],
+                        "psi_input": json.loads(row["psi_input"]) if row["psi_input"] else None,
+                        "psi_suggested": json.loads(row["psi_suggested"]) if row["psi_suggested"] else None,
+                        "feedback_text": row["feedback_text"],
+                        "llm_response": row["llm_response"],
+                        "csv_present": bool(row["csv_present"]),
+                        "screenshot_presente": bool(row["screenshot_presente"]),
                     }
                 )
             return sessions

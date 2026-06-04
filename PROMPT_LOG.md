@@ -192,3 +192,4 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 
 -->
 | 2026-06-04 08:27 UTC | BMW | Monza | ~100 | 2048 | claude |
+| 2026-06-04 10:46 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
