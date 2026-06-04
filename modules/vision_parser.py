@@ -102,7 +102,7 @@ def parse_setup_from_image(
 
     # Chiamata API con Vision
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         max_tokens=1000,
         system=VISION_SYSTEM_PROMPT,
         messages=[

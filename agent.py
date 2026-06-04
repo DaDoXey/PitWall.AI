@@ -99,7 +99,7 @@ def call_claude(user_input: str, api_key: str) -> str:
     """Chiamata a Claude Sonnet (primario)."""
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         max_tokens=MAX_OUTPUT_TOKENS,
         system=load_system_prompt(),
         messages=[{"role": "user", "content": user_input}],
@@ -160,7 +160,7 @@ def get_ai_response(
         )
 
     # Tentativo 1: Claude Sonnet
-    model_used = "claude-sonnet-4-20250514"
+    model_used = "claude-sonnet-4-6"
     try:
         response = call_claude(user_input, anthropic_key)
         if validate_output(response):

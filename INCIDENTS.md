@@ -152,3 +152,12 @@ contesto.
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |
+| 2026-06-04 10:39 UTC | Errore chiamata Claude: Error code: 404 - {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4-20250514'}, 'request_id': 'req_011Cbi5PETMBEDBNQcSih764'} |
+| 2026-06-04 10:39 UTC | Tutti i modelli LLM hanno fallito — output di errore restituito all'utente. |
+| 2026-06-04 10:39 UTC | Errore salvataggio sessione DB: table sessions has no column named session_id |
+| 2026-06-04 10:39 UTC | Errore chiamata Claude: Error code: 404 - {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4-20250514'}, 'request_id': 'req_011Cbi5PdRUWnhr7493yh77R'} |
+| 2026-06-04 10:39 UTC | Tutti i modelli LLM hanno fallito — output di errore restituito all'utente. |
+| 2026-06-04 10:39 UTC | Errore salvataggio sessione DB: table sessions has no column named session_id |
+| 2026-06-04 10:44 UTC | Errore chiamata Claude: Error code: 404 - {'type': 'error', 'error': {'type': 'not_found_error', 'message': 'model: claude-sonnet-4-20250514'}, 'request_id': 'req_011Cbi5jbwj9cKaRyzVB9aqk'} |
+| 2026-06-04 10:44 UTC | Tutti i modelli LLM hanno fallito — output di errore restituito all'utente. |
+| 2026-06-04 10:44 UTC | Errore salvataggio sessione DB: table sessions has no column named session_id |
