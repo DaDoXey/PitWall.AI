@@ -611,15 +611,15 @@ with tab_analisi:
         st.divider()
 
         feedback = st.text_area(
-            "",
+            "📻 Descrivi il problema riscontrato in pista",
             height=200,
             placeholder=(
                 "Es: 'Ho troppo sottosterzo a centro curva sulle curve lente. "
                 "L'auto non ruota e devo aprire il volante. "
                 "Accade soprattutto nelle curve a destra, principalmente nel settore 2.'"
             ),
-            label_visibility="collapsed",
             help="Più sei specifico (fase della curva, tipo di curva, condizioni), migliore sarà l'analisi.",
+            key="feedback_text_area",
         )
 
         btn_analizza = st.button("🔍 ANALIZZA SESSIONE", type="primary", use_container_width=True)
