@@ -31,6 +31,20 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+st.markdown("""
+<style>
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+    footer {
+        display: none !important;
+    }
+    .block-container {
+        padding-top: 1rem !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Inizializza database sessioni (non cachato per evitare threading issues con SQLite)
 def get_session_db():
     db = SessionDatabase()
