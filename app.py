@@ -31,20 +31,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.markdown("""
-<style>
-    header[data-testid="stHeader"] {
-        display: none !important;
-    }
-    footer {
-        display: none !important;
-    }
-    .block-container {
-        padding-top: 1rem !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Inizializza database sessioni (non cachato per evitare threading issues con SQLite)
 def get_session_db():
     db = SessionDatabase()
@@ -80,6 +66,16 @@ st.markdown("""
     --muted:    #7A7A7A;
     --green:    #00C853;
     --yellow:   #FFD600;
+}
+
+header[data-testid="stHeader"] {
+    display: none !important;
+}
+footer {
+    display: none !important;
+}
+.block-container {
+    padding-top: 1rem !important;
 }
 
 html, body, [data-testid="stAppViewContainer"] {
@@ -294,6 +290,126 @@ html, body, [data-testid="stAppViewContainer"] {
     border: none;
     border-top: 1px solid #1e1e1e;
     margin: 14px 0;
+}
+
+/* ── SIDEBAR BACKGROUND ── */
+section[data-testid="stSidebar"] {
+    background-color: #111111 !important;
+    border-right: 1px solid #222222 !important;
+}
+
+/* ── SIDEBAR — testo generico ── */
+section[data-testid="stSidebar"] * {
+    color: #999999 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ── SIDEBAR — titolo principale (PITWALL.AI SESSIONE) ── */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] .sidebar-title {
+    color: #FFFFFF !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+}
+
+/* ── SIDEBAR — label dei widget (Auto, Tracciato, ecc.) ── */
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] .stSelectbox label,
+section[data-testid="stSidebar"] .stNumberInput label,
+section[data-testid="stSidebar"] .stSlider label {
+    color: #666666 !important;
+    font-size: 0.65rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+}
+
+/* ── SIDEBAR — selectbox (dropdown) ── */
+section[data-testid="stSidebar"] .stSelectbox > div > div {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    border-radius: 4px !important;
+    color: #FFFFFF !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox > div > div:hover {
+    border-color: #E8002D !important;
+}
+
+/* ── SIDEBAR — number input ── */
+section[data-testid="stSidebar"] .stNumberInput > div > div > input {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    border-radius: 4px !important;
+    color: #FFFFFF !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.9rem !important;
+}
+
+section[data-testid="stSidebar"] .stNumberInput > div > div > input:focus {
+    border-color: #E8002D !important;
+    box-shadow: 0 0 0 1px #E8002D !important;
+}
+
+/* ── SIDEBAR — bottoni +/- del number input ── */
+section[data-testid="stSidebar"] .stNumberInput button {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    color: #999999 !important;
+}
+
+section[data-testid="stSidebar"] .stNumberInput button:hover {
+    border-color: #E8002D !important;
+    color: #E8002D !important;
+}
+
+/* ── SIDEBAR — upload button ── */
+section[data-testid="stSidebar"] .stFileUploader > div {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    border-radius: 4px !important;
+}
+
+section[data-testid="stSidebar"] .stFileUploader button {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    color: #999999 !important;
+    font-size: 0.75rem !important;
+}
+
+section[data-testid="stSidebar"] .stFileUploader button:hover {
+    border-color: #E8002D !important;
+    color: #FFFFFF !important;
+}
+
+/* ── SIDEBAR — testo piccolo (es. "200MB per file • CSV") ── */
+section[data-testid="stSidebar"] .stFileUploader small,
+section[data-testid="stSidebar"] small {
+    color: #444444 !important;
+    font-size: 0.65rem !important;
+}
+
+/* ── SIDEBAR — divider (st.divider / hr) ── */
+section[data-testid="stSidebar"] hr {
+    border-color: #222222 !important;
+    margin: 0.75rem 0 !important;
+}
+
+/* ── SIDEBAR — link GitHub ── */
+section[data-testid="stSidebar"] a {
+    color: #E8002D !important;
+    text-decoration: none !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+}
+
+section[data-testid="stSidebar"] a:hover {
+    color: #CC0028 !important;
+    text-decoration: underline !important;
 }
 
 /* ── TYRE VISUALIZER ── */
