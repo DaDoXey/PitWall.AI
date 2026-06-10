@@ -908,7 +908,7 @@ with tab_carburante:
         st.markdown("**Tempo Giro Medio**")
         st.markdown('<div style="font-size:0.75rem;color:#999;">Formato: mm:ss</div>', unsafe_allow_html=True)
         lap_time_str = st.text_input(
-            "",
+            "Tempo giro",
             value="1:52",
             key="fuel_laptime",
             label_visibility="collapsed",
