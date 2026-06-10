@@ -366,49 +366,40 @@ section[data-testid="stSidebar"] .stNumberInput button:hover {
     color: #E8002D !important;
 }
 
-/* ── SIDEBAR — file uploader container ── */
+/* ── SIDEBAR FILE UPLOADER — reset completo ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] * {
+    all: revert !important;
+}
+
 section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
-    background-color: transparent !important;
+    background: transparent !important;
     border: none !important;
     padding: 0 !important;
+    margin: 0 !important;
 }
 
-/* ── SIDEBAR — file uploader dropzone (area tratteggiata) ── */
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
+/* Nasconde il testo nativo "upload" dell'input file sottostante */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] input[type="file"] {
+    display: none !important;
+}
+
+/* Stile sul wrapper visibile */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div {
     background-color: #1a1a1a !important;
     border: 1px solid #333333 !important;
     border-radius: 4px !important;
-    padding: 0.5rem !important;
-    min-height: unset !important;
+    padding: 0.4rem 0.6rem !important;
 }
 
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]:hover {
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div:hover {
     border-color: #E8002D !important;
 }
 
-/* ── SIDEBAR — testo dentro la dropzone ── */
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] span,
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] small {
-    color: #666666 !important;
+/* Testo dentro il box (es. "200MB per file • CSV") */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] small {
+    color: #444444 !important;
     font-size: 0.65rem !important;
-}
-
-/* ── SIDEBAR — bottone Browse files ── */
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInput"] + div button,
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {
-    background-color: #1a1a1a !important;
-    border: 1px solid #333333 !important;
-    border-radius: 4px !important;
-    color: #999999 !important;
-    font-size: 0.7rem !important;
-    padding: 0.25rem 0.75rem !important;
-    width: auto !important;
-    display: inline-block !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button:hover {
-    border-color: #E8002D !important;
-    color: #FFFFFF !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 /* ── SIDEBAR — divider (st.divider / hr) ── */
