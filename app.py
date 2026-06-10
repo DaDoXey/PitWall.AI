@@ -366,30 +366,49 @@ section[data-testid="stSidebar"] .stNumberInput button:hover {
     color: #E8002D !important;
 }
 
-/* ── SIDEBAR — upload button ── */
-section[data-testid="stSidebar"] .stFileUploader > div {
+/* ── SIDEBAR — file uploader container ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* ── SIDEBAR — file uploader dropzone (area tratteggiata) ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
     background-color: #1a1a1a !important;
     border: 1px solid #333333 !important;
     border-radius: 4px !important;
+    padding: 0.5rem !important;
+    min-height: unset !important;
 }
 
-section[data-testid="stSidebar"] .stFileUploader button {
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]:hover {
+    border-color: #E8002D !important;
+}
+
+/* ── SIDEBAR — testo dentro la dropzone ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] span,
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] small {
+    color: #666666 !important;
+    font-size: 0.65rem !important;
+}
+
+/* ── SIDEBAR — bottone Browse files ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInput"] + div button,
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {
     background-color: #1a1a1a !important;
     border: 1px solid #333333 !important;
+    border-radius: 4px !important;
     color: #999999 !important;
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
+    padding: 0.25rem 0.75rem !important;
+    width: auto !important;
+    display: inline-block !important;
 }
 
-section[data-testid="stSidebar"] .stFileUploader button:hover {
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button:hover {
     border-color: #E8002D !important;
     color: #FFFFFF !important;
-}
-
-/* ── SIDEBAR — testo piccolo (es. "200MB per file • CSV") ── */
-section[data-testid="stSidebar"] .stFileUploader small,
-section[data-testid="stSidebar"] small {
-    color: #444444 !important;
-    font-size: 0.65rem !important;
 }
 
 /* ── SIDEBAR — divider (st.divider / hr) ── */
@@ -410,6 +429,19 @@ section[data-testid="stSidebar"] a {
 section[data-testid="stSidebar"] a:hover {
     color: #CC0028 !important;
     text-decoration: underline !important;
+}
+
+/* ── FIX — number input layout ── */
+section[data-testid="stSidebar"] .stNumberInput > div {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+}
+
+section[data-testid="stSidebar"] .stNumberInput input {
+    flex: 1 !important;
+    min-width: 0 !important;
+    text-align: center !important;
 }
 
 /* ── TYRE VISUALIZER ── */
