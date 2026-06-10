@@ -292,21 +292,29 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 14px 0;
 }
 
-/* ── SIDEBAR BACKGROUND ── */
+/* ── SIDEBAR — background e bordo ── */
 section[data-testid="stSidebar"] {
     background-color: #111111 !important;
     border-right: 1px solid #222222 !important;
 }
 
-/* ── SIDEBAR — testo generico ── */
-section[data-testid="stSidebar"] * {
+/* ── SIDEBAR — testo generico (ESCLUDI icone materiali e bottone collapse) ── */
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] span:not([data-testid="stIconMaterial"]),
+section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p {
     color: #999999 !important;
     font-family: 'Inter', sans-serif !important;
 }
 
-/* ── SIDEBAR — titolo principale (PITWALL.AI SESSIONE) ── */
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] .sidebar-title {
+/* ── SIDEBAR — nasconde il testo dell'icona collapse (keyboard_double_arrow_left) ── */
+section[data-testid="stSidebar"] span[data-testid="stIconMaterial"] {
+    color: transparent !important;
+    font-size: 1.2rem !important;
+}
+
+/* ── SIDEBAR — titolo PITWALL.AI SESSIONE ── */
+section[data-testid="stSidebar"] h1 {
     color: #FFFFFF !important;
     font-family: 'Orbitron', sans-serif !important;
     font-size: 0.75rem !important;
@@ -315,19 +323,16 @@ section[data-testid="stSidebar"] .sidebar-title {
     text-transform: uppercase !important;
 }
 
-/* ── SIDEBAR — label dei widget (Auto, Tracciato, ecc.) ── */
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] .stSelectbox label,
-section[data-testid="stSidebar"] .stNumberInput label,
-section[data-testid="stSidebar"] .stSlider label {
+/* ── SIDEBAR — label widget ── */
+section[data-testid="stSidebar"] label {
     color: #666666 !important;
     font-size: 0.65rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.12em !important;
+    letter-spacing: 0.10em !important;
     text-transform: uppercase !important;
 }
 
-/* ── SIDEBAR — selectbox (dropdown) ── */
+/* ── SIDEBAR — selectbox ── */
 section[data-testid="stSidebar"] .stSelectbox > div > div {
     background-color: #1a1a1a !important;
     border: 1px solid #333333 !important;
@@ -340,21 +345,20 @@ section[data-testid="stSidebar"] .stSelectbox > div > div:hover {
 }
 
 /* ── SIDEBAR — number input ── */
-section[data-testid="stSidebar"] .stNumberInput > div > div > input {
+section[data-testid="stSidebar"] .stNumberInput input {
     background-color: #1a1a1a !important;
     border: 1px solid #333333 !important;
     border-radius: 4px !important;
     color: #FFFFFF !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.9rem !important;
+    text-align: center !important;
 }
 
-section[data-testid="stSidebar"] .stNumberInput > div > div > input:focus {
+section[data-testid="stSidebar"] .stNumberInput input:focus {
     border-color: #E8002D !important;
     box-shadow: 0 0 0 1px #E8002D !important;
 }
 
-/* ── SIDEBAR — bottoni +/- del number input ── */
 section[data-testid="stSidebar"] .stNumberInput button {
     background-color: #1a1a1a !important;
     border: 1px solid #333333 !important;
@@ -366,7 +370,29 @@ section[data-testid="stSidebar"] .stNumberInput button:hover {
     color: #E8002D !important;
 }
 
-/* ── SIDEBAR — divider (st.divider / hr) ── */
+/* ── SIDEBAR — file uploader: nasconde il <p>Upload</p> duplicato ── */
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    display: none !important;
+}
+
+/* ── SIDEBAR — file uploader dropzone ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    border-radius: 4px !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]:hover {
+    border-color: #E8002D !important;
+}
+
+/* ── SIDEBAR — istruzioni dropzone (testo "200MB per file") ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
+    color: #444444 !important;
+    font-size: 0.65rem !important;
+}
+
+/* ── SIDEBAR — divider ── */
 section[data-testid="stSidebar"] hr {
     border-color: #222222 !important;
     margin: 0.75rem 0 !important;
@@ -378,25 +404,11 @@ section[data-testid="stSidebar"] a {
     text-decoration: none !important;
     font-size: 0.7rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
 }
 
 section[data-testid="stSidebar"] a:hover {
     color: #CC0028 !important;
     text-decoration: underline !important;
-}
-
-/* ── FIX — number input layout ── */
-section[data-testid="stSidebar"] .stNumberInput > div {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0 !important;
-}
-
-section[data-testid="stSidebar"] .stNumberInput input {
-    flex: 1 !important;
-    min-width: 0 !important;
-    text-align: center !important;
 }
 
 /* ── TYRE VISUALIZER ── */
