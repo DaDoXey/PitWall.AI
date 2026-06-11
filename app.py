@@ -69,10 +69,102 @@ st.markdown("""
 }
 
 header[data-testid="stHeader"] {
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+/* Nasconde toolbar Streamlit (Deploy, hamburger, status) ma NON il toggle sidebar */
+header[data-testid="stHeader"] button:not([data-testid="stExpandSidebarButton"]),
+header[data-testid="stHeader"] [data-testid="stStatusWidget"],
+header[data-testid="stHeader"] [data-testid="stDecoration"],
+header[data-testid="stHeader"] [data-testid="headerActionElements"],
+header[data-testid="stHeader"] [data-testid="stHeaderActionElements"] {
     display: none !important;
+    visibility: hidden !important;
 }
 footer {
     display: none !important;
+}
+
+/* ── SIDEBAR TOGGLE — visibile in entrambi gli stati ── */
+/* Bottone per CHIUDERE la sidebar (quando è aperta) */
+[data-testid="stSidebarCollapseButton"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+    border: 1px solid #333 !important;
+    border-radius: 6px !important;
+    z-index: 9999 !important;
+    color: #999999 !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+}
+[data-testid="stSidebarCollapseButton"]:hover {
+    border-color: #E8002D !important;
+    color: #ffffff !important;
+}
+[data-testid="stSidebarCollapseButton"] svg {
+    fill: #999999 !important;
+}
+[data-testid="stSidebarCollapseButton"]:hover svg {
+    fill: #ffffff !important;
+}
+
+/* Bottone per RIAPRIRE la sidebar (quando è chiusa) */
+[data-testid="stExpandSidebarButton"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background-color: #1a1a1a !important;
+    border: 1px solid #333 !important;
+    border-radius: 6px !important;
+    z-index: 9999 !important;
+    color: #999999 !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 50px !important;
+    left: 4px !important;
+}
+[data-testid="stExpandSidebarButton"]:hover {
+    border-color: #E8002D !important;
+    color: #ffffff !important;
+}
+[data-testid="stExpandSidebarButton"] svg {
+    fill: #999999 !important;
+}
+[data-testid="stExpandSidebarButton"]:hover svg {
+    fill: #ffffff !important;
+}
+
+/* Fix icone file uploader sidebar — centratura assoluta */
+[data-testid="stFileUploaderDropzone"] button {
+    position: relative !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+[data-testid="stFileUploaderDropzone"] button span[data-testid="stIconMaterial"] {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    color: #999999 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 1.2rem !important;
+}
+[data-testid="stFileUploaderDropzone"] button:hover span[data-testid="stIconMaterial"] {
+    color: #ffffff !important;
 }
 .block-container {
     padding-top: 1rem !important;
@@ -86,8 +178,8 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
-    background-color: #0d0d0d !important;
-    border-right: 1px solid #1a1a1a;
+    background-color: #0f0f0f !important;
+    border-right: 1px solid #222 !important;
 }
 [data-testid="stSidebar"] .block-container {
     padding-top: 1.5rem;
@@ -122,9 +214,10 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-bottom: 4px;
 }
 .sidebar-divider {
+    height: 1px;
+    background-color: #1e1e1e;
+    margin: 1rem 0;
     border: none;
-    border-top: 1px solid #1e1e1e;
-    margin: 14px 0;
 }
 
 /* ── HEADER ── */
@@ -286,16 +379,16 @@ html, body, [data-testid="stAppViewContainer"] {
     background: var(--border);
     margin: 0.8rem 0;
 }
-.sidebar-divider {
-    border: none;
-    border-top: 1px solid #1e1e1e;
-    margin: 14px 0;
-}
+/* Sidebar divider — duplicate kept for safety */
 
 /* ── SIDEBAR — background e bordo ── */
 section[data-testid="stSidebar"] {
-    background-color: #111111 !important;
-    border-right: 1px solid #222222 !important;
+    background-color: #0f0f0f !important;
+    border-right: 1px solid #222 !important;
+    padding-top: 0 !important;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    padding: 1rem 1rem 1.5rem 1rem !important;
 }
 
 /* ── SIDEBAR — testo generico (ESCLUDI icone materiali e bottone collapse) ── */
@@ -311,6 +404,17 @@ section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p {
 section[data-testid="stSidebar"] span[data-testid="stIconMaterial"] {
     color: transparent !important;
     font-size: 1.2rem !important;
+}
+/* Riattiva icone nei file uploader */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] span[data-testid="stIconMaterial"] {
+    color: #999999 !important;
+}
+/* Riattiva icona bottone collapse sidebar */
+section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] span[data-testid="stIconMaterial"] {
+    color: #999999 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"]:hover span[data-testid="stIconMaterial"] {
+    color: #ffffff !important;
 }
 
 /* ── SIDEBAR — titolo PITWALL.AI SESSIONE ── */
@@ -377,19 +481,40 @@ section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
 
 /* ── SIDEBAR — file uploader dropzone ── */
 section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
-    background-color: #1a1a1a !important;
-    border: 1px solid #333333 !important;
-    border-radius: 4px !important;
+    background-color: #141414 !important;
+    border: 1px dashed #333 !important;
+    border-radius: 6px !important;
+    padding: 0.75rem !important;
+    transition: border-color 0.2s ease !important;
 }
 
 section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]:hover {
     border-color: #E8002D !important;
+    background-color: #1a1010 !important;
 }
 
-/* ── SIDEBAR — istruzioni dropzone (testo "200MB per file") ── */
+/* ── SIDEBAR — istruzioni dropzone ── */
 section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] {
-    color: #444444 !important;
-    font-size: 0.65rem !important;
+    color: #666666 !important;
+    font-size: 0.72rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ── SIDEBAR — icona upload ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] svg {
+    width: 20px !important;
+    height: 20px !important;
+    color: #666666 !important;
+}
+
+/* ── SIDEBAR — label file uploader ── */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] label {
+    font-size: 0.75rem !important;
+    font-family: 'Orbitron', sans-serif !important;
+    color: #999999 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    margin-bottom: 0.25rem !important;
 }
 
 /* ── SIDEBAR — divider ── */
@@ -554,12 +679,21 @@ st.markdown("")
 # SIDEBAR — ristaurato stile e sezioni precedenti
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-title">⚙ PITWALL.AI SESSIONE</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="padding: 1.25rem 0 0.75rem 0; border-bottom: 1px solid #1e1e1e; margin-bottom: 1rem;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; 
+                    letter-spacing: 0.15em; color: #666666; text-transform: uppercase; 
+                    margin-bottom: 0.2rem;">Sessione</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 1rem; 
+                    color: #FFFFFF; letter-spacing: 0.08em;">PITWALL<span style="color:#E8002D;">.</span>AI</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # ── SEZIONE: DATI SESSIONE ──
-    st.markdown('<hr class="sidebar-divider">', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-section-label">▸ DATI SESSIONE</div>', unsafe_allow_html=True)
-    st.markdown('<hr class="sidebar-divider">', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 0.65rem; 
+                letter-spacing: 0.12em; color: #444444; text-transform: uppercase; 
+                margin-bottom: 0.75rem;">Dati Sessione</div>
+    """, unsafe_allow_html=True)
 
     st.markdown('<div style="font-size:0.85rem;color:#CCC;">📊 CSV Sessione</div>', unsafe_allow_html=True)
     csv_file = st.file_uploader(
@@ -571,6 +705,8 @@ with st.sidebar:
     if csv_file:
         st.caption(f"📄 {csv_file.name}")
     st.markdown("")
+
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
 
     st.markdown('<div style="font-size:0.85rem;color:#CCC;">📸 Screenshot Setup ACC</div>', unsafe_allow_html=True)
     st.caption("Carica foto del menu setup.")
@@ -600,16 +736,21 @@ with st.sidebar:
 
     # ── FOOTER ──
     st.markdown("")
-    st.markdown('<div class="section-separator"></div>', unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#7A7A7A;">
-        v0.2.0 — MVP<br>
-        <a href="https://github.com/DaDoXey/PitWall.AI" style="color:#E8002D;text-decoration:none;">GitHub</a>
+    st.markdown("""
+    <div style="position: fixed; bottom: 1.5rem; left: 0; width: 240px; 
+                padding: 0 1rem; box-sizing: border-box;">
+        <div style="border-top: 1px solid #1e1e1e; padding-top: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; 
+                             color: #444444;">v0.2.0 — MVP</span>
+                <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank"
+                   style="font-family: 'Orbitron', sans-serif; font-size: 0.6rem; 
+                          color: #E8002D; text-decoration: none; letter-spacing: 0.08em;
+                          text-transform: uppercase;">GitHub ↗</a>
+            </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────

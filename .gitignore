@@ -4,6 +4,7 @@
 # Database SQLite locale — dati di sessione
 database/pitwall.db
 backend/database.db
+pitwall_sessions.db
 
 # Cache Python
 __pycache__/
