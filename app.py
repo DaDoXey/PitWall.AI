@@ -11,6 +11,7 @@ import os
 import streamlit as st
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+import pandas as pd
 
 # Import moduli PitWall
 from agent import get_ai_response, log_incident
@@ -718,9 +719,9 @@ with st.sidebar:
     )
     if screenshot_file is not None:
         if st.button("🔍 Leggi Parametri da Screenshot", type="secondary", use_container_width=True):
-            api_key = os.getenv("ANTHROPIC_API_KEY", "")
+            api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
             if not api_key:
-                st.error("ANTHROPIC_API_KEY non trovata nel file .env")
+                st.error("ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
             else:
                 with st.spinner("Analisi screenshot in corso..."):
                     result = parse_setup_from_image(screenshot_file.getvalue(), api_key=api_key)
@@ -751,6 +752,78 @@ with st.sidebar:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────
+# CSV — PARSING IMMEDIATO + PREVIEW
+# ─────────────────────────────────────────────
+csv_filename = csv_file.name if csv_file else None
+if csv_file is not None and st.session_state.get("csv_filename") != csv_filename:
+    try:
+        from backend.parser.csv_parser import CSVParseError
+        st.session_state["csv_parsed_result"] = parse_session_csv(csv_file)
+        st.session_state["csv_filename"] = csv_filename
+        csv_result = st.session_state["csv_parsed_result"]
+        press = csv_result.get("pressures") or {}
+        temp = csv_result.get("temperatures") or {}
+        if press:
+            st.session_state["csv_pressures"] = {
+                k: press[k]["avg"] for k in ["fl", "fr", "rl", "rr"] if k in press
+            }
+        if temp:
+            st.session_state["csv_temps"] = {
+                k: temp[k]["avg"] for k in ["fl", "fr", "rl", "rr"] if k in temp
+            }
+    except CSVParseError as e:
+        st.warning(f"⚠️ CSV non valido: {str(e)}")
+
+if "csv_parsed_result" in st.session_state:
+    csv_result = st.session_state["csv_parsed_result"]
+
+    st.markdown('<div class="section-title">📊 Anteprima Dati Sessione</div>', unsafe_allow_html=True)
+
+    # 2a — Metriche aggregate
+    temp_stats = csv_result.get("temperatures", {})
+    press_stats = csv_result.get("pressures", {})
+
+    def _get_stat(stats_dict, pos, key):
+        if stats_dict and pos in stats_dict:
+            return stats_dict[pos].get(key, 0.0)
+        return 0.0
+
+    temp_vals = [_get_stat(temp_stats, p, "max") for p in ["fl", "fr", "rl", "rr"]]
+    temp_max = max(temp_vals) if temp_vals else 0.0
+    press_vals = [_get_stat(press_stats, p, "avg") for p in ["fl", "fr", "rl", "rr"]]
+    press_avg_rr = _get_stat(press_stats, "rr", "avg")
+
+    metric_cols = st.columns(5)
+    with metric_cols[0]:
+        st.metric("🏁 Giri registrati", csv_result.get("laps_count", 0))
+    with metric_cols[1]:
+        st.metric("⛽ Consumo medio", f"{csv_result.get('fuel_cons_avg', 0):.2f} L/giro")
+    with metric_cols[2]:
+        st.metric("🌡 Temp max RR", f"{_get_stat(temp_stats, 'rr', 'max'):.1f}°C")
+    with metric_cols[3]:
+        st.metric("🔧 Press avg RR", f"{press_avg_rr:.1f} psi")
+    with metric_cols[4]:
+        st.metric("🔥 Temp max generale", f"{temp_max:.1f}°C")
+
+    # 2c — Alert visivo automatico
+    if temp_max > 100:
+        st.warning(f"⚠️ Temperatura critica rilevata: {temp_max:.1f}°C — analisi prioritaria raccomandata.")
+    elif temp_max > 95:
+        st.info(f"ℹ️ Temperature elevate: {temp_max:.1f}°C — monitorare in analisi.")
+
+    # 2b — Tabella dati grezzi (collassabile)
+    try:
+        csv_file.seek(0)
+        df_preview = pd.read_csv(csv_file)
+        with st.expander("📊 Dati grezzi sessione", expanded=False):
+            st.dataframe(df_preview, use_container_width=True)
+    except Exception:
+        pass
+
+    st.markdown("---")
 
 
 # ─────────────────────────────────────────────
@@ -1350,44 +1423,23 @@ if btn_analizza:
         st.warning("⚠️ Descrivi il problema riscontrato in pista prima di procedere.")
         st.stop()
 
-    # Recupera API key
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    # Recupera API key — compatibile con locale (.env) e Streamlit Cloud (Secrets)
+    api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
     if not api_key:
-        st.error("❌ ANTHROPIC_API_KEY non trovata nel file .env")
+        st.error("❌ ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
         st.stop()
 
-    # Parsing CSV (se presente)
+    # Parsing CSV (usa risultato pre-parsed dalla preview)
     csv_context = ""
-    if csv_file is not None:
-        try:
-            from backend.parser.csv_parser import CSVParseError
-            csv_result = parse_session_csv(csv_file)
-            # Formatta il risultato per il contesto LLM
-            csv_context = f"""
+    if csv_file is not None and "csv_parsed_result" in st.session_state:
+        csv_result = st.session_state["csv_parsed_result"]
+        csv_context = f"""
 ### Dati Sessione CSV
 - **Giri**: {csv_result.get('laps_count', 0)}
 - **Consumo medio**: {csv_result.get('fuel_cons_avg', 0):.2f} L/giro
 - **Pressioni gomme**: {csv_result.get('pressures', {})}
 - **Temperature gomme**: {csv_result.get('temperatures', {})}
 """
-            # Popola dati gomme per il visualizzatore
-            raw = csv_result.get("raw", {})
-            if raw:
-                last = raw.get("last_lap", {})
-                st.session_state["csv_pressures"] = {
-                    "fl": last.get("tire_press_fl", 26.7),
-                    "fr": last.get("tire_press_fr", 26.7),
-                    "rl": last.get("tire_press_rl", 26.7),
-                    "rr": last.get("tire_press_rr", 26.7),
-                }
-                st.session_state["csv_temps"] = {
-                    "fl": last.get("tire_temp_fl", 85.0),
-                    "fr": last.get("tire_temp_fr", 85.0),
-                    "rl": last.get("tire_temp_rl", 85.0),
-                    "rr": last.get("tire_temp_rr", 85.0),
-                }
-        except CSVParseError as e:
-            st.warning(f"⚠️ CSV non valido: {str(e)}")
 
     # Formattazione setup
     setup_context = format_setup_for_prompt(current_setup)
