@@ -32,6 +32,20 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ─────────────────────────────────────────────
+# AUTENTICAZIONE GATE
+# ─────────────────────────────────────────────
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.switch_page("pages/login.py")
+    st.stop()
+
+user_id = st.session_state.get("user_id")
+user_name = st.session_state.get("user_name")
+user_email = st.session_state.get("user_email")
+
 # Inizializza database sessioni (non cachato per evitare threading issues con SQLite)
 def get_session_db():
     db = SessionDatabase()
@@ -734,6 +748,20 @@ with st.sidebar:
         if st.button("✅ Usa questi parametri nel form", use_container_width=True):
             st.session_state["load_vision_params"] = True
             st.rerun()
+
+    # ── USER INFO + LOGOUT ──
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px;">Logged in as</div>
+    <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; margin-bottom: 2px;">{user_name}</div>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
+    """, unsafe_allow_html=True)
+    if st.button("Logout", use_container_width=True, key="btn_logout"):
+        st.session_state.authenticated = False
+        st.session_state.user_id = None
+        st.session_state.user_name = None
+        st.session_state.user_email = None
+        st.switch_page("pages/login.py")
 
     # ── FOOTER ──
     st.markdown("")

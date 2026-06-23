@@ -5,3 +5,4 @@ python-dotenv>=1.0
 pandas>=2.0
 plotly>=5.0
 requests>=2.30
+# google-auth-oauthlib>=1.2.0  # Optional, per PROD OAuth

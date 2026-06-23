@@ -5,6 +5,7 @@
 database/pitwall.db
 backend/database.db
 pitwall_sessions.db
+pitwall_auth.db
 
 # Cache Python
 __pycache__/

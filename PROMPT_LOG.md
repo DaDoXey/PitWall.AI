@@ -174,6 +174,39 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 - Possibile aggiungere pulsante "Esporta sessione" per salvare PDF report
 - Dark mode UX potrebbe beneficiare di contrasto leggermente maggiore (test WCAG AA)
 
+---
+
+## Entry #005 — Google OAuth Ibrido + Pagina Login (23/06/2026)
+
+| Campo | Valore |
+|---|---|
+| Data | 23/06/2026 |
+| Modello testato | mimo-v2.5-free (OpenCode CLI) |
+| Versione app | v0.2.0 MVP |
+| Contesto | Aggiunta autenticazione ibrida mock/OAuth con pagina login dedicata |
+
+**Modifica:**
+- **auth_config.py** (NUOVO): Strategia auth basata su env var `STREAMLIT_ENV` (dev=mock, prod=OAuth)
+- **db_auth.py** (NUOVO): SQLite schema per users e sessions con CRUD base
+- **styles/login.css** (NUOVO): Design system login coerente con PitWall.AI (Orbitron, #E8002D, dark theme)
+- **pages/login.py** (NUOVO): Pagina login con mock auth (DEV) e placeholder OAuth (PROD)
+- **app.py** (MODIFICATO): Auth gate all'inizio + user badge + logout nella sidebar
+- **.env.example** (MODIFICATO): Aggiunte variabili `STREAMLIT_ENV`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- **requirements.txt** (MODIFICATO): Aggiunto commento `google-auth-oauthlib` opzionale
+
+**Motivazione:** Mancanza totale di autenticazione. Necessità di tracciare utenti per sessioni demo e storico futuro.
+
+**Risultato osservato:**
+- Mock auth funziona in DEV senza dipendenze Google
+- Login page rispetta design system (colori, font, layout)
+- Auth gate blocca accesso non autenticato
+- Logout pulisce session state e reindirizza a login
+- Nessuna modifica ai file protetti (agent.py, parser.py, system_prompt.txt)
+
+**Decisione:** Mantenuto. Testare flow completo con `streamlit run app.py`.
+
+**File protetti non toccati:** agent.py, parser.py, prompts/system_prompt.txt
+
 <!-- TEMPLATE — copia e incolla per ogni nuova entry
 
 ## Entry #XXX — [titolo breve]
@@ -193,3 +226,4 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 -->
 | 2026-06-04 08:27 UTC | BMW | Monza | ~100 | 2048 | claude |
 | 2026-06-04 10:46 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
+| 2026-06-11 15:59 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
