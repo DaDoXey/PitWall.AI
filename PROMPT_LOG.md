@@ -224,6 +224,46 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 **Decisione:** ☐ Mantenuto  ☐ Modificato ulteriormente  ☐ Rollback  
 
 -->
+
+## Entry #006 — GT3 Silhouette SVG Fix + Login UI Polish (24/06/2026)
+
+| Campo | Valore |
+|---|---|
+| Data | 24/06/2026 |
+| Modello testato | mimo-v2.5-free (OpenCode CLI) |
+| Versione app | v0.2.0 MVP |
+| Contesto | Login page: SVG silhouette rendering broken, logout button broken, Gemini logo visible |
+
+**Modifica:**
+
+**BUG-03 — SVG Silhouette Rendering**
+- `st.markdown(unsafe_allow_html=True)` non riesce a rendere SVG complessi — mostra HTML grezzo
+- Soluzione: `st.components.v1.html()` per contenuti SVG/HTML complessi
+- Sostituito SVG disegnato manualmente con output di vectorizer.ai (`file.svg` → `assets/gt3_silhouette.svg`)
+- 5 path SVG: corpo bianco, ala grigia, 2 antenne, dettaglio
+
+**BUG-04 — Logout Button CSS**
+- Selettore CSS `button[kind="secondary"]` non funziona (attributi React interni non accessibili)
+- Soluzione: `button[data-testid="stBaseButton-secondary"]`
+
+**UI-04 — Login Page Improvements**
+- Aggiunto pulsante Google OAuth (placeholder per backend callback)
+- Aggiunta maschera CSS `linear-gradient` per sfumare silhouette dal basso verso l'alto (nasconde logo Gemini)
+
+**Motivazione:** Silhouette SVG non rendeva (HTML grezzo visibile), logout non funzionava, logo Gemini visibile in basso a destra.
+
+**Risultato osservato:**
+- Silhouette GT3 ora rende correttamente con animazione smooth
+- Logout button funziona con stile coerente
+- Logo Gemini nascosto dalla maschera gradient
+- Nessuna modifica ai file protetti
+
+**Decisione:** Mantenuto.
+
+**Lezione Appresa:**
+- `st.markdown(unsafe_allow_html=True)` non supporta SVG complessi — usare `st.components.v1.html()`
+- CSS React interni (`kind`) non accessibili — usare `data-testid`
+- Per SVG vettoriali precisi, usare vectorizer.ai invece di disegnare a mano
 | 2026-06-04 08:27 UTC | BMW | Monza | ~100 | 2048 | claude |
 | 2026-06-04 10:46 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
 | 2026-06-11 15:59 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
