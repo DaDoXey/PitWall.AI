@@ -10,10 +10,10 @@ st.set_page_config(page_title="PitWall.AI — Login", page_icon="🏁", layout="
 with open("styles/login.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Ferrari 296 GT3 Animation
+# GT3 Silhouette Animation
 import streamlit.components.v1 as components
 
-# CSS animation via st.markdown
+# Track line CSS
 st.markdown("""
 <style>
 .ferrari-track {
@@ -21,89 +21,171 @@ st.markdown("""
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 90px;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-}
-.ferrari-track::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
     height: 1px;
     background: linear-gradient(90deg, transparent 0%, #E8002D 30%, #E8002D 70%, transparent 100%);
     opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# SVG animation via components.html (renderizza correttamente in iframe)
-ferrari_svg_html = """
+# SVG animation via components.html
+gt3_svg_html = """
 <!DOCTYPE html>
 <html>
 <head>
 <style>
   * { margin: 0; padding: 0; }
   body { background: transparent; overflow: hidden; }
-  .track { position: relative; width: 100vw; height: 90px; overflow: hidden; }
+  .track { position: relative; width: 100vw; height: 110px; overflow: hidden; }
   .car {
     position: absolute;
-    bottom: 8px;
-    right: -500px;
-    opacity: 0.25;
-    animation: drive 14s linear infinite;
-    filter: drop-shadow(0 0 6px rgba(232, 0, 45, 0.3));
+    bottom: 5px;
+    right: -600px;
+    opacity: 0.18;
+    animation: drive 16s linear infinite;
   }
   @keyframes drive {
-    0%   { right: -500px; }
+    0%   { right: -600px; }
     100% { right: 110%; }
   }
 </style>
 </head>
 <body>
 <div class="track">
-  <svg class="car" width="380" height="78" viewBox="0 0 420 85" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 45 62 L 52 52 L 60 44 L 75 36 L 95 30 L 130 25 L 175 22 L 220 21 L 265 22 L 295 24 L 318 28 L 330 34 L 335 42 L 338 52 L 340 62 Z" fill="#E8002D" opacity="0.95"/>
-    <path d="M 115 25 L 122 13 L 135 7 L 200 5 L 250 6 L 268 10 L 280 18 L 290 24 L 265 22 L 220 21 L 175 22 L 130 25 Z" fill="#cc0022" opacity="0.9"/>
-    <path d="M 128 24 L 135 10 L 145 7 L 200 6 L 245 7 L 260 12 L 268 20 L 250 22 L 175 22 Z" fill="#0a0a0a" opacity="0.75"/>
-    <rect x="148" y="4" width="4" height="22" rx="1" fill="#FFFFFF" opacity="0.7"/>
-    <rect x="195" y="0" width="2" height="22" rx="1" fill="#FFFFFF" opacity="0.8"/>
-    <path d="M 118 25 L 110 22 L 108 26 L 118 27 Z" fill="#FFFFFF" opacity="0.6"/>
-    <path d="M 338 58 L 370 60 L 370 64 L 338 64 Z" fill="#E8002D" opacity="0.8"/>
-    <path d="M 355 60 L 380 62 L 380 65 L 355 64 Z" fill="#cc0022" opacity="0.6"/>
-    <path d="M 42 52 L 30 50 L 20 53 L 18 60 L 25 65 L 42 65 Z" fill="#cc0022" opacity="0.85"/>
-    <rect x="22" y="54" width="2" height="8" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
-    <rect x="26" y="53" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
-    <rect x="30" y="53" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
-    <rect x="34" y="54" width="2" height="8" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
-    <rect x="58" y="24" width="5" height="16" rx="1" fill="#FFFFFF" opacity="0.75"/>
-    <rect x="80" y="24" width="5" height="16" rx="1" fill="#FFFFFF" opacity="0.75"/>
-    <path d="M 50 22 L 98 22 L 98 26 L 50 26 Z" fill="#FFFFFF" opacity="0.9"/>
-    <path d="M 48 18 L 100 18 L 100 21 L 48 21 Z" fill="#FFFFFF" opacity="0.7"/>
-    <rect x="68" y="18" width="3" height="8" rx="0.5" fill="#FFFFFF" opacity="0.6"/>
-    <circle cx="308" cy="65" r="17" fill="#111" stroke="#444" stroke-width="2.5"/>
-    <circle cx="308" cy="65" r="10" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <line x1="308" y1="55" x2="308" y2="75" stroke="#666" stroke-width="1.5"/>
-    <line x1="298" y1="65" x2="318" y2="65" stroke="#666" stroke-width="1.5"/>
-    <line x1="301" y1="58" x2="315" y2="72" stroke="#666" stroke-width="1"/>
-    <line x1="315" y1="58" x2="301" y2="72" stroke="#666" stroke-width="1"/>
-    <path d="M 290 48 Q 308 44 326 48 L 326 64 Q 308 82 290 64 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.5"/>
-    <circle cx="85" cy="65" r="17" fill="#111" stroke="#444" stroke-width="2.5"/>
-    <circle cx="85" cy="65" r="10" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <line x1="85" y1="55" x2="85" y2="75" stroke="#666" stroke-width="1.5"/>
-    <line x1="75" y1="65" x2="95" y2="65" stroke="#666" stroke-width="1.5"/>
-    <line x1="78" y1="58" x2="92" y2="72" stroke="#666" stroke-width="1"/>
-    <line x1="92" y1="58" x2="78" y2="72" stroke="#666" stroke-width="1"/>
-    <path d="M 67 48 Q 85 44 103 48 L 103 64 Q 85 82 67 64 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.5"/>
-    <line x1="103" y1="64" x2="290" y2="64" stroke="#cc0022" stroke-width="1" opacity="0.4"/>
+  <svg class="car" width="480" height="110" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Rear diffuser -->
+    <path d="M 25 82 L 15 78 L 8 80 L 5 88 L 12 95 L 30 95 L 35 88 Z" fill="#E8002D" opacity="0.7"/>
+    <rect x="10" y="83" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
+    <rect x="15" y="82" width="2" height="10" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
+    <rect x="20" y="82" width="2" height="10" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
+    <rect x="25" y="83" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
+
+    <!-- Rear wing endplate left -->
+    <rect x="38" y="30" width="6" height="32" rx="1" fill="#E8002D" opacity="0.85"/>
+    <!-- Rear wing endplate right -->
+    <rect x="88" y="30" width="6" height="32" rx="1" fill="#E8002D" opacity="0.85"/>
+    <!-- Rear wing main plane -->
+    <path d="M 35 33 L 95 33 L 95 40 L 35 40 Z" fill="#E8002D" opacity="0.9"/>
+    <!-- Rear wing flap -->
+    <path d="M 33 27 L 97 27 L 97 32 L 33 32 Z" fill="#cc0022" opacity="0.7"/>
+    <!-- Wing gurney flap -->
+    <rect x="33" y="25" width="64" height="2" rx="0.5" fill="#FFFFFF" opacity="0.5"/>
+    <!-- Wing stay sx -->
+    <rect x="52" y="40" width="4" height="22" rx="1" fill="#FFFFFF" opacity="0.55"/>
+    <!-- Wing stay dx -->
+    <rect x="76" y="40" width="4" height="22" rx="1" fill="#FFFFFF" opacity="0.55"/>
+
+    <!-- Antenna 1 (short, L-shape) -->
+    <rect x="215" y="16" width="2" height="16" rx="0.5" fill="#FFFFFF" opacity="0.6"/>
+    <rect x="215" y="16" width="8" height="1.5" rx="0.5" fill="#FFFFFF" opacity="0.5"/>
+    <!-- Antenna 2 (tall, straight) -->
+    <rect x="248" y="4" width="1.5" height="28" rx="0.5" fill="#FFFFFF" opacity="0.65"/>
+
+    <!-- Body silhouette — smooth GT3 profile -->
+    <path d="
+      M 35 82
+      L 42 72
+      L 55 64
+      L 72 56
+      L 95 50
+      L 125 44
+      L 160 39
+      L 195 35
+      L 225 33
+      L 260 32
+      L 300 32
+      L 335 33
+      L 360 35
+      L 385 38
+      L 405 42
+      L 420 48
+      L 432 55
+      L 440 64
+      L 445 72
+      L 448 82
+      Z
+    " fill="#E8002D" opacity="0.92"/>
+
+    <!-- Roof/cabin -->
+    <path d="
+      M 175 38
+      L 185 26
+      L 200 20
+      L 235 17
+      L 275 16
+      L 305 17
+      L 325 20
+      L 340 26
+      L 348 33
+      L 300 32
+      L 260 32
+      L 225 33
+      L 195 35
+      Z
+    " fill="#cc0022" opacity="0.88"/>
+
+    <!-- Windshield -->
+    <path d="
+      M 190 37
+      L 198 23
+      L 210 19
+      L 240 17
+      L 270 17
+      L 295 18
+      L 310 22
+      L 320 28
+      L 330 33
+      L 260 32
+      L 225 33
+      L 195 35
+      Z
+    " fill="#0a0a0a" opacity="0.7"/>
+
+    <!-- Front splitter -->
+    <path d="M 445 78 L 475 80 L 478 84 L 445 84 Z" fill="#E8002D" opacity="0.75"/>
+    <path d="M 460 80 L 490 82 L 492 86 L 460 85 Z" fill="#cc0022" opacity="0.55"/>
+
+    <!-- Side skirt -->
+    <line x1="95" y1="82" x2="405" y2="82" stroke="#cc0022" stroke-width="1.5" opacity="0.35"/>
+
+    <!-- Rear wheel arch -->
+    <path d="M 55 60 Q 78 48 100 60 L 100 82 Q 78 98 55 82 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.4"/>
+    <!-- Rear wheel -->
+    <circle cx="78" cy="80" r="18" fill="#111" stroke="#444" stroke-width="2.5"/>
+    <circle cx="78" cy="80" r="11" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
+    <line x1="78" y1="69" x2="78" y2="91" stroke="#666" stroke-width="1.5"/>
+    <line x1="67" y1="80" x2="89" y2="80" stroke="#666" stroke-width="1.5"/>
+    <line x1="70" y1="72" x2="86" y2="88" stroke="#666" stroke-width="1"/>
+    <line x1="86" y1="72" x2="70" y2="88" stroke="#666" stroke-width="1"/>
+
+    <!-- Front wheel arch -->
+    <path d="M 400 56 Q 423 44 445 56 L 445 82 Q 423 98 400 82 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.4"/>
+    <!-- Front wheel -->
+    <circle cx="423" cy="80" r="18" fill="#111" stroke="#444" stroke-width="2.5"/>
+    <circle cx="423" cy="80" r="11" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
+    <line x1="423" y1="69" x2="423" y2="91" stroke="#666" stroke-width="1.5"/>
+    <line x1="412" y1="80" x2="434" y2="80" stroke="#666" stroke-width="1.5"/>
+    <line x1="415" y1="72" x2="431" y2="88" stroke="#666" stroke-width="1"/>
+    <line x1="431" y1="72" x2="415" y2="88" stroke="#666" stroke-width="1"/>
+
+    <!-- Mirror -->
+    <path d="M 170 37 L 162 34 L 160 38 L 170 39 Z" fill="#FFFFFF" opacity="0.5"/>
+
+    <!-- Headlight -->
+    <ellipse cx="442" cy="62" rx="6" ry="3" fill="#FFFFFF" opacity="0.5"/>
+
+    <!-- Underbody line -->
+    <line x1="100" y1="82" x2="400" y2="82" stroke="#E8002D" stroke-width="0.8" opacity="0.2"/>
+
   </svg>
 </div>
 </body>
 </html>
 """
-components.html(ferrari_svg_html, height=90, scrolling=False)
+components.html(gt3_svg_html, height=110, scrolling=False)
 
 # Hide sidebar navigation
 st.markdown("""
