@@ -46,6 +46,151 @@ user_id = st.session_state.get("user_id")
 user_name = st.session_state.get("user_name")
 user_email = st.session_state.get("user_email")
 
+# Benvenuto Gigi — mostra solo alla prima apertura della sessione
+if not st.session_state.get("gigi_welcomed", False):
+    user_name_display = user_name if user_name else "Pilota"
+    
+    st.markdown(f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&display=swap');
+    
+    .gigi-welcome-card {{
+        background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%);
+        border: 1px solid #333;
+        border-left: 3px solid #E8002D;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        animation: fadeInDown 0.5s ease;
+    }}
+    
+    @keyframes fadeInDown {{
+        from {{ opacity: 0; transform: translateY(-10px); }}
+        to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+    
+    .gigi-avatar {{
+        flex-shrink: 0;
+        margin-top: 4px;
+    }}
+    
+    .gigi-content {{
+        flex: 1;
+    }}
+    
+    .gigi-header {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }}
+    
+    .gigi-name {{
+        font-family: 'Orbitron', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        color: #E8002D;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }}
+    
+    .gigi-role {{
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        color: #666666;
+        letter-spacing: 0.05em;
+    }}
+    
+    .gigi-message {{
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #CCCCCC;
+        line-height: 1.6;
+        margin-bottom: 14px;
+    }}
+    
+    .gigi-message strong {{
+        color: #FFFFFF;
+    }}
+    
+    .gigi-features {{
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }}
+    
+    .gigi-feature-tag {{
+        background: rgba(232, 0, 45, 0.1);
+        border: 1px solid rgba(232, 0, 45, 0.25);
+        border-radius: 4px;
+        padding: 4px 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        color: #E8002D;
+        letter-spacing: 0.05em;
+    }}
+    </style>
+    
+    <div class="gigi-welcome-card">
+        <!-- Avatar Gigi: ingegnere con cuffie -->
+        <div class="gigi-avatar">
+            <svg width="56" height="72" viewBox="0 0 56 72" xmlns="http://www.w3.org/2000/svg">
+                <!-- Corpo -->
+                <rect x="14" y="38" width="28" height="26" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+                <!-- Giacca/uniforme con banda rossa -->
+                <rect x="14" y="38" width="28" height="4" rx="2" fill="#E8002D" opacity="0.9"/>
+                <!-- Testa -->
+                <circle cx="28" cy="26" r="13" fill="#2a2a2a" stroke="#444" stroke-width="1.5"/>
+                <!-- Cuffie da pit lane -->
+                <!-- Archetto -->
+                <path d="M16 24 Q16 12 28 12 Q40 12 40 24" fill="none" stroke="#E8002D" stroke-width="3" stroke-linecap="round"/>
+                <!-- Padiglione sinistro -->
+                <rect x="11" y="22" width="7" height="9" rx="3" fill="#E8002D"/>
+                <!-- Padiglione destro -->
+                <rect x="38" y="22" width="7" height="9" rx="3" fill="#E8002D"/>
+                <!-- Microfono braccetto -->
+                <path d="M38 28 Q44 30 46 33" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="46" cy="34" r="2.5" fill="#999"/>
+                <!-- Occhi -->
+                <circle cx="23" cy="26" r="2" fill="#E8002D" opacity="0.8"/>
+                <circle cx="33" cy="26" r="2" fill="#E8002D" opacity="0.8"/>
+                <!-- Bocca/sorriso -->
+                <path d="M23 32 Q28 35 33 32" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Tablet/clipboard in mano -->
+                <rect x="20" y="46" width="16" height="12" rx="2" fill="#0a0a0a" stroke="#E8002D" stroke-width="1"/>
+                <rect x="22" y="48" width="12" height="2" rx="1" fill="#E8002D" opacity="0.6"/>
+                <rect x="22" y="51" width="8" height="1.5" rx="0.5" fill="#333"/>
+                <rect x="22" y="54" width="10" height="1.5" rx="0.5" fill="#333"/>
+            </svg>
+        </div>
+        
+        <div class="gigi-content">
+            <div class="gigi-header">
+                <span class="gigi-name">GIGI</span>
+                <span class="gigi-role">// Race Engineer Virtuale</span>
+            </div>
+            <div class="gigi-message">
+                Bentornato nel box, <strong>{user_name_display}</strong>! Sono Gigi, il tuo ingegnere virtuale.<br><br>
+                Siamo qui per trasformare quello che senti in pista in modifiche tecniche precise. 
+                Carica i <strong>dati di sessione CSV</strong>, descrivimi cosa provi alla guida 
+                e ti darò un'analisi completa — bilanciamento, gomme, differenziale, carburante. 
+                Tutto quello che ti serve per uscire dal box più veloce di prima.
+            </div>
+            <div class="gigi-features">
+                <span class="gigi-feature-tag">📊 Analisi Telemetria</span>
+                <span class="gigi-feature-tag">🔧 Setup GT3</span>
+                <span class="gigi-feature-tag">⛽ Strategia Carburante</span>
+                <span class="gigi-feature-tag">🌡️ Monitor Gomme</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.session_state["gigi_welcomed"] = True
+
 # Inizializza database sessioni (non cachato per evitare threading issues con SQLite)
 def get_session_db():
     db = SessionDatabase()
@@ -755,6 +900,25 @@ with st.sidebar:
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px;">Logged in as</div>
     <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; margin-bottom: 2px;">{user_name}</div>
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
+    """, unsafe_allow_html=True)
+    st.sidebar.markdown("""
+    <style>
+    /* Logout button fix */
+    [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] {
+        background-color: transparent !important;
+        border: 1px solid #333 !important;
+        color: #999999 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 12px !important;
+        width: 100% !important;
+        transition: border-color 0.2s, color 0.2s !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"]:hover {
+        border-color: #E8002D !important;
+        color: #FFFFFF !important;
+        background-color: rgba(232, 0, 45, 0.08) !important;
+    }
+    </style>
     """, unsafe_allow_html=True)
     if st.button("Logout", use_container_width=True, key="btn_logout"):
         st.session_state.authenticated = False

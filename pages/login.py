@@ -10,6 +10,75 @@ st.set_page_config(page_title="PitWall.AI — Login", page_icon="🏁", layout="
 with open("styles/login.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# GT3 Car Animation
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+/* GT3 Car Animation Container */
+.gt3-track {
+    position: fixed;
+    bottom: 80px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.18;
+}
+
+.gt3-car {
+    position: absolute;
+    right: -300px;
+    bottom: 0;
+    animation: carDrive 12s linear infinite;
+}
+
+@keyframes carDrive {
+    0%   { right: -300px; }
+    100% { right: 110%; }
+}
+
+/* Track line */
+.gt3-track::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #E8002D, transparent);
+    opacity: 0.4;
+}
+</style>
+
+<div class="gt3-track">
+    <svg class="gt3-car" width="260" height="55" viewBox="0 0 260 55" xmlns="http://www.w3.org/2000/svg">
+        <!-- GT3 silhouette stilizzata -->
+        <!-- Corpo principale -->
+        <path d="M20 38 L30 22 L55 16 L90 12 L140 11 L185 13 L215 20 L235 28 L240 38 Z" 
+              fill="#E8002D" opacity="0.9"/>
+        <!-- Tetto/abitacolo -->
+        <path d="M70 12 L85 4 L155 3 L175 10 L185 13 L140 11 L90 12 Z" 
+              fill="#FFFFFF" opacity="0.7"/>
+        <!-- Ala posteriore -->
+        <rect x="10" y="26" width="25" height="3" rx="1" fill="#FFFFFF" opacity="0.8"/>
+        <rect x="18" y="22" width="2" height="6" fill="#FFFFFF" opacity="0.8"/>
+        <!-- Ruota anteriore -->
+        <circle cx="195" cy="40" r="10" fill="#111" stroke="#999" stroke-width="2"/>
+        <circle cx="195" cy="40" r="5" fill="#333"/>
+        <!-- Ruota posteriore -->
+        <circle cx="60" cy="40" r="10" fill="#111" stroke="#999" stroke-width="2"/>
+        <circle cx="60" cy="40" r="5" fill="#333"/>
+        <!-- Splitter anteriore -->
+        <path d="M235 32 L248 33 L248 36 L232 36 Z" fill="#E8002D" opacity="0.7"/>
+        <!-- Dettagli finestrino -->
+        <path d="M95 12 L100 5 L150 4 L160 11 Z" fill="#0a0a0a" opacity="0.6"/>
+    </svg>
+</div>
+""", unsafe_allow_html=True)
+
 # Hide sidebar navigation
 st.markdown("""
 <style>
