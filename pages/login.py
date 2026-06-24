@@ -45,6 +45,8 @@ gt3_svg_html = """
     right: -600px;
     opacity: 0.18;
     animation: drive 16s linear infinite;
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.8) 60%, black 100%);
+    mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.8) 60%, black 100%);
   }
   @keyframes drive {
     0%   { right: -600px; }
