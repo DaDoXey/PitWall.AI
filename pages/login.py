@@ -30,7 +30,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# SVG animation via components.html
+# SVG animation — clean GT3 silhouette matching reference
 gt3_svg_html = """
 <!DOCTYPE html>
 <html>
@@ -38,154 +38,122 @@ gt3_svg_html = """
 <style>
   * { margin: 0; padding: 0; }
   body { background: transparent; overflow: hidden; }
-  .track { position: relative; width: 100vw; height: 110px; overflow: hidden; }
+  .track { position: relative; width: 100vw; height: 100px; overflow: hidden; }
   .car {
     position: absolute;
-    bottom: 5px;
-    right: -600px;
-    opacity: 0.18;
+    bottom: 2px;
+    right: -550px;
+    opacity: 0.2;
     animation: drive 16s linear infinite;
   }
   @keyframes drive {
-    0%   { right: -600px; }
+    0%   { right: -550px; }
     100% { right: 110%; }
   }
 </style>
 </head>
 <body>
 <div class="track">
-  <svg class="car" width="480" height="110" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg">
+  <svg class="car" width="460" height="95" viewBox="0 0 500 100" xmlns="http://www.w3.org/2000/svg">
 
-    <!-- Rear diffuser -->
-    <path d="M 25 82 L 15 78 L 8 80 L 5 88 L 12 95 L 30 95 L 35 88 Z" fill="#E8002D" opacity="0.7"/>
-    <rect x="10" y="83" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
-    <rect x="15" y="82" width="2" height="10" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
-    <rect x="20" y="82" width="2" height="10" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
-    <rect x="25" y="83" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.4"/>
+    <!-- REAR WING — large, prominent, defines the GT3 look -->
+    <!-- Endplate sx -->
+    <rect x="30" y="18" width="5" height="38" rx="1.5" fill="#E8002D" opacity="0.85"/>
+    <!-- Endplate dx -->
+    <rect x="100" y="18" width="5" height="38" rx="1.5" fill="#E8002D" opacity="0.85"/>
+    <!-- Main plane -->
+    <path d="M 28 22 L 108 22 L 108 30 L 28 30 Z" fill="#E8002D" opacity="0.9"/>
+    <!-- Flap -->
+    <path d="M 26 16 L 110 16 L 110 21 L 26 21 Z" fill="#cc0022" opacity="0.65"/>
+    <!-- Gurney -->
+    <rect x="26" y="14" width="84" height="2" rx="0.5" fill="#FFFFFF" opacity="0.4"/>
+    <!-- Stays -->
+    <rect x="48" y="30" width="3" height="24" rx="0.5" fill="#FFFFFF" opacity="0.45"/>
+    <rect x="82" y="30" width="3" height="24" rx="0.5" fill="#FFFFFF" opacity="0.45"/>
 
-    <!-- Rear wing endplate left -->
-    <rect x="38" y="30" width="6" height="32" rx="1" fill="#E8002D" opacity="0.85"/>
-    <!-- Rear wing endplate right -->
-    <rect x="88" y="30" width="6" height="32" rx="1" fill="#E8002D" opacity="0.85"/>
-    <!-- Rear wing main plane -->
-    <path d="M 35 33 L 95 33 L 95 40 L 35 40 Z" fill="#E8002D" opacity="0.9"/>
-    <!-- Rear wing flap -->
-    <path d="M 33 27 L 97 27 L 97 32 L 33 32 Z" fill="#cc0022" opacity="0.7"/>
-    <!-- Wing gurney flap -->
-    <rect x="33" y="25" width="64" height="2" rx="0.5" fill="#FFFFFF" opacity="0.5"/>
-    <!-- Wing stay sx -->
-    <rect x="52" y="40" width="4" height="22" rx="1" fill="#FFFFFF" opacity="0.55"/>
-    <!-- Wing stay dx -->
-    <rect x="76" y="40" width="4" height="22" rx="1" fill="#FFFFFF" opacity="0.55"/>
-
-    <!-- Antenna 1 (short, L-shape) -->
-    <rect x="215" y="16" width="2" height="16" rx="0.5" fill="#FFFFFF" opacity="0.6"/>
-    <rect x="215" y="16" width="8" height="1.5" rx="0.5" fill="#FFFFFF" opacity="0.5"/>
-    <!-- Antenna 2 (tall, straight) -->
-    <rect x="248" y="4" width="1.5" height="28" rx="0.5" fill="#FFFFFF" opacity="0.65"/>
-
-    <!-- Body silhouette — smooth GT3 profile -->
+    <!-- BODY — single smooth flowing silhouette -->
     <path d="
-      M 35 82
-      L 42 72
-      L 55 64
-      L 72 56
-      L 95 50
-      L 125 44
-      L 160 39
-      L 195 35
-      L 225 33
-      L 260 32
-      L 300 32
-      L 335 33
-      L 360 35
-      L 385 38
-      L 405 42
-      L 420 48
-      L 432 55
-      L 440 64
-      L 445 72
-      L 448 82
+      M 30 72
+      C 35 62, 48 52, 65 44
+      C 82 36, 105 30, 135 26
+      C 165 22, 200 20, 240 19
+      C 280 18, 320 18, 355 19
+      C 375 20, 395 22, 415 26
+      C 430 30, 442 36, 450 44
+      C 456 50, 460 58, 462 66
+      L 462 72
       Z
     " fill="#E8002D" opacity="0.92"/>
 
-    <!-- Roof/cabin -->
+    <!-- ROOF / CABIN — smooth dome -->
     <path d="
-      M 175 38
-      L 185 26
-      L 200 20
-      L 235 17
-      L 275 16
-      L 305 17
-      L 325 20
-      L 340 26
-      L 348 33
-      L 300 32
-      L 260 32
-      L 225 33
-      L 195 35
+      M 185 24
+      C 192 16, 210 10, 240 8
+      C 270 7, 300 7, 325 9
+      C 345 11, 358 16, 365 22
+      L 355 19
+      C 320 18, 280 18, 240 19
+      C 200 20, 165 22, 135 26
+      C 120 28, 110 30, 105 32
       Z
-    " fill="#cc0022" opacity="0.88"/>
+    " fill="#cc0022" opacity="0.85"/>
 
-    <!-- Windshield -->
+    <!-- WINDSHIELD — dark glass -->
     <path d="
-      M 190 37
-      L 198 23
-      L 210 19
-      L 240 17
-      L 270 17
-      L 295 18
-      L 310 22
-      L 320 28
-      L 330 33
-      L 260 32
-      L 225 33
-      L 195 35
+      M 195 23
+      C 200 16, 215 11, 240 9
+      C 265 8, 290 8, 310 10
+      C 325 12, 335 16, 342 22
+      L 300 19
+      C 270 18, 240 19, 210 21
       Z
-    " fill="#0a0a0a" opacity="0.7"/>
+    " fill="#0a0a0a" opacity="0.65"/>
 
-    <!-- Front splitter -->
-    <path d="M 445 78 L 475 80 L 478 84 L 445 84 Z" fill="#E8002D" opacity="0.75"/>
-    <path d="M 460 80 L 490 82 L 492 86 L 460 85 Z" fill="#cc0022" opacity="0.55"/>
+    <!-- FRONT SPLITTER — low, wide -->
+    <path d="M 458 68 L 485 70 L 488 74 L 458 74 Z" fill="#E8002D" opacity="0.7"/>
 
-    <!-- Side skirt -->
-    <line x1="95" y1="82" x2="405" y2="82" stroke="#cc0022" stroke-width="1.5" opacity="0.35"/>
+    <!-- SIDE SKIRT line -->
+    <line x1="65" y1="72" x2="420" y2="72" stroke="#cc0022" stroke-width="1.2" opacity="0.3"/>
 
-    <!-- Rear wheel arch -->
-    <path d="M 55 60 Q 78 48 100 60 L 100 82 Q 78 98 55 82 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.4"/>
-    <!-- Rear wheel -->
-    <circle cx="78" cy="80" r="18" fill="#111" stroke="#444" stroke-width="2.5"/>
-    <circle cx="78" cy="80" r="11" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <line x1="78" y1="69" x2="78" y2="91" stroke="#666" stroke-width="1.5"/>
-    <line x1="67" y1="80" x2="89" y2="80" stroke="#666" stroke-width="1.5"/>
-    <line x1="70" y1="72" x2="86" y2="88" stroke="#666" stroke-width="1"/>
-    <line x1="86" y1="72" x2="70" y2="88" stroke="#666" stroke-width="1"/>
+    <!-- REAR DIFFUSER — subtle -->
+    <path d="M 28 66 L 18 64 L 12 68 L 10 74 L 18 78 L 32 78 L 35 72 Z" fill="#cc0022" opacity="0.6"/>
 
-    <!-- Front wheel arch -->
-    <path d="M 400 56 Q 423 44 445 56 L 445 82 Q 423 98 400 82 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.4"/>
-    <!-- Front wheel -->
-    <circle cx="423" cy="80" r="18" fill="#111" stroke="#444" stroke-width="2.5"/>
-    <circle cx="423" cy="80" r="11" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <line x1="423" y1="69" x2="423" y2="91" stroke="#666" stroke-width="1.5"/>
-    <line x1="412" y1="80" x2="434" y2="80" stroke="#666" stroke-width="1.5"/>
-    <line x1="415" y1="72" x2="431" y2="88" stroke="#666" stroke-width="1"/>
-    <line x1="431" y1="72" x2="415" y2="88" stroke="#666" stroke-width="1"/>
+    <!-- REAR WHEEL -->
+    <circle cx="72" cy="74" r="14" fill="#111" stroke="#444" stroke-width="2"/>
+    <circle cx="72" cy="74" r="8" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+    <!-- Spokes -->
+    <line x1="72" y1="66" x2="72" y2="82" stroke="#555" stroke-width="1.2"/>
+    <line x1="64" y1="74" x2="80" y2="74" stroke="#555" stroke-width="1.2"/>
+    <line x1="66" y1="68" x2="78" y2="80" stroke="#555" stroke-width="0.8"/>
+    <line x1="78" y1="68" x2="66" y2="80" stroke="#555" stroke-width="0.8"/>
 
-    <!-- Mirror -->
-    <path d="M 170 37 L 162 34 L 160 38 L 170 39 Z" fill="#FFFFFF" opacity="0.5"/>
+    <!-- FRONT WHEEL -->
+    <circle cx="418" cy="74" r="14" fill="#111" stroke="#444" stroke-width="2"/>
+    <circle cx="418" cy="74" r="8" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+    <!-- Spokes -->
+    <line x1="418" y1="66" x2="418" y2="82" stroke="#555" stroke-width="1.2"/>
+    <line x1="410" y1="74" x2="426" y2="74" stroke="#555" stroke-width="1.2"/>
+    <line x1="412" y1="68" x2="424" y2="80" stroke="#555" stroke-width="0.8"/>
+    <line x1="424" y1="68" x2="412" y2="80" stroke="#555" stroke-width="0.8"/>
 
-    <!-- Headlight -->
-    <ellipse cx="442" cy="62" rx="6" ry="3" fill="#FFFFFF" opacity="0.5"/>
+    <!-- Antenna 1 — short L-shape -->
+    <rect x="245" y="6" width="1.5" height="10" rx="0.5" fill="#FFFFFF" opacity="0.5"/>
+    <rect x="245" y="6" width="6" height="1" rx="0.5" fill="#FFFFFF" opacity="0.4"/>
+    <!-- Antenna 2 — tall straight -->
+    <rect x="270" y="0" width="1" height="18" rx="0.5" fill="#FFFFFF" opacity="0.55"/>
 
-    <!-- Underbody line -->
-    <line x1="100" y1="82" x2="400" y2="82" stroke="#E8002D" stroke-width="0.8" opacity="0.2"/>
+    <!-- HEADLIGHT -->
+    <ellipse cx="456" cy="50" rx="5" ry="2.5" fill="#FFFFFF" opacity="0.45"/>
+
+    <!-- MIRROR -->
+    <path d="M 178 23 L 170 20 L 168 24 L 178 25 Z" fill="#FFFFFF" opacity="0.4"/>
 
   </svg>
 </div>
 </body>
 </html>
 """
-components.html(gt3_svg_html, height=110, scrolling=False)
+components.html(gt3_svg_html, height=100, scrolling=False)
 
 # Hide sidebar navigation
 st.markdown("""
