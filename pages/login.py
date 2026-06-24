@@ -11,11 +11,14 @@ with open("styles/login.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Ferrari 296 GT3 Animation
+import streamlit.components.v1 as components
+
+# CSS animation via st.markdown
 st.markdown("""
 <style>
 .ferrari-track {
     position: fixed;
-    bottom: 60px;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 90px;
@@ -23,7 +26,6 @@ st.markdown("""
     pointer-events: none;
     z-index: 0;
 }
-/* Linea pista */
 .ferrari-track::after {
     content: '';
     position: absolute;
@@ -34,136 +36,74 @@ st.markdown("""
     background: linear-gradient(90deg, transparent 0%, #E8002D 30%, #E8002D 70%, transparent 100%);
     opacity: 0.25;
 }
-.ferrari-car {
+</style>
+""", unsafe_allow_html=True)
+
+# SVG animation via components.html (renderizza correttamente in iframe)
+ferrari_svg_html = """
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; }
+  body { background: transparent; overflow: hidden; }
+  .track { position: relative; width: 100vw; height: 90px; overflow: hidden; }
+  .car {
     position: absolute;
-    bottom: 1px;
+    bottom: 8px;
     right: -500px;
-    opacity: 0.22;
-    animation: ferrariDrive 14s linear infinite;
+    opacity: 0.25;
+    animation: drive 14s linear infinite;
     filter: drop-shadow(0 0 6px rgba(232, 0, 45, 0.3));
-}
-@keyframes ferrariDrive {
+  }
+  @keyframes drive {
     0%   { right: -500px; }
     100% { right: 110%; }
-}
+  }
 </style>
-
-<div class="ferrari-track">
-  <svg class="ferrari-car" width="420" height="85" viewBox="0 0 420 85" xmlns="http://www.w3.org/2000/svg">
-    <!-- ===== FERRARI 296 GT3 SILHOUETTE ===== -->
-    
-    <!-- Corpo principale — profilo lungo e basso -->
-    <path d="
-      M 45 62
-      L 52 52
-      L 60 44
-      L 75 36
-      L 95 30
-      L 130 25
-      L 175 22
-      L 220 21
-      L 265 22
-      L 295 24
-      L 318 28
-      L 330 34
-      L 335 42
-      L 338 52
-      L 340 62
-      Z
-    " fill="#E8002D" opacity="0.95"/>
-
-    <!-- Tetto piatto e abitacolo -->
-    <path d="
-      M 115 25
-      L 122 13
-      L 135 7
-      L 200 5
-      L 250 6
-      L 268 10
-      L 280 18
-      L 290 24
-      L 265 22
-      L 220 21
-      L 175 22
-      L 130 25
-      Z
-    " fill="#cc0022" opacity="0.9"/>
-
-    <!-- Finestrino scuro -->
-    <path d="
-      M 128 24
-      L 135 10
-      L 145 7
-      L 200 6
-      L 245 7
-      L 260 12
-      L 268 20
-      L 250 22
-      L 175 22
-      Z
-    " fill="#0a0a0a" opacity="0.75"/>
-
-    <!-- Roll bar -->
+</head>
+<body>
+<div class="track">
+  <svg class="car" width="380" height="78" viewBox="0 0 420 85" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 45 62 L 52 52 L 60 44 L 75 36 L 95 30 L 130 25 L 175 22 L 220 21 L 265 22 L 295 24 L 318 28 L 330 34 L 335 42 L 338 52 L 340 62 Z" fill="#E8002D" opacity="0.95"/>
+    <path d="M 115 25 L 122 13 L 135 7 L 200 5 L 250 6 L 268 10 L 280 18 L 290 24 L 265 22 L 220 21 L 175 22 L 130 25 Z" fill="#cc0022" opacity="0.9"/>
+    <path d="M 128 24 L 135 10 L 145 7 L 200 6 L 245 7 L 260 12 L 268 20 L 250 22 L 175 22 Z" fill="#0a0a0a" opacity="0.75"/>
     <rect x="148" y="4" width="4" height="22" rx="1" fill="#FFFFFF" opacity="0.7"/>
-
-    <!-- Antenna lunga -->
     <rect x="195" y="0" width="2" height="22" rx="1" fill="#FFFFFF" opacity="0.8"/>
-
-    <!-- Specchietto -->
     <path d="M 118 25 L 110 22 L 108 26 L 118 27 Z" fill="#FFFFFF" opacity="0.6"/>
-
-    <!-- Splitter anteriore pronunciato -->
     <path d="M 338 58 L 370 60 L 370 64 L 338 64 Z" fill="#E8002D" opacity="0.8"/>
     <path d="M 355 60 L 380 62 L 380 65 L 355 64 Z" fill="#cc0022" opacity="0.6"/>
-
-    <!-- Diffusore posteriore complesso -->
     <path d="M 42 52 L 30 50 L 20 53 L 18 60 L 25 65 L 42 65 Z" fill="#cc0022" opacity="0.85"/>
     <rect x="22" y="54" width="2" height="8" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
     <rect x="26" y="53" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
     <rect x="30" y="53" width="2" height="9" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
     <rect x="34" y="54" width="2" height="8" rx="0.5" fill="#0a0a0a" opacity="0.5"/>
-
-    <!-- Supporto alettone sx -->
     <rect x="58" y="24" width="5" height="16" rx="1" fill="#FFFFFF" opacity="0.75"/>
-    <!-- Supporto alettone dx -->
     <rect x="80" y="24" width="5" height="16" rx="1" fill="#FFFFFF" opacity="0.75"/>
-    <!-- Piano alettone principale -->
     <path d="M 50 22 L 98 22 L 98 26 L 50 26 Z" fill="#FFFFFF" opacity="0.9"/>
-    <!-- Flap superiore -->
     <path d="M 48 18 L 100 18 L 100 21 L 48 21 Z" fill="#FFFFFF" opacity="0.7"/>
-    <!-- Supporto verticale centrale alettone -->
     <rect x="68" y="18" width="3" height="8" rx="0.5" fill="#FFFFFF" opacity="0.6"/>
-
-    <!-- Ruota anteriore (destra nella direzione di marcia) -->
     <circle cx="308" cy="65" r="17" fill="#111" stroke="#444" stroke-width="2.5"/>
     <circle cx="308" cy="65" r="10" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <!-- Razze cerchio anteriore -->
     <line x1="308" y1="55" x2="308" y2="75" stroke="#666" stroke-width="1.5"/>
     <line x1="298" y1="65" x2="318" y2="65" stroke="#666" stroke-width="1.5"/>
     <line x1="301" y1="58" x2="315" y2="72" stroke="#666" stroke-width="1"/>
     <line x1="315" y1="58" x2="301" y2="72" stroke="#666" stroke-width="1"/>
-
-    <!-- Passaruota anteriore -->
     <path d="M 290 48 Q 308 44 326 48 L 326 64 Q 308 82 290 64 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.5"/>
-
-    <!-- Ruota posteriore (sinistra nella direzione di marcia) -->
     <circle cx="85" cy="65" r="17" fill="#111" stroke="#444" stroke-width="2.5"/>
     <circle cx="85" cy="65" r="10" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <!-- Razze cerchio posteriore -->
     <line x1="85" y1="55" x2="85" y2="75" stroke="#666" stroke-width="1.5"/>
     <line x1="75" y1="65" x2="95" y2="65" stroke="#666" stroke-width="1.5"/>
     <line x1="78" y1="58" x2="92" y2="72" stroke="#666" stroke-width="1"/>
     <line x1="92" y1="58" x2="78" y2="72" stroke="#666" stroke-width="1"/>
-
-    <!-- Passaruota posteriore -->
     <path d="M 67 48 Q 85 44 103 48 L 103 64 Q 85 82 67 64 Z" fill="none" stroke="#cc0022" stroke-width="1.5" opacity="0.5"/>
-
-    <!-- Linea sottoscocca -->
     <line x1="103" y1="64" x2="290" y2="64" stroke="#cc0022" stroke-width="1" opacity="0.4"/>
-
   </svg>
 </div>
-""", unsafe_allow_html=True)
+</body>
+</html>
+"""
+components.html(ferrari_svg_html, height=90, scrolling=False)
 
 # Hide sidebar navigation
 st.markdown("""
