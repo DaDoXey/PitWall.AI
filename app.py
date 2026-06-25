@@ -490,6 +490,18 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stButton"] > button[kind="primary"]:hover {
     background: var(--red-dim) !important;
 }
+/* Sidebar primary button (logout) */
+section[data-testid="stSidebar"] div[data-testid="stButton"] button {
+    background: #E8002D !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
+    background: #CC0028 !important;
+}
 [data-testid="stButton"] > button[kind="secondary"] {
     background: var(--surface2) !important;
     border: 1px solid var(--border) !important;
@@ -902,36 +914,12 @@ with st.sidebar:
     <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; margin-bottom: 2px;">{user_name}</div>
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
     """, unsafe_allow_html=True)
-    import streamlit.components.v1 as _components
-    _logout_clicked = _components.html("""
-    <style>
-      .logout-btn {
-        display: block;
-        width: 100%;
-        padding: 10px 0;
-        background: #E8002D;
-        color: #FFFFFF !important;
-        font-family: 'Orbitron', 'Inter', sans-serif;
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-align: center;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        text-transform: uppercase;
-        margin-top: 8px;
-      }
-      .logout-btn:hover {
-        background: #CC0028;
-      }
-    </style>
-    <button class="logout-btn" onclick="window.parent.postMessage({type:'streamlit:setComponentValue', value: true}, '*')">
-      LOGOUT
-    </button>
-    """, height=52)
-    if _logout_clicked:
+    if st.button("LOGOUT", type="primary", use_container_width=True, key="btn_logout"):
         st.session_state.authenticated = False
+        st.session_state.user_id = None
+        st.session_state.user_name = None
+        st.session_state.user_email = None
+        st.session_state.gigi_welcomed = False
         st.switch_page("pages/login.py")
 
     # ── FOOTER ──
