@@ -20,14 +20,25 @@ PROMPT_PATH = Path(__file__).parent / "prompts" / "system_prompt_v4.txt"
 REQUIRED_SECTIONS = ["## Diagnosi", "## Causa Meccanica", "## Correzione Setup", "## Note Aggiuntive"]
 MAX_RETRIES = 1
 
-MAX_OUTPUT_TOKENS = int(os.getenv("PITWALL_MAX_OUTPUT_TOKENS", "2048"))
-MAX_INPUT_TOKENS  = int(os.getenv("PITWALL_MAX_INPUT_TOKENS", "8000"))
 
-LOG_PATH    = os.getenv("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
-INCIDENT_PATH = os.getenv("PITWALL_INCIDENTS_PATH", "INCIDENTS.md")
+def get_env_var(name: str, default: str = "") -> str:
+    """Recupera una variabile da st.secrets (Streamlit Cloud) o os.getenv (locale)."""
+    try:
+        import streamlit as st
+        if name in st.secrets:
+            return str(st.secrets[name])
+    except Exception:
+        pass
+    return os.getenv(name, default)
 
 
-CLAUDE_MODEL = os.getenv("LLM_MODEL", "claude-3-5-haiku-20241022")
+MAX_OUTPUT_TOKENS = int(get_env_var("PITWALL_MAX_OUTPUT_TOKENS", "2048"))
+MAX_INPUT_TOKENS  = int(get_env_var("PITWALL_MAX_INPUT_TOKENS", "8000"))
+
+LOG_PATH    = get_env_var("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
+INCIDENT_PATH = get_env_var("PITWALL_INCIDENTS_PATH", "INCIDENTS.md")
+
+CLAUDE_MODEL = get_env_var("LLM_MODEL", "claude-3-5-haiku-20241022")
 
 
 def estimate_tokens(text: str) -> int:
@@ -150,7 +161,7 @@ def get_ai_response(
       6. Logga utilizzo token su PROMPT_LOG.md
     """
     anthropic_key = api_key
-    openai_key = os.getenv("OPENAI_API_KEY", "")
+    openai_key = get_env_var("OPENAI_API_KEY", "")
 
     # Controllo dimensione contesto
     context_ok, estimated_tokens = check_and_warn(user_input)
@@ -161,6 +172,8 @@ def get_ai_response(
             "La risposta potrebbe essere più lenta o incompleta. "
             "Prova a ridurre la lunghezza del feedback o del CSV."
         )
+
+    errors = []
 
     # Tentativo 1: Claude
     model_used = CLAUDE_MODEL
@@ -174,7 +187,9 @@ def get_ai_response(
         if validate_output(response):
             log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model_used, auto, tracciato)
             return response
+        errors.append("La risposta di Claude non conteneva tutte le 4 sezioni obbligatorie.")
     except Exception as exc:
+        errors.append(f"Errore Claude ({model_used}): {exc}")
         log_incident(f"Errore chiamata Claude: {exc}")
 
     # Fallback: GPT-4o mini
@@ -185,12 +200,20 @@ def get_ai_response(
             if validate_output(response):
                 log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model_used, auto, tracciato)
                 return response
+            errors.append("La risposta di GPT-4o mini non conteneva tutte le 4 sezioni obbligatorie.")
         except Exception as exc:
+            errors.append(f"Errore GPT-4o mini: {exc}")
             log_incident(f"Errore chiamata GPT-4o mini fallback: {exc}")
+    else:
+        errors.append("GPT-4o mini non configurato (manca OPENAI_API_KEY).")
 
     log_incident("Tutti i modelli LLM hanno fallito — output di errore restituito all'utente.")
+    
+    # Restituisce i dettagli dell'errore all'utente per permettere il debug online
+    err_details = "\n".join(f"- {err}" for err in errors)
     return (
         "⚠️ **Errore nella generazione del consiglio.**\n\n"
-        "Il servizio è temporaneamente non disponibile. "
-        "Riprova tra qualche istante."
+        "Il servizio API ha riscontrato un problema. Dettagli tecnici:\n\n"
+        f"{err_details}\n\n"
+        "Verifica le chiavi API nei Secrets di Streamlit o riprova tra qualche istante."
     )
