@@ -111,8 +111,9 @@ def validate_output(response: str) -> bool:
 
 def call_claude(user_input: str, api_key: str, model_name: str) -> str:
     """Chiamata a Claude con un modello specifico."""
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, base_url="https://api.anthropic.com")
     message = client.messages.create(
+
         model=model_name,
         max_tokens=MAX_OUTPUT_TOKENS,
         system=load_system_prompt(),
