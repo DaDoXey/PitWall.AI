@@ -38,7 +38,8 @@ MAX_INPUT_TOKENS  = int(get_env_var("PITWALL_MAX_INPUT_TOKENS", "8000"))
 LOG_PATH    = get_env_var("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
 INCIDENT_PATH = get_env_var("PITWALL_INCIDENTS_PATH", "INCIDENTS.md")
 
-CLAUDE_MODEL = get_env_var("LLM_MODEL", "claude-3-5-haiku-20241022")
+CLAUDE_MODEL = get_env_var("LLM_MODEL", "claude-3-haiku-20240307")
+
 
 
 def estimate_tokens(text: str) -> int:
