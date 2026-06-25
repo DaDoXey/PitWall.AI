@@ -10,7 +10,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import anthropic
-from openai import OpenAI
 
 
 # ─────────────────────────────────────────────
@@ -39,7 +38,6 @@ LOG_PATH    = get_env_var("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
 INCIDENT_PATH = get_env_var("PITWALL_INCIDENTS_PATH", "INCIDENTS.md")
 
 CLAUDE_MODEL = get_env_var("LLM_MODEL", "claude-3-haiku-20240307")
-
 
 
 def estimate_tokens(text: str) -> int:
@@ -110,30 +108,16 @@ def validate_output(response: str) -> bool:
     return all(section in response for section in REQUIRED_SECTIONS)
 
 
-def call_claude(user_input: str, api_key: str) -> str:
-    """Chiamata a Claude (caricato dinamicamente)."""
+def call_claude(user_input: str, api_key: str, model_name: str) -> str:
+    """Chiamata a Claude con un modello specifico."""
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model=CLAUDE_MODEL,
+        model=model_name,
         max_tokens=MAX_OUTPUT_TOKENS,
         system=load_system_prompt(),
         messages=[{"role": "user", "content": user_input}],
     )
     return message.content[0].text
-
-
-def call_gpt4o_mini(user_input: str, api_key: str) -> str:
-    """Chiamata a GPT-4o mini (fallback)."""
-    client = OpenAI(api_key=api_key)
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        max_tokens=MAX_OUTPUT_TOKENS,
-        messages=[
-            {"role": "system", "content": load_system_prompt()},
-            {"role": "user", "content": user_input},
-        ],
-    )
-    return response.choices[0].message.content
 
 
 def check_and_warn(user_input: str) -> tuple[bool, int]:
@@ -151,18 +135,9 @@ def get_ai_response(
     show_warning: bool = True,
 ) -> str:
     """
-    Ottieni risposta dall'LLM con retry logic e fallback.
-
-    Flusso:
-      1. Controlla dimensione contesto
-      2. Tenta Claude (modello caricato dinamicamente)
-      3. Se output non valido → retry su Claude
-      4. Se ancora non valido → fallback GPT-4o mini
-      5. Se tutto fallisce → messaggio di errore utente
-      6. Logga utilizzo token su PROMPT_LOG.md
+    Ottieni risposta da Claude con retry logic e fallback su altri modelli Anthropic.
     """
     anthropic_key = api_key
-    openai_key = get_env_var("OPENAI_API_KEY", "")
 
     # Controllo dimensione contesto
     context_ok, estimated_tokens = check_and_warn(user_input)
@@ -176,45 +151,46 @@ def get_ai_response(
 
     errors = []
 
-    # Tentativo 1: Claude
-    model_used = CLAUDE_MODEL
-    try:
-        response = call_claude(user_input, anthropic_key)
-        if validate_output(response):
-            log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model_used, auto, tracciato)
-            return response
-        # Retry 1
-        response = call_claude(user_input, anthropic_key)
-        if validate_output(response):
-            log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model_used, auto, tracciato)
-            return response
-        errors.append("La risposta di Claude non conteneva tutte le 4 sezioni obbligatorie.")
-    except Exception as exc:
-        errors.append(f"Errore Claude ({model_used}): {exc}")
-        log_incident(f"Errore chiamata Claude: {exc}")
+    # Lista ordinata di modelli Anthropic da provare in cascata in caso di errori (es. 404)
+    models_to_try = [
+        CLAUDE_MODEL,                         # 1. Modello scelto/configurato da utente
+        "claude-3-5-sonnet-20241022",         # 2. Sonnet 3.5 (nuovo)
+        "claude-3-5-sonnet-20240620",         # 3. Sonnet 3.5 (precedente)
+        "claude-3-haiku-20240307",            # 4. Haiku 3 (standard)
+    ]
 
-    # Fallback: GPT-4o mini
-    model_used = "gpt-4o-mini"
-    if openai_key:
+    # Rimuove duplicati mantenendo l'ordine
+    unique_models = []
+    for m in models_to_try:
+        if m not in unique_models:
+            unique_models.append(m)
+
+    for idx, model in enumerate(unique_models):
         try:
-            response = call_gpt4o_mini(user_input, openai_key)
+            # Primo tentativo con questo modello
+            response = call_claude(user_input, anthropic_key, model)
             if validate_output(response):
-                log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model_used, auto, tracciato)
+                log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model, auto, tracciato)
                 return response
-            errors.append("La risposta di GPT-4o mini non conteneva tutte le 4 sezioni obbligatorie.")
+            
+            # Secondo tentativo (retry) con lo stesso modello
+            response = call_claude(user_input, anthropic_key, model)
+            if validate_output(response):
+                log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model, auto, tracciato)
+                return response
+            
+            errors.append(f"Modello {model}: Output generato ma incompleto (sezioni mancanti).")
         except Exception as exc:
-            errors.append(f"Errore GPT-4o mini: {exc}")
-            log_incident(f"Errore chiamata GPT-4o mini fallback: {exc}")
-    else:
-        errors.append("GPT-4o mini non configurato (manca OPENAI_API_KEY).")
+            errors.append(f"Modello {model} fallito: {exc}")
+            log_incident(f"Errore chiamata Claude ({model}): {exc}")
 
-    log_incident("Tutti i modelli LLM hanno fallito — output di errore restituito all'utente.")
-    
+    log_incident("Tutti i modelli Anthropic hanno fallito.")
+
     # Restituisce i dettagli dell'errore all'utente per permettere il debug online
     err_details = "\n".join(f"- {err}" for err in errors)
     return (
-        "⚠️ **Errore nella generazione del consiglio.**\n\n"
-        "Il servizio API ha riscontrato un problema. Dettagli tecnici:\n\n"
+        "⚠️ **Errore nella generazione del consiglio con Anthropic.**\n\n"
+        "Tutti i tentativi con i modelli disponibili sono falliti. Dettagli tecnici:\n\n"
         f"{err_details}\n\n"
-        "Verifica le chiavi API nei Secrets di Streamlit o riprova tra qualche istante."
+        "Verifica che la tua ANTHROPIC_API_KEY sia corretta, attiva e disponga di credito sufficiente."
     )
