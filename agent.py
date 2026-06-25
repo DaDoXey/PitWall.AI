@@ -27,6 +27,9 @@ LOG_PATH    = os.getenv("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
 INCIDENT_PATH = os.getenv("PITWALL_INCIDENTS_PATH", "INCIDENTS.md")
 
 
+CLAUDE_MODEL = os.getenv("LLM_MODEL", "claude-3-5-haiku-20241022")
+
+
 def estimate_tokens(text: str) -> int:
     return len(text) // 4
 
@@ -96,10 +99,10 @@ def validate_output(response: str) -> bool:
 
 
 def call_claude(user_input: str, api_key: str) -> str:
-    """Chiamata a Claude Sonnet (primario)."""
+    """Chiamata a Claude (caricato dinamicamente)."""
     client = anthropic.Anthropic(api_key=api_key)
     message = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=CLAUDE_MODEL,
         max_tokens=MAX_OUTPUT_TOKENS,
         system=load_system_prompt(),
         messages=[{"role": "user", "content": user_input}],
@@ -140,7 +143,7 @@ def get_ai_response(
 
     Flusso:
       1. Controlla dimensione contesto
-      2. Tenta Claude Sonnet
+      2. Tenta Claude (modello caricato dinamicamente)
       3. Se output non valido → retry su Claude
       4. Se ancora non valido → fallback GPT-4o mini
       5. Se tutto fallisce → messaggio di errore utente
@@ -159,8 +162,8 @@ def get_ai_response(
             "Prova a ridurre la lunghezza del feedback o del CSV."
         )
 
-    # Tentativo 1: Claude Sonnet
-    model_used = "claude-sonnet-4-6"
+    # Tentativo 1: Claude
+    model_used = CLAUDE_MODEL
     try:
         response = call_claude(user_input, anthropic_key)
         if validate_output(response):
