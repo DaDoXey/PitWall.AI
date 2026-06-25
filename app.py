@@ -931,9 +931,8 @@ with st.sidebar:
     </button>
     """, height=52)
     if _logout_clicked:
-        for _k in list(st.session_state.keys()):
-            del st.session_state[_k]
-        st.rerun()
+        st.session_state.authenticated = False
+        st.switch_page("pages/login.py")
 
     # ── FOOTER ──
     st.markdown("")
