@@ -1,5 +1,6 @@
 streamlit>=1.0
-anthropic
+anthropic>=0.26.0
+
 openai
 python-dotenv>=1.0
 pandas>=2.0
