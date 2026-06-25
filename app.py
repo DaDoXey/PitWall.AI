@@ -903,43 +903,37 @@ with st.sidebar:
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
     """, unsafe_allow_html=True)
     import streamlit.components.v1 as _components
-    _components.html("""
-    <script>
-    function styleLogout() {
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        if (!sidebar) return;
-        const buttons = sidebar.querySelectorAll('button[kind="secondary"]');
-        buttons.forEach(btn => {
-            if (btn.textContent.trim().toLowerCase().includes('logout')) {
-                btn.style.backgroundColor = '#E8002D';
-                btn.style.color = '#FFFFFF';
-                btn.style.border = 'none';
-                btn.style.fontFamily = "'JetBrains Mono', 'Orbitron', monospace";
-                btn.style.fontSize = '12px';
-                btn.style.fontWeight = '700';
-                btn.style.letterSpacing = '0.12em';
-                btn.style.textTransform = 'uppercase';
-                btn.style.width = '100%';
-                btn.style.padding = '8px 12px';
-                btn.style.borderRadius = '4px';
-                btn.style.cursor = 'pointer';
-                btn.onmouseover = function() { this.style.backgroundColor = '#CC0028'; };
-                btn.onmouseout = function() { this.style.backgroundColor = '#E8002D'; };
-            }
-        });
-    }
-    styleLogout();
-    const observer = new MutationObserver(styleLogout);
-    observer.observe(document.body, {childList: true, subtree: true});
-    </script>
-    """, height=0, scrolling=False)
-    if st.button("LOGOUT", use_container_width=True, key="btn_logout"):
-        st.session_state.authenticated = False
-        st.session_state.user_id = None
-        st.session_state.user_name = None
-        st.session_state.user_email = None
-        st.session_state.gigi_welcomed = False
-        st.switch_page("pages/login.py")
+    _logout_clicked = _components.html("""
+    <style>
+      .logout-btn {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+        background: #E8002D;
+        color: #FFFFFF !important;
+        font-family: 'Orbitron', 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-align: center;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-transform: uppercase;
+        margin-top: 8px;
+      }
+      .logout-btn:hover {
+        background: #CC0028;
+      }
+    </style>
+    <button class="logout-btn" onclick="window.parent.postMessage({type:'streamlit:setComponentValue', value: true}, '*')">
+      LOGOUT
+    </button>
+    """, height=52)
+    if _logout_clicked:
+        for _k in list(st.session_state.keys()):
+            del st.session_state[_k]
+        st.rerun()
 
     # ── FOOTER ──
     st.markdown("")
@@ -1106,6 +1100,118 @@ def render_param_slider(key: str, param: dict, col=None) -> float | int:
 
 
 # ─────────────────────────────────────────────
+# LISTE AUTO E PISTA (per selectbox + auto-detect)
+# ─────────────────────────────────────────────
+
+CAR_LIST = [
+    "BMW M4 GT3",
+    "Ferrari 296 GT3",
+    "Ferrari 488 GT3 Evo",
+    "Porsche 992 GT3 R",
+    "Porsche 991 II GT3 R",
+    "Mercedes-AMG GT3 Evo",
+    "Audi R8 LMS Evo II GT3",
+    "Lamborghini Huracán GT3 EVO2",
+    "McLaren 720S GT3 Evo",
+    "Bentley Continental GT3",
+    "Honda NSX GT3 Evo",
+    "Nissan GT-R Nismo GT3",
+    "Lexus RC F GT3",
+    "Ford Mustang GT3",
+    "Aston Martin V8 Vantage GT3",
+]
+
+TRACK_LIST = [
+    "Monza", "Spa-Francorchamps", "Nürburgring GP", "Silverstone",
+    "Misano", "Barcelona", "Hungaroring", "Zandvoort", "Imola",
+    "Kyalami", "Mount Panorama", "Suzuka", "Zolder",
+    "Paul Ricard", "Brands Hatch",
+]
+
+
+def detect_car_and_track(text: str) -> dict:
+    """
+    Rileva auto e pista dal testo libero del pilota usando keyword matching.
+    Restituisce dict con chiavi 'car' e 'track' (None se non rilevati).
+    """
+    text_lower = text.lower()
+
+    CAR_KEYWORDS = {
+        "ferrari": "Ferrari 296 GT3",
+        "296": "Ferrari 296 GT3",
+        "488": "Ferrari 488 GT3 Evo",
+        "bmw": "BMW M4 GT3",
+        "m4": "BMW M4 GT3",
+        "porsche": "Porsche 992 GT3 R",
+        "992": "Porsche 992 GT3 R",
+        "991": "Porsche 991 II GT3 R",
+        "lamborghini": "Lamborghini Huracán GT3 EVO2",
+        "huracan": "Lamborghini Huracán GT3 EVO2",
+        "huracán": "Lamborghini Huracán GT3 EVO2",
+        "mercedes": "Mercedes-AMG GT3 Evo",
+        "amg": "Mercedes-AMG GT3 Evo",
+        "audi": "Audi R8 LMS Evo II GT3",
+        "r8": "Audi R8 LMS Evo II GT3",
+        "mclaren": "McLaren 720S GT3 Evo",
+        "720": "McLaren 720S GT3 Evo",
+        "bentley": "Bentley Continental GT3",
+        "continental": "Bentley Continental GT3",
+        "honda": "Honda NSX GT3 Evo",
+        "nsx": "Honda NSX GT3 Evo",
+        "nissan": "Nissan GT-R Nismo GT3",
+        "gtr": "Nissan GT-R Nismo GT3",
+        "gt-r": "Nissan GT-R Nismo GT3",
+        "lexus": "Lexus RC F GT3",
+        "ford": "Ford Mustang GT3",
+        "mustang": "Ford Mustang GT3",
+        "aston": "Aston Martin V8 Vantage GT3",
+        "vantage": "Aston Martin V8 Vantage GT3",
+    }
+
+    TRACK_KEYWORDS = {
+        "monza": "Monza",
+        "spa": "Spa-Francorchamps",
+        "francorchamps": "Spa-Francorchamps",
+        "nurburgring": "Nürburgring GP",
+        "nürburgring": "Nürburgring GP",
+        "nurburg": "Nürburgring GP",
+        "silverstone": "Silverstone",
+        "paul ricard": "Paul Ricard",
+        "ricard": "Paul Ricard",
+        "barcelona": "Barcelona",
+        "catalogna": "Barcelona",
+        "catalunya": "Barcelona",
+        "zandvoort": "Zandvoort",
+        "misano": "Misano",
+        "hungaroring": "Hungaroring",
+        "hungary": "Hungaroring",
+        "ungheria": "Hungaroring",
+        "imola": "Imola",
+        "kyalami": "Kyalami",
+        "mount panorama": "Mount Panorama",
+        "bathurst": "Mount Panorama",
+        "suzuka": "Suzuka",
+        "zolder": "Zolder",
+        "brands hatch": "Brands Hatch",
+        "brands": "Brands Hatch",
+    }
+
+    result = {"car": None, "track": None}
+
+    for keyword, car_value in CAR_KEYWORDS.items():
+        if keyword in text_lower:
+            result["car"] = car_value
+            break
+
+    for keyword, track_value in TRACK_KEYWORDS.items():
+        if keyword in text_lower:
+            result["track"] = track_value
+            break
+
+    return result
+
+
+# ─────────────────────────────────────────────
 # AREA PRINCIPALE — 2 colonne: feedback + setup
 # ─────────────────────────────────────────────
 
@@ -1116,6 +1222,17 @@ tab_analisi, tab_carburante, tab_storico = st.tabs([
 ])
 
 with tab_analisi:
+    # Auto-detect auto/pista dal feedback pilota
+    _fb_text = st.session_state.get("feedback_text_area", "")
+    _detected = detect_car_and_track(_fb_text) if _fb_text else {"car": None, "track": None}
+    _last = st.session_state.get("_last_auto_detect", {"car": None, "track": None})
+    if _detected != _last:
+        if _detected["car"] and _detected["car"] in CAR_LIST:
+            st.session_state["sel_car"] = _detected["car"]
+        if _detected["track"] and _detected["track"] in TRACK_LIST:
+            st.session_state["sel_track"] = _detected["track"]
+        st.session_state["_last_auto_detect"] = _detected
+
     col1, col2, col3 = st.columns([1, 1.2, 1.5], gap="medium")
 
     # ══ COLONNA 1 — Configurazione Sessione ══
@@ -1127,35 +1244,14 @@ with tab_analisi:
         # auto/pista: input manuale obbligatorio, il CSV ACC non contiene questi metadati
         selected_car = st.selectbox(
             "🏎 Auto",
-            options=[
-                "BMW M4 GT3",
-                "Ferrari 296 GT3",
-                "Ferrari 488 GT3 Evo",
-                "Porsche 992 GT3 R",
-                "Porsche 991 II GT3 R",
-                "Mercedes-AMG GT3 Evo",
-                "Audi R8 LMS Evo II GT3",
-                "Lamborghini Huracán GT3 EVO2",
-                "McLaren 720S GT3 Evo",
-                "Bentley Continental GT3",
-                "Honda NSX GT3 Evo",
-                "Nissan GT-R Nismo GT3",
-                "Lexus RC F GT3",
-                "Ford Mustang GT3",
-                "Aston Martin V8 Vantage GT3",
-            ],
+            options=CAR_LIST,
             key="sel_car",
         )
 
         # auto/pista: input manuale obbligatorio, il CSV ACC non contiene questi metadati
         selected_track = st.selectbox(
             "🏁 Tracciato",
-            options=[
-                "Monza", "Spa-Francorchamps", "Nürburgring GP", "Silverstone",
-                "Misano", "Barcelona", "Hungaroring", "Zandvoort", "Imola",
-                "Kyalami", "Mount Panorama", "Suzuka", "Zolder",
-                "Paul Ricard", "Brands Hatch",
-            ],
+            options=TRACK_LIST,
             key="sel_track",
         )
 
