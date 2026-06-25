@@ -902,33 +902,43 @@ with st.sidebar:
     <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; margin-bottom: 2px;">{user_name}</div>
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
     """, unsafe_allow_html=True)
-    st.sidebar.markdown("""
-    <style>
-    /* Logout button fix — targeting Streamlit secondary button via data-testid */
-    [data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] {
-        background-color: #1a1a1a !important;
-        border: 1px solid #2a2a2a !important;
-        color: #888888 !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 12px !important;
-        width: 100% !important;
-        padding: 6px 12px !important;
-        border-radius: 4px !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
+    import streamlit.components.v1 as _components
+    _components.html("""
+    <script>
+    function styleLogout() {
+        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+        if (!sidebar) return;
+        const buttons = sidebar.querySelectorAll('button[kind="secondary"]');
+        buttons.forEach(btn => {
+            if (btn.textContent.trim().toLowerCase().includes('logout')) {
+                btn.style.backgroundColor = '#E8002D';
+                btn.style.color = '#FFFFFF';
+                btn.style.border = 'none';
+                btn.style.fontFamily = "'JetBrains Mono', 'Orbitron', monospace";
+                btn.style.fontSize = '12px';
+                btn.style.fontWeight = '700';
+                btn.style.letterSpacing = '0.12em';
+                btn.style.textTransform = 'uppercase';
+                btn.style.width = '100%';
+                btn.style.padding = '8px 12px';
+                btn.style.borderRadius = '4px';
+                btn.style.cursor = 'pointer';
+                btn.onmouseover = function() { this.style.backgroundColor = '#CC0028'; };
+                btn.onmouseout = function() { this.style.backgroundColor = '#E8002D'; };
+            }
+        });
     }
-    [data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"]:hover {
-        border-color: #E8002D !important;
-        color: #FFFFFF !important;
-        background-color: rgba(232, 0, 45, 0.07) !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    if st.button("Logout", use_container_width=True, key="btn_logout"):
+    styleLogout();
+    const observer = new MutationObserver(styleLogout);
+    observer.observe(document.body, {childList: true, subtree: true});
+    </script>
+    """, height=0, scrolling=False)
+    if st.button("LOGOUT", use_container_width=True, key="btn_logout"):
         st.session_state.authenticated = False
         st.session_state.user_id = None
         st.session_state.user_name = None
         st.session_state.user_email = None
+        st.session_state.gigi_welcomed = False
         st.switch_page("pages/login.py")
 
     # ── FOOTER ──
@@ -972,6 +982,20 @@ if csv_file is not None and st.session_state.get("csv_filename") != csv_filename
             }
     except CSVParseError as e:
         st.warning(f"⚠️ CSV non valido: {str(e)}")
+
+# Inizializza slider pressioni con medie CSV (PRIMA del rendering dei widget)
+# Se il CSV non è caricato, resetta ai default di setup_params.py
+if "csv_pressures" in st.session_state and csv_file is not None:
+    _cp = st.session_state["csv_pressures"]
+    for _k in ["fl", "fr", "rl", "rr"]:
+        _skey = f"slider_tire_press_{_k}"
+        if _skey not in st.session_state and _k in _cp:
+            st.session_state[_skey] = round(_cp[_k], 2)
+elif csv_file is None:
+    for _k in ["fl", "fr", "rl", "rr"]:
+        _skey = f"slider_tire_press_{_k}"
+        if _skey in st.session_state:
+            del st.session_state[_skey]
 
 if "csv_parsed_result" in st.session_state:
     csv_result = st.session_state["csv_parsed_result"]
@@ -1072,7 +1096,7 @@ def render_param_slider(key: str, param: dict, col=None) -> float | int:
         full_label,
         min_value=float(param["min"]) if is_float else int(param["min"]),
         max_value=float(param["max"]) if is_float else int(param["max"]),
-        value=float(default) if is_float else int(default),
+        value=float(current_val) if is_float else int(current_val),
         step=float(param["step"]) if is_float else int(param["step"]),
         key=f"slider_{key}",
         label_visibility="collapsed",
@@ -1100,6 +1124,7 @@ with tab_analisi:
         st.caption("Parametri ambientali e di pista")
         st.divider()
 
+        # auto/pista: input manuale obbligatorio, il CSV ACC non contiene questi metadati
         selected_car = st.selectbox(
             "🏎 Auto",
             options=[
@@ -1122,6 +1147,7 @@ with tab_analisi:
             key="sel_car",
         )
 
+        # auto/pista: input manuale obbligatorio, il CSV ACC non contiene questi metadati
         selected_track = st.selectbox(
             "🏁 Tracciato",
             options=[
