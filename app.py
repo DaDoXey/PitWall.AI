@@ -192,6 +192,40 @@ if not st.session_state.get("gigi_welcomed", False):
     components.html(gigi_html, height=175, scrolling=False)
     st.session_state["gigi_welcomed"] = True
 
+def normalize_markdown(text: str) -> str:
+    """
+    Normalizza SOLO la spaziatura del Markdown prodotto dal modello, per una resa
+    affidabile a schermo. Non altera mai testo, numeri o valori: inserisce solo
+    righe vuote dove servono.
+    - Garantisce una riga vuota prima di ogni header (## / ###).
+    - Garantisce una riga vuota prima dell'inizio di un elenco (*, -, 1.),
+      così il Markdown lo renderizza come lista.
+    """
+    import re
+
+    if not text:
+        return text
+
+    def _is_list(s: str) -> bool:
+        s = s.lstrip()
+        return bool(re.match(r"[-*]\s+", s)) or bool(re.match(r"\d+\.\s+", s))
+
+    lines = text.split("\n")
+    out: list[str] = []
+    for line in lines:
+        stripped = line.lstrip()
+        prev = out[-1] if out else ""
+        is_header = stripped.startswith("##")
+        # Riga vuota prima di un header
+        if is_header and out and prev.strip() != "":
+            out.append("")
+        # Riga vuota prima dell'inizio di un elenco (non se la precedente è già lista)
+        elif _is_list(line) and out and prev.strip() != "" and not _is_list(prev):
+            out.append("")
+        out.append(line)
+    return "\n".join(out)
+
+
 # Inizializza database sessioni (non cachato per evitare threading issues con SQLite)
 def get_session_db():
     db = SessionDatabase()
@@ -1494,8 +1528,10 @@ with tab_analisi:
     if "last_response" in st.session_state:
         st.markdown("---")
         st.markdown('<div class="section-title">▶ Analisi PitWall.AI</div>', unsafe_allow_html=True)
+        # Le righe vuote attorno al contenuto chiudono il blocco HTML grezzo,
+        # così il Markdown interno (header, liste) viene renderizzato correttamente.
         st.markdown(
-            f'<div class="ai-output">{st.session_state["last_response"]}</div>',
+            f'<div class="ai-output">\n\n{normalize_markdown(st.session_state["last_response"])}\n\n</div>',
             unsafe_allow_html=True,
         )
 
