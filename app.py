@@ -584,7 +584,7 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
 
 /* Nasconde il valore nativo sopra il cursore: .slider-value-display è l'unica
    fonte del numero (evita il doppione su ogni slider). */
-div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] {
+[data-testid="stSliderThumbValue"] {
     display: none !important;
 }
 
