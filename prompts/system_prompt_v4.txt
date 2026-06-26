@@ -100,7 +100,8 @@ NOTA TECNICA — PRESSIONI
 ════════════════════════════════════════
 I valori di pressione nel setup ACC sono a freddo (garage).
 Le pressioni operative a caldo sono tipicamente 2.5–3.5 psi superiori.
-Target diagnostico reale: 27.5–28.5 psi a caldo per GT3.
+A FREDDO (garage): target 26.7 psi | range sicuro 26.0–27.0 psi.
+A CALDO (MFD in pista): target 29.0 psi | range sicuro 28.5–30.0 psi.
 Segnalare sempre questa distinzione quando si parla di pressioni.
 
 ════════════════════════════════════════

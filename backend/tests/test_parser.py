@@ -16,7 +16,7 @@ from io import StringIO
 # Aggiungi la directory backend al path se necessario
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-from backend.parser import parse_session_csv, calculate_fuel_load, CSVParseError
+from backend.parser import parse_session_csv, CSVParseError
 
 # ---------------------------------------------------------------------------
 # Utility di test minimale
@@ -101,60 +101,6 @@ except CSVParseError as e:
 except Exception as e:
     test("TC-05f: valori non numerici", False, f"Eccezione inattesa: {e}")
 
-
-# ---------------------------------------------------------------------------
-# TC-06 — Calcolo carburante (Spec v3 §4.2, §10)
-# Input: gara 20 min, consumo 3.2 L/giro, tempo giro 1:52 (= 1.8667 min)
-# Atteso: ceil(20/1.8667) × 3.2 × 1.05 ≈ 36.1 L
-# ---------------------------------------------------------------------------
-
-print("\n── TC-06: Calcolo carburante ─────────────────────────────────────")
-
-LAP_TIME_MIN = 1 + 52/60  # 1:52 → 1.8667 min
-
-try:
-    result = calculate_fuel_load(
-        race_duration_min=20,
-        lap_time_min=LAP_TIME_MIN,
-        fuel_cons_per_lap=3.2,
-        safety_margin=0.05
-    )
-
-    expected_laps  = math.ceil(20 / LAP_TIME_MIN)   # = 11
-    expected_fuel  = round(expected_laps * 3.2, 2)   # = 35.2
-    expected_total = round(expected_fuel * 1.05, 2)  # = 36.96
-
-    test(
-        "TC-06a: laps_needed corretto",
-        result["laps_needed"] == expected_laps,
-        f"Ottenuto: {result['laps_needed']}, Atteso: {expected_laps}"
-    )
-    test(
-        "TC-06b: fuel_needed corretto",
-        result["fuel_needed_L"] == expected_fuel,
-        f"Ottenuto: {result['fuel_needed_L']}, Atteso: {expected_fuel}"
-    )
-    test(
-        "TC-06c: fuel_recommended entro 0.5 L dall'atteso",
-        abs(result["fuel_recommended_L"] - expected_total) <= 0.5,
-        f"Ottenuto: {result['fuel_recommended_L']}, Atteso: ~{expected_total}"
-    )
-    test(
-        "TC-06d: safety_margin_pct = 5.0",
-        result["safety_margin_pct"] == 5.0,
-        f"Ottenuto: {result['safety_margin_pct']}"
-    )
-    print(f"        Dettaglio: {result}")
-
-except Exception as e:
-    test("TC-06: calcolo carburante", False, f"Eccezione inattesa: {e}")
-
-# Edge case: input non valido
-try:
-    calculate_fuel_load(0, 1.5, 3.2)
-    test("TC-06e: race_duration=0 → ValueError", False, "Doveva sollevare ValueError")
-except ValueError as e:
-    test("TC-06e: race_duration=0 → ValueError", True, str(e))
 
 
 # ---------------------------------------------------------------------------

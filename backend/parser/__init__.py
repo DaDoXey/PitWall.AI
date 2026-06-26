@@ -1,5 +1,3 @@
-from backend.core.physics import calculate_fuel_load
-
 from .csv_parser import (
     CSVParseError,
     extract_averages,
@@ -12,5 +10,4 @@ __all__ = [
     "validate_schema",
     "extract_averages",
     "CSVParseError",
-    "calculate_fuel_load",
 ]

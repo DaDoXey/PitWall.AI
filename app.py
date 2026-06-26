@@ -1270,6 +1270,23 @@ with tab_analisi:
             key="feedback_text_area",
         )
 
+        # ── INC-002: distinzione obbligatoria pressioni freddo / caldo ──
+        # Le pressioni a caldo (MFD) sono ~2.5-3.5 PSI sopra quelle a freddo (garage).
+        # Senza questo contesto il modello classifica le pressioni con la finestra sbagliata.
+        pressure_context_label = st.radio(
+            "🌡 Le pressioni inserite/lette sono:",
+            options=[
+                "A freddo (impostate in garage prima della sessione)",
+                "A caldo (lette dal MFD in pista — tasto N)",
+            ],
+            horizontal=False,
+            key="pressure_context_radio",
+            help="A freddo: target 26.7 PSI (range 26.0–27.0). A caldo: target 29.0 PSI (range 28.5–30.0).",
+        )
+        st.session_state["pressure_context"] = (
+            "cold" if "freddo" in pressure_context_label else "hot"
+        )
+
         btn_analizza = st.button("🔍 ANALIZZA SESSIONE", type="primary", use_container_width=True)
 
     # ══ COLONNA 3 — Setup Corrente ══
@@ -1760,6 +1777,22 @@ if btn_analizza:
     )
     if csv_context:
         full_context += f"\n\n{csv_context}"
+
+    # ── INC-002: contesto pressioni freddo/caldo iniettato nel prompt ──
+    _pctx = st.session_state.get("pressure_context", "cold")
+    if _pctx == "hot":
+        full_context += (
+            "\n\nCONTESTO PRESSIONI: A CALDO (lette dal MFD in pista).\n"
+            "Finestra operativa GT3 a caldo: target 29.0 PSI, range sicuro 28.5–30.0 PSI.\n"
+            "Classifica le pressioni con questa finestra: NON usare il target a freddo (26.7 PSI)."
+        )
+    else:
+        full_context += (
+            "\n\nCONTESTO PRESSIONI: A FREDDO (impostate in garage).\n"
+            "Finestra a freddo GT3: target 26.7 PSI, range sicuro 26.0–27.0 PSI.\n"
+            "A freddo le pressioni saliranno di ~2.5–3.5 PSI a caldo: tienine conto nei consigli."
+        )
+
     full_context += f"\n\nFeedback pilota: {feedback.strip()}"
 
     # Chiamata LLM

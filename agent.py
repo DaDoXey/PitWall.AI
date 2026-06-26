@@ -37,7 +37,7 @@ MAX_INPUT_TOKENS  = int(get_env_var("PITWALL_MAX_INPUT_TOKENS", "8000"))
 LOG_PATH    = get_env_var("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
 INCIDENT_PATH = get_env_var("PITWALL_INCIDENTS_PATH", "INCIDENTS.md")
 
-CLAUDE_MODEL = get_env_var("LLM_MODEL", "claude-3-5-haiku-latest")
+CLAUDE_MODEL = get_env_var("LLM_MODEL", "claude-haiku-4-5")
 
 
 
@@ -155,10 +155,10 @@ def get_ai_response(
 
     # Lista ordinata di modelli Anthropic da provare in cascata in caso di errori (es. 404)
     models_to_try = [
-        CLAUDE_MODEL,                         # 1. Modello scelto/configurato da utente
-        "claude-3-5-haiku-latest",            # 2. Haiku 3.5 (più recente)
-        "claude-3-5-sonnet-latest",           # 3. Sonnet 3.5 (standard)
-        "claude-3-7-sonnet-latest",           # 4. Sonnet 3.7 (più recente)
+        CLAUDE_MODEL,              # 1. Modello scelto/configurato da utente
+        "claude-haiku-4-5",        # 2. Haiku 4.5 (veloce ed economico)
+        "claude-sonnet-4-6",       # 3. Sonnet 4.6 (qualità superiore)
+        "claude-3-5-haiku-latest", # 4. Haiku 3.5 (ultimo fallback legacy)
     ]
 
 
