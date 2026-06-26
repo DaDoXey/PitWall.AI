@@ -120,6 +120,7 @@ if auth_method["type"] == "mock":
             st.session_state.user_id = uid
             st.session_state.user_email = "demo@pitwall.ai"
             st.session_state.user_name = "Demo Pilot"
+            st.session_state["gigi_chat"] = []  # chat azzerata a ogni login (come il DB)
             st.switch_page("app.py")
 
     with col_custom:
@@ -139,6 +140,7 @@ if auth_method["type"] == "mock":
                 st.session_state.user_id = uid
                 st.session_state.user_email = email
                 st.session_state.user_name = name
+                st.session_state["gigi_chat"] = []  # chat azzerata a ogni login (come il DB)
                 st.switch_page("app.py")
             else:
                 st.error("Compila tutti i campi.")

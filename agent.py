@@ -197,3 +197,55 @@ def get_ai_response(
         f"{err_details}\n\n"
         "Verifica che la tua ANTHROPIC_API_KEY sia corretta, attiva e disponga di credito sufficiente."
     )
+
+
+# ─────────────────────────────────────────────
+# CHAT GIGI (aggiunta — canale conversazionale, separato dall'analisi a 4 sezioni)
+# ─────────────────────────────────────────────
+CHAT_PROMPT_PATH = Path(__file__).parent / "prompts" / "chat_system_prompt.txt"
+CHAT_MAX_OUTPUT_TOKENS = int(get_env_var("PITWALL_CHAT_MAX_TOKENS", "800"))
+
+
+def load_chat_system_prompt() -> str:
+    """Carica il system prompt conversazionale di Gigi. Fallback minimo se assente."""
+    try:
+        return CHAT_PROMPT_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return (
+            "Sei Gigi, ingegnere di pista virtuale per ACC GT3. Rispondi in chat "
+            "in modo breve, diretto e tecnico, restando nei range reali di ACC."
+        )
+
+
+def chat_with_gigi(messages: list, api_key: str, context: str = "", model_name: str | None = None):
+    """
+    Generatore: invia la cronologia chat a Claude in streaming e fa yield dei
+    chunk di testo (per st.write_stream). NESSUNA validazione a 4 sezioni.
+
+    Args:
+        messages: lista [{"role": "user"|"assistant", "content": str}, ...].
+        api_key:  ANTHROPIC_API_KEY.
+        context:  blocco contesto opzionale (ultima analisi, setup, CSV).
+        model_name: override modello; default CLAUDE_MODEL.
+    """
+    model = model_name or CLAUDE_MODEL
+    system_prompt = load_chat_system_prompt()
+    if context.strip():
+        system_prompt += f"\n\n[CONTESTO SESSIONE]\n{context.strip()}"
+
+    client = anthropic.Anthropic(api_key=api_key, base_url="https://api.anthropic.com")
+    try:
+        with client.messages.stream(
+            model=model,
+            max_tokens=CHAT_MAX_OUTPUT_TOKENS,
+            system=system_prompt,
+            messages=messages,
+        ) as stream:
+            for text in stream.text_stream:
+                yield text
+    except Exception as exc:
+        log_incident(f"Errore chat Gigi ({model}): {exc}")
+        yield (
+            "⚠️ Ops, problema di collegamento col muretto. "
+            "Controlla la API key o riprova tra poco."
+        )

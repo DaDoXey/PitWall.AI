@@ -933,7 +933,11 @@ with st.sidebar:
     )
     if screenshot_file is not None:
         if st.button("🔍 Leggi Parametri da Screenshot", type="secondary", use_container_width=True):
-            api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+            # st.secrets solleva se manca secrets.toml (locale): fallback robusto su .env
+            try:
+                api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+            except Exception:
+                api_key = os.getenv("ANTHROPIC_API_KEY", "")
             if not api_key:
                 st.error("ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
             else:
@@ -1540,6 +1544,123 @@ with tab_analisi:
         )
 
     # ─────────────────────────────────────────────
+    # CHAT GIGI — canale conversazionale (memoria di sessione, separato dall'analisi)
+    # ─────────────────────────────────────────────
+    import html as _html
+
+    st.markdown("---")
+    st.markdown('<div class="section-title">💬 Parla con Gigi</div>', unsafe_allow_html=True)
+    st.caption("Chiacchiera col tuo ingegnere: domande di approfondimento, dubbi sul setup. La chat si azzera a ogni login.")
+
+    st.session_state.setdefault("gigi_chat", [])
+
+    # CSS scoped: avatar (3 stati) + bolle chat, coerente col design system
+    st.markdown("""
+    <style>
+    .gchat-row { display:flex; align-items:flex-start; gap:10px; margin:10px 0; }
+    .gchat-row.user { justify-content:flex-end; }
+    .gbubble { max-width:78%; padding:10px 14px; border-radius:10px; font-family:'Inter',sans-serif;
+               font-size:13.5px; line-height:1.6; }
+    .gbubble.gigi { background:#1a1a1a; border:1px solid #2a2a2a; border-left:3px solid #E8002D; color:#CFCFCF; }
+    .gbubble.user { background:rgba(232,0,45,0.10); border:1px solid rgba(232,0,45,0.25); color:#FFFFFF; }
+    .gavatar { flex-shrink:0; }
+    .gavatar .eye { fill:#E8002D; }
+    .gavatar.think .eye { animation: gigiThink 0.9s ease-in-out infinite; }
+    .gavatar.talk { animation: gigiTalk 0.6s ease-in-out infinite; }
+    @keyframes gigiThink { 0%,100%{opacity:0.25;} 50%{opacity:1;} }
+    @keyframes gigiTalk { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-2px);} }
+    </style>
+    """, unsafe_allow_html=True)
+
+    def _gigi_avatar(state: str = "idle") -> str:
+        """Mini-avatar SVG di Gigi (casco/cuffie). state: idle | think | talk."""
+        return (
+            f'<span class="gavatar {state}"><svg width="34" height="40" viewBox="0 0 58 64" '
+            f'xmlns="http://www.w3.org/2000/svg">'
+            f'<circle cx="29" cy="30" r="14" fill="#252525" stroke="#333" stroke-width="1.5"/>'
+            f'<path d="M16 28 Q16 13 29 13 Q42 13 42 28" fill="none" stroke="#E8002D" stroke-width="3" stroke-linecap="round"/>'
+            f'<rect x="11" y="25" width="7" height="10" rx="3.5" fill="#E8002D"/>'
+            f'<rect x="40" y="25" width="7" height="10" rx="3.5" fill="#E8002D"/>'
+            f'<circle class="eye" cx="23.5" cy="30" r="2"/>'
+            f'<circle class="eye" cx="34.5" cy="30" r="2"/>'
+            f'<path d="M23 36 Q29 40 35 36" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>'
+            f'</svg></span>'
+        )
+
+    def _build_gigi_context() -> str:
+        """Contesto utile per Gigi (ultima analisi, setup, CSV) — senza rieseguire l'analisi."""
+        parts = []
+        last = st.session_state.get("last_response")
+        if last:
+            parts.append("Ultima analisi generata:\n" + last[:1500])
+        car = st.session_state.get("sel_car")
+        track = st.session_state.get("sel_track")
+        cond = st.session_state.get("sel_conditions")
+        if car or track:
+            parts.append(f"Sessione corrente: auto={car}, pista={track}, condizioni={cond}")
+        csv_res = st.session_state.get("csv_parsed_result")
+        if csv_res:
+            parts.append(
+                f"Dati CSV: giri={csv_res.get('laps_count')}, "
+                f"pressioni={csv_res.get('pressures')}, temperature={csv_res.get('temperatures')}"
+            )
+        return "\n\n".join(parts)
+
+    # Storico chat — reso STATICAMENTE (nessuna ri-animazione ai rerun)
+    for _m in st.session_state["gigi_chat"]:
+        if _m["role"] == "user":
+            st.markdown(
+                f'<div class="gchat-row user"><div class="gbubble user">{_html.escape(_m["content"])}</div></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f'<div class="gchat-row">{_gigi_avatar("idle")}'
+                f'<div class="gbubble gigi">{_html.escape(_m["content"])}</div></div>',
+                unsafe_allow_html=True,
+            )
+
+    # Turno in sospeso: l'ultimo messaggio è dell'utente → genera la risposta (streaming, animata UNA volta)
+    if st.session_state["gigi_chat"] and st.session_state["gigi_chat"][-1]["role"] == "user":
+        # st.secrets solleva se manca secrets.toml (locale): fallback robusto su .env
+        try:
+            _api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+        except Exception:
+            _api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not _api_key:
+            st.error("❌ ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
+        else:
+            from agent import chat_with_gigi
+
+            # Stato "pensa"
+            _think = st.empty()
+            _think.markdown(
+                f'<div class="gchat-row">{_gigi_avatar("think")}'
+                f'<div class="gbubble gigi"><em style="color:#777;">Gigi sta pensando…</em></div></div>',
+                unsafe_allow_html=True,
+            )
+
+            _context = _build_gigi_context()
+            _history = st.session_state["gigi_chat"][-12:]  # cap contesto: ultimi 12 messaggi
+
+            _think.empty()
+            # Stato "parla" + streaming
+            st.markdown(
+                f'<div class="gchat-row">{_gigi_avatar("talk")}'
+                f'<div class="gbubble gigi" style="padding-bottom:2px;"><strong style="color:#E8002D;">Gigi</strong></div></div>',
+                unsafe_allow_html=True,
+            )
+            _full = st.write_stream(chat_with_gigi(_history, _api_key, _context))
+            st.session_state["gigi_chat"].append({"role": "assistant", "content": _full})
+            st.rerun()
+
+    # Input chat (nativo, invio con Enter) — non interferisce con "ANALIZZA SESSIONE"
+    _user_msg = st.chat_input("Chiedi a Gigi…")
+    if _user_msg:
+        st.session_state["gigi_chat"].append({"role": "user", "content": _user_msg})
+        st.rerun()
+
+    # ─────────────────────────────────────────────
     # TAB: Strategia Carburante
     # ─────────────────────────────────────────────
 with tab_carburante:
@@ -1786,7 +1907,11 @@ if btn_analizza:
         st.stop()
 
     # Recupera API key — compatibile con locale (.env) e Streamlit Cloud (Secrets)
-    api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+    # st.secrets solleva se manca secrets.toml (locale): fallback robusto su .env
+    try:
+        api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+    except Exception:
+        api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
         st.error("❌ ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
         st.stop()
