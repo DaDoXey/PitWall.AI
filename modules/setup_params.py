@@ -422,3 +422,74 @@ def format_setup_for_prompt(setup: dict) -> str:
         lines.extend(params_list)
 
     return "\n".join(lines)
+
+
+# ─────────────────────────────────────────────
+# OVERRIDE PER VETTURA / CIRCUITO (DB JSON)
+# I generici sopra restano il fallback: get_params_for_car() applica
+# eventuali override da data/car_setup_ranges.json, senza mai inventare valori.
+# ─────────────────────────────────────────────
+import copy
+import json
+from pathlib import Path
+
+_CAR_DB_PATH = Path(__file__).resolve().parents[1] / "data" / "car_setup_ranges.json"
+_CAR_DB_CACHE = None
+
+
+def _load_car_db() -> dict:
+    """Carica (una volta) il DB JSON degli override. {} se assente o malformato."""
+    global _CAR_DB_CACHE
+    if _CAR_DB_CACHE is None:
+        try:
+            with open(_CAR_DB_PATH, encoding="utf-8") as f:
+                _CAR_DB_CACHE = json.load(f)
+        except Exception:
+            _CAR_DB_CACHE = {}
+    return _CAR_DB_CACHE
+
+
+# Campi numerici sovrascrivibili (gli altri come label/unit/tip restano dal generico)
+_OVERRIDABLE_FIELDS = ("min", "max", "step", "default")
+
+
+def _apply_param_overrides(sections: dict, overrides: dict) -> None:
+    """
+    Applica override flat {param_key: {min/max/step/default}} alle sezioni (in-place).
+    Cerca il param_key nella sezione corretta; ignora chiavi sconosciute e _status.
+    """
+    for param_key, fields in (overrides or {}).items():
+        if not isinstance(fields, dict):
+            continue
+        for section in sections.values():
+            if param_key in section["params"]:
+                target = section["params"][param_key]
+                for fld in _OVERRIDABLE_FIELDS:
+                    if fld in fields:
+                        target[fld] = fields[fld]
+                break
+
+
+def get_params_for_car(car: str | None = None, track: str | None = None) -> dict:
+    """
+    Restituisce la struttura SETUP_SECTIONS (stessa forma) con applicati gli
+    override per vettura e, se presente, per circuito. Fallback ai generici se
+    la vettura non è nel DB. Non modifica mai SETUP_SECTIONS (deepcopy).
+    """
+    sections = copy.deepcopy(SETUP_SECTIONS)
+
+    db = _load_car_db()
+    car_entry = (db.get("cars", {}) or {}).get(car) if car else None
+    if not car_entry:
+        return sections  # nessun override: generici identici
+
+    # Override a livello vettura
+    _apply_param_overrides(sections, car_entry.get("params", {}))
+
+    # Override a livello circuito (hanno priorità sui generici e su quelli vettura)
+    if track:
+        track_entry = (car_entry.get("tracks", {}) or {}).get(track)
+        if track_entry:
+            _apply_param_overrides(sections, track_entry.get("params", {}))
+
+    return sections

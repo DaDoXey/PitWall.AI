@@ -17,7 +17,7 @@ import pandas as pd
 from agent import get_ai_response, log_incident
 from backend.parser.csv_parser import parse_session_csv
 from backend.database.manager import SessionDatabase
-from modules.setup_params import SETUP_SECTIONS, get_all_params_flat, format_setup_for_prompt
+from modules.setup_params import SETUP_SECTIONS, get_all_params_flat, format_setup_for_prompt, get_params_for_car
 from modules.vision_parser import parse_setup_from_image, summarize_parsed_setup
 
 # ─────────────────────────────────────────────
@@ -1101,15 +1101,26 @@ def render_param_slider(key: str, param: dict, col=None) -> float | int:
 
     target = col if col else st
 
+    p_min = float(param["min"]) if is_float else int(param["min"])
+    p_max = float(param["max"]) if is_float else int(param["max"])
+
     # Recupera il valore corrente dallo session_state (se esiste)
     current_val = st.session_state.get(f"slider_{key}", float(default) if is_float else int(default))
-    
+
+    # Clamp: se il valore salvato è fuori dal nuovo range (es. dopo cambio vettura),
+    # riportalo entro [min,max]. Va riscritto in session_state PRIMA dello slider,
+    # altrimenti st.slider con key= solleverebbe per valore fuori range.
+    if current_val < p_min or current_val > p_max:
+        current_val = min(max(current_val, p_min), p_max)
+        current_val = float(current_val) if is_float else int(current_val)
+        st.session_state[f"slider_{key}"] = current_val
+
     # Formatta il valore per display
     if is_float:
         formatted_val = f"{current_val:.2f}"
     else:
         formatted_val = str(int(current_val))
-    
+
     target.markdown(
         f'<div class="slider-value-display" style="font-size:0.8rem;padding:0.1rem 0.3rem;margin-bottom:0.15rem;">{formatted_val}</div>',
         unsafe_allow_html=True,
@@ -1117,8 +1128,8 @@ def render_param_slider(key: str, param: dict, col=None) -> float | int:
 
     value = target.slider(
         full_label,
-        min_value=float(param["min"]) if is_float else int(param["min"]),
-        max_value=float(param["max"]) if is_float else int(param["max"]),
+        min_value=p_min,
+        max_value=p_max,
         value=float(current_val) if is_float else int(current_val),
         step=float(param["step"]) if is_float else int(param["step"]),
         key=f"slider_{key}",
@@ -1340,14 +1351,17 @@ with tab_analisi:
         # Dizionario per raccogliere tutti i valori del setup
         current_setup = {}
 
+        # Range/default specifici per vettura (e circuito) con fallback ai generici
+        car_sections = get_params_for_car(selected_car, selected_track)
+
         # Render dei 5 tab — stessa struttura del gioco ACC
-        tab_keys = list(SETUP_SECTIONS.keys())
-        tab_labels = [SETUP_SECTIONS[k]["label"] for k in tab_keys]
+        tab_keys = list(car_sections.keys())
+        tab_labels = [car_sections[k]["label"] for k in tab_keys]
         tabs = st.tabs(tab_labels)
 
         for tab, section_key in zip(tabs, tab_keys):
             with tab:
-                section = SETUP_SECTIONS[section_key]
+                section = car_sections[section_key]
                 params = section["params"]
 
                 # ── TYRES: griglia 2×2 per le 4 ruote ──
