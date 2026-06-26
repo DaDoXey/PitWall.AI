@@ -555,8 +555,10 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
     color: #666;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    margin-bottom: 0.3rem;
-    margin-top: 0.6rem;
+    margin-top: 1.4rem;
+    margin-bottom: 0.6rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid #222;
 }
 .tip-text {
     font-size: 0.65rem;
@@ -578,6 +580,12 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
     border: 1px solid var(--border);
     border-radius: 3px;
     margin-bottom: 0.2rem;
+}
+
+/* Nasconde il valore nativo sopra il cursore: .slider-value-display è l'unica
+   fonte del numero (evita il doppione su ogni slider). */
+div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] {
+    display: none !important;
 }
 
 /* ── SECTION SEPARATOR ── */
@@ -948,7 +956,7 @@ with st.sidebar:
     <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; margin-bottom: 2px;">{user_name}</div>
     <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
     """, unsafe_allow_html=True)
-    if st.button("LOGOUT", type="primary", use_container_width=True, key="btn_logout"):
+    if st.button("🚪 Esci", type="primary", use_container_width=True, key="btn_logout"):
         st.session_state.authenticated = False
         st.session_state.user_id = None
         st.session_state.user_name = None
@@ -956,20 +964,16 @@ with st.sidebar:
         st.session_state.gigi_welcomed = False
         st.switch_page("pages/login.py")
 
-    # ── FOOTER ──
-    st.markdown("")
+    # ── FOOTER (in fondo alla sidebar, in flusso normale) ──
     st.markdown("""
-    <div style="position: fixed; bottom: 1.5rem; left: 0; width: 240px; 
-                padding: 0 1rem; box-sizing: border-box;">
-        <div style="border-top: 1px solid #1e1e1e; padding-top: 0.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; 
-                             color: #444444;">v0.2.0 — MVP</span>
-                <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank"
-                   style="font-family: 'Orbitron', sans-serif; font-size: 0.6rem; 
-                          color: #E8002D; text-decoration: none; letter-spacing: 0.08em;
-                          text-transform: uppercase;">GitHub ↗</a>
-            </div>
+    <div style="margin-top: 2.5rem; border-top: 1px solid #1e1e1e; padding-top: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+                         color: #444444;">v0.2.0 — MVP</span>
+            <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank"
+               style="font-family: 'Orbitron', sans-serif; font-size: 0.6rem;
+                      color: #E8002D; text-decoration: none; letter-spacing: 0.08em;
+                      text-transform: uppercase;">GitHub ↗</a>
         </div>
     </div>
     """, unsafe_allow_html=True)
