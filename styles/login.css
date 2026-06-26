@@ -80,3 +80,128 @@
 .login-footer code {
   color: var(--accent);
 }
+
+/* ==============================================
+   RESTYLE LOGIN - hero cinematografico
+   ============================================== */
+.pw-hero {
+  text-align: center;
+  padding: 8px 0 4px 0;
+}
+
+.pw-hero-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: 6px;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.pw-hero-title .dot {
+  color: var(--accent);
+}
+
+/* Righello rosso orizzontale sotto l'hero */
+.pw-ruler {
+  height: 2px;
+  width: 260px;
+  margin: 14px auto 16px auto;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 25%, var(--accent) 75%, transparent 100%);
+  opacity: 0.85;
+}
+
+.pw-hero-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Badge stato [ ● MVP V2.0 ] */
+.pw-badge-status {
+  display: inline-block;
+  margin: 18px auto 6px auto;
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.pw-badge-status .pulse {
+  color: var(--accent);
+  margin-right: 6px;
+}
+
+/* Etichetta "Quick Login · DEV" dentro la card */
+.pw-quick-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 4px 0 10px 0;
+}
+
+/* Separatore "oppure" */
+.pw-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px 0;
+  color: var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pw-divider::before,
+.pw-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Bottone "Accedi con Google" — PREDISPOSTO, non attivo (stato "in arrivo") */
+.pw-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 18px;
+  background: #f5f5f5;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3a3a3a;
+  opacity: 0.55;            /* attenuato: non ancora attivo */
+  cursor: not-allowed;
+  user-select: none;
+}
+
+.pw-google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.pw-google-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+}

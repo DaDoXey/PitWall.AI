@@ -1,13 +1,13 @@
 import streamlit as st
 import uuid
-from auth_config import get_auth_method, ENVIRONMENT
+from auth_config import is_oauth_configured
 from db_auth import init_db, create_or_update_user
 
 init_db()
 
 st.set_page_config(page_title="PitWall.AI — Login", page_icon="🏁", layout="centered")
 
-with open("styles/login.css") as f:
+with open("styles/login.css", encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # GT3 Silhouette Animation
@@ -79,37 +79,47 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Header
-col_title, col_badge = st.columns([3, 1])
-with col_title:
-    st.markdown("""
-    <div style="padding-top: 20px;">
-        <div class="login-title">PITWALL<span style="color:#E8002D;">.AI</span></div>
-        <div class="login-subtitle">Virtual Race Engineer — ACC GT3</div>
-    </div>
-    """, unsafe_allow_html=True)
-with col_badge:
-    st.markdown("""
-    <div style="text-align: right; padding-top: 28px;">
-        <span class="badge-mvp">MVP v2.0</span>
-    </div>
-    """, unsafe_allow_html=True)
+# ── HERO cinematografico ──
+st.markdown("""
+<div class="pw-hero">
+    <div class="pw-hero-title">PITWALL<span class="dot">●</span>AI</div>
+</div>
+<div class="pw-ruler"></div>
+<div class="pw-hero" style="padding-top:0;">
+    <div class="pw-hero-sub">Virtual Race Engineer · ACC GT3</div>
+    <div class="pw-badge-status"><span class="pulse">●</span>MVP V2.0</div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("")
-st.markdown('<div style="height:1px;background:#222;"></div>', unsafe_allow_html=True)
-st.markdown("")
 
-auth_method = get_auth_method()
+oauth_ready = is_oauth_configured()
 
-if auth_method["type"] == "mock":
+# ── Blocco autenticazione, centrato (effetto card) ──
+_left, _mid, _right = st.columns([1, 2, 1])
+with _mid:
+    # Bottone "Accedi con Google" — sempre VISIBILE ma PREDISPOSTO (non attivo).
+    # Elemento non interattivo: nessun href, nessuna chiamata OAuth.
+    _google_tag = "" if oauth_ready else "· in arrivo ·"
     st.markdown(f"""
-    <div class="dev-banner">
-        DEV MODE — Mock Authentication<br>
-        <span style="color:#666;">Environment: <code style="color:#E8002D;">{ENVIRONMENT}</code></span>
+    <div class="pw-google-btn" title="Login Google in arrivo — per ora usa Quick Login">
+        <svg class="pw-google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span>Accedi con Google</span>
+        <span class="pw-google-tag">{_google_tag}</span>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Quick Login")
+    # TODO OAuth: quando is_oauth_configured() ritornerà True (GOOGLE_CLIENT_ID/SECRET
+    # in Streamlit Secrets + redirect URI configurato), agganciare QUI il flusso reale —
+    # sostituire il bottone statico sopra con il redirect/azione OAuth e gestire il callback.
+
+    st.markdown('<div class="pw-divider">oppure</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pw-quick-label">Quick Login · DEV</div>', unsafe_allow_html=True)
 
     col_demo, col_custom = st.columns(2)
     with col_demo:
@@ -144,67 +154,6 @@ if auth_method["type"] == "mock":
                 st.switch_page("app.py")
             else:
                 st.error("Compila tutti i campi.")
-
-else:
-    st.markdown("### Login with Google")
-    st.markdown("Accedi con il tuo account Google per continuare.")
-    st.warning("""
-    **Placeholder PROD:** Google OAuth richiede:
-    - Google Cloud Project creato
-    - Client ID e Secret in Streamlit Secrets
-    - Redirect URI configurato
-    """)
-
-    # Separatore
-    st.markdown("<hr style='border: none; border-top: 1px solid #222; margin: 16px 0;'>", unsafe_allow_html=True)
-
-    # Bottone Google OAuth stilizzato
-    import streamlit.components.v1 as components
-    google_btn_html = """
-<style>
-.google-login-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 11px 20px;
-    background: #ffffff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: #1a1a1a;
-    transition: background 0.2s, box-shadow 0.2s;
-    text-decoration: none;
-}
-.google-login-btn:hover {
-    background: #f0f0f0;
-    box-shadow: 0 2px 8px rgba(255,255,255,0.15);
-}
-.google-icon {
-    width: 18px;
-    height: 18px;
-}
-</style>
-
-<a class="google-login-btn" href="/oauth/google" id="google-btn">
-  <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-  </svg>
-  Accedi con Google
-</a>
-"""
-    components.html(google_btn_html, height=55)
-
-    # TODO: implementare Google OAuth callback
-    # Per ora mostra info se la pagina OAuth non è configurata
-    st.info("Google OAuth in arrivo. Usa 'Demo Pilot' per testare.")
 
 st.markdown("""
 <div class="login-footer">

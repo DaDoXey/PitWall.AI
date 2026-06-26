@@ -18,3 +18,11 @@ AUTH_STRATEGY = {
 
 def get_auth_method():
     return AUTH_STRATEGY.get(ENVIRONMENT, AUTH_STRATEGY["dev"])
+
+
+def is_oauth_configured() -> bool:
+    """
+    True solo se le credenziali Google OAuth sono presenti.
+    Finché è False, il bottone "Accedi con Google" resta predisposto ma non attivo.
+    """
+    return bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
