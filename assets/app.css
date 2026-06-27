@@ -943,3 +943,42 @@ section[data-testid="stSidebar"] a:hover {
     font-size: 1.4rem;
     font-weight: 700;
 }
+
+/* =============================================================
+   FASE 6 — Responsiveness (desktop-first) + anti-flicker
+   ============================================================= */
+/* Transizioni morbide su elementi che cambiano ai rerun (riduce lo "stacco") */
+.pw-metric-card, .ai-output, .gbubble, .pw-tyre-panel, .pw-heat-corner {
+    transition: background-color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+}
+[data-testid="stAppViewContainer"] { scroll-behavior: smooth; }
+
+/* Tablet / laptop piccoli */
+@media (max-width: 1100px) {
+    .pw-header { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+    .pw-logo-text { font-size: 1.1rem; }
+    .section-title { font-size: 1rem; }
+}
+
+/* Mobile / finestre strette */
+@media (max-width: 768px) {
+    .pw-metric-grid { grid-template-columns: 1fr; }
+    .pw-tyre-grid { flex-wrap: wrap; }
+    .ai-output { padding: var(--sp-4) var(--sp-3); }
+    .ai-output h2 { font-size: 0.92rem; padding-left: 2.2rem; }
+    .pw-heat { height: auto; min-height: 240px; }
+    .pw-heat-val { font-size: 1.1rem; }
+    .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; }
+}
+
+/* Contrasto: la label muted delle card su bg-surface resta leggibile */
+.pw-metric-card .pw-mc-label { color: var(--text-secondary); }
+
+/* Rispetto preferenze utente: niente animazioni se reduce-motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
