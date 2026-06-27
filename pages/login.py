@@ -7,6 +7,10 @@ init_db()
 
 st.set_page_config(page_title="PitWall.AI — Login", page_icon="🏁", layout="centered")
 
+# Design system: font self-hosted + token (senza gli stili dei componenti dell'app)
+from assets.css_loader import inject_design_system
+inject_design_system(include_app_css=False)
+
 with open("styles/login.css", encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
@@ -140,9 +144,12 @@ with _mid:
     if st.session_state.get("show_custom_login"):
         st.markdown("---")
         st.markdown("#### Custom User (Dev Only)")
-        email = st.text_input("Email", key="custom_email")
-        name = st.text_input("Name", key="custom_name")
-        if st.button("Login", use_container_width=True, type="primary"):
+        # st.form: invio con Enter da un campo testo + un solo rerun al submit
+        with st.form("custom_login_form", clear_on_submit=False):
+            email = st.text_input("Email", key="custom_email")
+            name = st.text_input("Name", key="custom_name")
+            submitted = st.form_submit_button("Login", use_container_width=True, type="primary")
+        if submitted:
             if email and name:
                 uid = str(uuid.uuid4())
                 create_or_update_user(uid, email, name, "mock")
@@ -153,11 +160,11 @@ with _mid:
                 st.session_state["gigi_chat"] = []  # chat azzerata a ogni login (come il DB)
                 st.switch_page("app.py")
             else:
-                st.error("Compila tutti i campi.")
+                st.error("Compila tutti i campi (email e nome).")
 
 st.markdown("""
 <div class="login-footer">
     PitWall.AI | AI-Powered Virtual Race Engineer<br>
-    Built on <code>Claude Sonnet</code> + <code>Streamlit</code>
+    Built on <code>Claude</code> + <code>Streamlit</code>
 </div>
 """, unsafe_allow_html=True)

@@ -33,8 +33,8 @@ _FONTS = [
 
 
 @functools.lru_cache(maxsize=1)
-def _build_style() -> str:
-    """Costruisce il blocco <style> completo (font base64 + token). Cache: 1 lettura."""
+def _base_style() -> str:
+    """Font self-hosted (base64) + token del design system. Cache: 1 lettura."""
     faces = []
     for family, weight, filename in _FONTS:
         data = (_FONTS_DIR / filename).read_bytes()
@@ -52,15 +52,23 @@ def _build_style() -> str:
     if marker in css:
         css = css[css.index(marker):]
 
-    # Stile principale dell'app (estratto da app.py in Lotto 2), dopo i token
-    app_css = _APP_CSS.read_text(encoding="utf-8") if _APP_CSS.exists() else ""
-
-    return "<style>" + "".join(faces) + css + app_css + "</style>"
+    return "".join(faces) + css
 
 
-def inject_design_system() -> None:
-    """Inietta font self-hosted + token + tema dark. Da chiamare una volta all'avvio."""
-    st.markdown(_build_style(), unsafe_allow_html=True)
+@functools.lru_cache(maxsize=1)
+def _app_style() -> str:
+    """Stile principale dell'app (estratto da app.py in Lotto 2)."""
+    return _APP_CSS.read_text(encoding="utf-8") if _APP_CSS.exists() else ""
+
+
+def inject_design_system(include_app_css: bool = True) -> None:
+    """Inietta font self-hosted + token + tema dark. Da chiamare una volta per pagina.
+
+    include_app_css: True per l'app principale; False per pagine leggere (es. login)
+    che vogliono solo font+token senza gli stili dei componenti dell'app.
+    """
+    style = _base_style() + (_app_style() if include_app_css else "")
+    st.markdown("<style>" + style + "</style>", unsafe_allow_html=True)
     st.markdown(
         "<script>document.documentElement.setAttribute('data-theme','dark');</script>",
         unsafe_allow_html=True,

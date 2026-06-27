@@ -1,13 +1,11 @@
+/* Alias locali → design system (FASE 4). I nomi presenti nei token globali
+   (--accent, --accent-hover, --text-primary/secondary, --border) NON sono
+   ridefiniti qui: si ereditano da assets/design_system.css. */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-tertiary: #1a1a1a;
-  --accent: #E8002D;
-  --accent-hover: #CC0028;
-  --text-primary: #FFFFFF;
-  --text-secondary: #999999;
-  --text-tertiary: #666666;
-  --border: #222222;
+  --bg-primary:   var(--bg-base);    /* #0a0a0a */
+  --bg-secondary: var(--bg-surface); /* #111111 */
+  --bg-tertiary:  var(--bg-raised);  /* #1a1a1a */
+  --text-tertiary: var(--text-muted); /* #666666 */
 }
 
 .login-card {
@@ -17,7 +15,7 @@
   padding: 48px 40px;
   max-width: 420px;
   margin: 0 auto;
-  box-shadow: 0 8px 32px rgba(232, 0, 45, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .login-title {
@@ -51,7 +49,7 @@
 
 .badge-status {
   display: inline-block;
-  color: #00C853;
+  color: var(--status-ok);
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 1px;
