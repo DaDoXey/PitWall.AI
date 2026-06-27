@@ -33,6 +33,12 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
+# DESIGN SYSTEM — font self-hosted + token (iniettati una sola volta)
+# ─────────────────────────────────────────────
+from assets.css_loader import inject_design_system
+inject_design_system()
+
+# ─────────────────────────────────────────────
 # AUTENTICAZIONE GATE
 # ─────────────────────────────────────────────
 if "authenticated" not in st.session_state:
@@ -248,7 +254,7 @@ def check_db_status() -> bool:
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+/* Font ora self-hosted via assets/css_loader.inject_design_system() — niente fetch Google Fonts */
 
 :root {
     --red:      #E8002D;

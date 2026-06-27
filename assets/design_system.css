@@ -1,0 +1,164 @@
+/* =============================================================
+   PitWall.AI — DESIGN SYSTEM (FASE 1)
+   Fonte di verità per colori, tipografia, spaziature, raggi,
+   ombre e breakpoint. Caricato UNA sola volta (vedi css_loader).
+
+   NB: in questa fase è rifinito SOLO il tema dark.
+   I token sono strutturati sotto [data-theme="dark"] così che
+   un futuro [data-theme="light"] sia aggiungibile senza refactor.
+   Il light mode NON è implementato ora (post-esame).
+   ============================================================= */
+
+/* ---------- 1. FONT SELF-HOSTED (no Google Fonts a runtime) ---------- */
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/orbitron-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/inter-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/inter-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/inter-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/jetbrainsmono-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/jetbrainsmono-500.woff2') format('woff2');
+}
+
+/* ===== TOKENS_START =====  (il loader inietta i font in base64 sopra questo marcatore) */
+
+/* ---------- 2. TOKEN GLOBALI (theme-agnostici) ---------- */
+:root {
+  /* Tipografia */
+  --font-display: 'Orbitron', system-ui, sans-serif;   /* titoli */
+  --font-body:    'Inter', system-ui, sans-serif;        /* testo */
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace; /* numerici/codice */
+
+  /* Scala tipografica (desktop-first) */
+  --fs-display: 2rem;      /* 32px — hero / titoli sezione grandi */
+  --fs-h1:      1.5rem;    /* 24px */
+  --fs-h2:      1.25rem;   /* 20px */
+  --fs-h3:      1.05rem;   /* ~17px */
+  --fs-body:    0.95rem;   /* ~15px */
+  --fs-small:   0.85rem;   /* caption */
+  --fs-xsmall:  0.72rem;   /* label/etichette uppercase */
+  --lh-tight:   1.2;
+  --lh-normal:  1.5;
+  --tracking-label: 0.12em; /* letter-spacing per etichette uppercase */
+
+  /* Spaziature (scala 4px) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* Raggi */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Transizioni */
+  --transition-fast: 120ms ease;
+  --transition: 200ms ease;
+
+  /* Breakpoint (riferimento per @media — desktop-first) */
+  --bp-tablet: 1024px;
+  --bp-mobile: 640px;
+
+  /* Accento di brand (costante tra i temi) */
+  --accent:        #E8002D;
+  --accent-hover:  #CC0028;
+  --accent-press:  #9B0020;
+}
+
+/* ---------- 3. TEMA DARK (rifinito) ---------- */
+[data-theme="dark"], :root {
+  color-scheme: dark;
+
+  /* Superfici / backgrounds */
+  --bg-base:    #0a0a0a;   /* sfondo app */
+  --bg-surface: #111111;   /* card / pannelli */
+  --bg-raised:  #1a1a1a;   /* elementi sopraelevati / hover surface */
+  --bg-inset:   #141414;   /* input / aree incassate */
+
+  /* Testo */
+  --text-primary:   #FFFFFF;
+  --text-secondary: #999999;
+  --text-muted:     #666666;
+
+  /* Bordi */
+  --border:        #222222;
+  --border-strong: #333333;
+
+  /* Stati semantici */
+  --status-ok:    #00C853;  /* verde — in range / ottimale */
+  --status-warn:  #FFB300;  /* ambra — attenzione (token, non hardcoded) */
+  --status-error: #E8002D;  /* rosso brand — fuori range / errore */
+
+  /* Accento contestualizzato sul tema */
+  --accent-soft:  rgba(232, 0, 45, 0.12); /* sfondi tenui / highlight */
+
+  /* Ombre */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+  --shadow-accent: 0 0 0 1px rgba(232,0,45,0.4), 0 4px 16px rgba(232,0,45,0.15);
+
+  /* Palette grafici (telemetria) — derivata dai token, niente deriva */
+  --chart-1: #E8002D;  /* accento */
+  --chart-2: #00C853;  /* ok/verde */
+  --chart-3: #FFB300;  /* warn/ambra */
+  --chart-4: #8A8A8A;  /* neutro */
+  --chart-grid: #222222;
+}
+
+/* ---------- 4. PLACEHOLDER TEMA LIGHT (NON rifinito — post-esame) ---------- */
+/* Struttura predisposta: i valori sono provvisori e verranno definiti
+   dopo l'esame. NON usare/attivare questo blocco finché non richiesto. */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg-base:    #FFFFFF;
+  --bg-surface: #F5F5F5;
+  --bg-raised:  #EDEDED;
+  --bg-inset:   #FAFAFA;
+  --text-primary:   #0a0a0a;
+  --text-secondary: #555555;
+  --text-muted:     #888888;
+  --border:        #DDDDDD;
+  --border-strong: #C4C4C4;
+  --status-ok:    #00A03E;
+  --status-warn:  #B36B00;
+  --status-error: #E8002D;
+}
