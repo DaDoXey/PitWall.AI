@@ -893,10 +893,7 @@ with tab_analisi:
                     current_setup["brake_duct_rear"] = render_param_slider("brake_duct_rear", params["brake_duct_rear"], c2)
 
     # ── Visualizzatore Live Gomme (full-width) ──
-    st.markdown(
-        '<div style="border-top:1px solid #2A2A2A;margin:0.5rem 0 1.2rem 0;"></div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="section-separator" style="margin:0.5rem 0 1.2rem 0;"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Visualizzazione Live Gomme</div>', unsafe_allow_html=True)
 
     def _tyre_color(val: float, metric: str) -> str:
@@ -921,12 +918,12 @@ with tab_analisi:
         dsign = "+" if delta > 0 else ""
         dcol = "#00C853" if delta > 0 else "#E8002D" if delta < 0 else "#7A7A7A"
         return (
-            f'<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:60px;">'
-            f'<div style="width:40px;height:120px;background:#1a1a1a;border:1px solid #333;border-radius:20px;display:flex;align-items:flex-end;overflow:hidden;">'
-            f'<div style="width:100%;height:{pct}%;background:{color};border-radius:20px;"></div></div>'
-            f'<div style="font-size:11px;font-weight:700;color:#fff;">{label}</div>'
-            f'<div style="font-size:10px;color:#ccc;">{val:.1f} {unit}</div>'
-            f'<div style="font-size:9px;color:{dcol};">{dsign}{delta:.1f} {unit}</div></div>'
+            f'<div class="pw-tyre">'
+            f'<div class="pw-tyre-tube">'
+            f'<div class="pw-tyre-fill" style="height:{pct}%;background:{color};"></div></div>'
+            f'<div class="pw-tyre-label">{label}</div>'
+            f'<div class="pw-tyre-val">{val:.1f} {unit}</div>'
+            f'<div class="pw-tyre-delta" style="color:{dcol};">{dsign}{delta:.1f} {unit}</div></div>'
         )
 
     slider_fl = st.session_state.get("slider_tire_press_fl")
@@ -950,20 +947,20 @@ with tab_analisi:
         fl_p, fr_p, rl_p, rr_p = (live_press.get(k, 26.7) for k in ("fl", "fr", "rl", "rr"))
         bars = "".join(_tyre_bar(l, v, v - TARGET_PRESS_CENTER, "pressure") for l, v in [("FL", fl_p), ("FR", fr_p), ("RL", rl_p), ("RR", rr_p)])
         st.markdown(
-            f'<div style="background:#141414;border:1px solid #2A2A2A;border-radius:8px;padding:12px 8px;">'
-            f'<div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#fff;margin-bottom:8px;text-align:center;">♟ Pressioni Gomme</div>'
-            f'<div style="display:flex;justify-content:center;gap:4px;">{bars}</div></div>',
+            f'<div class="pw-tyre-panel">'
+            f'<div class="pw-tyre-panel-title">♟ Pressioni Gomme</div>'
+            f'<div class="pw-tyre-grid">{bars}</div></div>',
             unsafe_allow_html=True,
         )
 
     with col_temp_panel:
         fl_t, fr_t, rl_t, rr_t = (csv_temps.get(k, 85.0) for k in ("fl", "fr", "rl", "rr"))
         bars_t = "".join(_tyre_bar(l, v, v - CENTER_TEMP, "temp") for l, v in [("FL", fl_t), ("FR", fr_t), ("RL", rl_t), ("RR", rr_t)])
-        csv_note = "" if csv_file else '<div style="font-size:9px;color:#7A7A7A;text-align:center;margin-top:6px;">Dati CSV non caricati — valori di esempio</div>'
+        csv_note = "" if csv_file else '<div class="pw-tyre-note">Dati CSV non caricati — valori di esempio</div>'
         st.markdown(
-            f'<div style="background:#141414;border:1px solid #2A2A2A;border-radius:8px;padding:12px 8px;">'
-            f'<div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#fff;margin-bottom:8px;text-align:center;">🌡 Temperature Gomme</div>'
-            f'<div style="display:flex;justify-content:center;gap:4px;">{bars_t}</div>'
+            f'<div class="pw-tyre-panel">'
+            f'<div class="pw-tyre-panel-title">🌡 Temperature Gomme</div>'
+            f'<div class="pw-tyre-grid">{bars_t}</div>'
             f'{csv_note}</div>',
             unsafe_allow_html=True,
         )
