@@ -268,7 +268,7 @@ st.markdown(
             <span class="pw-badge">MVP V2.0</span>
             <span style="font-size:1.4rem;">♟</span>
             <div>
-                <div class="pw-logo-text">PITWALL<span style="color:#E8002D;">.AI</span></div>
+                <div class="pw-logo-text">PITWALL<span class="pw-accent">.AI</span></div>
                 <div class="pw-subtitle">VIRTUAL RACE ENGINEER — ACC GT3</div>
             </div>
         </div>
@@ -285,22 +285,15 @@ st.markdown("")
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div style="padding: 1.25rem 0 0.75rem 0; border-bottom: 1px solid #1e1e1e; margin-bottom: 1rem;">
-        <div style="font-family: 'Orbitron', sans-serif; font-size: 0.7rem; 
-                    letter-spacing: 0.15em; color: #666666; text-transform: uppercase; 
-                    margin-bottom: 0.2rem;">Sessione</div>
-        <div style="font-family: 'Orbitron', sans-serif; font-size: 1rem; 
-                    color: #FFFFFF; letter-spacing: 0.08em;">PITWALL<span style="color:#E8002D;">.</span>AI</div>
+    <div class="pw-side-block">
+        <div class="pw-side-kicker tight">Sessione</div>
+        <div class="pw-side-title">PITWALL<span class="accent">.</span>AI</div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div style="font-family: 'Orbitron', sans-serif; font-size: 0.65rem; 
-                letter-spacing: 0.12em; color: #444444; text-transform: uppercase; 
-                margin-bottom: 0.75rem;">Dati Sessione</div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="pw-side-kicker">Dati Sessione</div>', unsafe_allow_html=True)
 
-    st.markdown('<div style="font-size:0.85rem;color:#CCC;">📊 CSV Sessione</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pw-side-label">📊 CSV Sessione</div>', unsafe_allow_html=True)
     csv_file = st.file_uploader(
         "Carica CSV",
         type=["csv"],
@@ -313,7 +306,7 @@ with st.sidebar:
 
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
 
-    st.markdown('<div style="font-size:0.85rem;color:#CCC;">📸 Screenshot Setup ACC</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pw-side-label">📸 Screenshot Setup ACC</div>', unsafe_allow_html=True)
     st.caption("Carica foto del menu setup.")
     screenshot_file = st.file_uploader(
         "Screenshot (JPG/PNG)",
@@ -346,9 +339,9 @@ with st.sidebar:
     # ── USER INFO + LOGOUT ──
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
     st.markdown(f"""
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px;">Logged in as</div>
-    <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #fff; margin-bottom: 2px;">{user_name}</div>
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #888;">{user_email}</div>
+    <div class="pw-side-user-kicker">Logged in as</div>
+    <div class="pw-side-user-name">{user_name}</div>
+    <div class="pw-side-user-mail">{user_email}</div>
     """, unsafe_allow_html=True)
     if st.button("🚪 Esci", type="primary", use_container_width=True, key="btn_logout"):
         st.session_state.authenticated = False
@@ -360,14 +353,10 @@ with st.sidebar:
 
     # ── FOOTER (in fondo alla sidebar, in flusso normale) ──
     st.markdown("""
-    <div style="margin-top: 2.5rem; border-top: 1px solid #1e1e1e; padding-top: 0.75rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
-                         color: #444444;">v0.2.0 — MVP</span>
-            <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank"
-               style="font-family: 'Orbitron', sans-serif; font-size: 0.6rem;
-                      color: #E8002D; text-decoration: none; letter-spacing: 0.08em;
-                      text-transform: uppercase;">GitHub ↗</a>
+    <div class="pw-side-footer">
+        <div class="row">
+            <span class="ver">v0.2.0 — MVP</span>
+            <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank" class="gh">GitHub ↗</a>
         </div>
     </div>
     """, unsafe_allow_html=True)

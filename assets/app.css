@@ -619,3 +619,76 @@ section[data-testid="stSidebar"] a:hover {
     align-items: center;
     gap: 0.4rem;
 }
+
+/* =============================================================
+   SIDEBAR + HEADER — classi token-based (FASE 4.2)
+   Sostituiscono gli stili inline ripetuti in app.py.
+   ============================================================= */
+.pw-side-block {
+    padding: var(--sp-5) 0 var(--sp-3) 0;
+    border-bottom: 1px solid var(--bg-raised);
+    margin-bottom: var(--sp-4);
+}
+.pw-side-kicker {
+    font-family: var(--font-display);
+    font-size: var(--fs-xsmall);
+    letter-spacing: var(--tracking-label);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: var(--sp-3);
+}
+.pw-side-kicker.tight { margin-bottom: 0.2rem; }
+.pw-side-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    color: var(--text-primary);
+    letter-spacing: 0.08em;
+}
+.pw-side-title .accent,
+.pw-accent { color: var(--accent); }
+.pw-side-label {
+    font-size: var(--fs-small);
+    color: var(--text-secondary);
+}
+.pw-side-user-kicker {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xsmall);
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.pw-side-user-name {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+.pw-side-user-mail {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xsmall);
+    color: var(--text-secondary);
+}
+.pw-side-footer {
+    margin-top: 2.5rem;
+    border-top: 1px solid var(--bg-raised);
+    padding-top: var(--sp-3);
+}
+.pw-side-footer .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.pw-side-footer .ver {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xsmall);
+    color: var(--text-muted);
+}
+.pw-side-footer .gh {
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
