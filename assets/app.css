@@ -6,17 +6,19 @@
 
 /* Font ora self-hosted via assets/css_loader.inject_design_system() — niente fetch Google Fonts */
 
+/* Alias legacy → design system (Lotto 3): fonte di verità unica nei token.
+   I nomi storici restano per non riscrivere 47 riferimenti, ma puntano ai token. */
 :root {
-    --red:      #E8002D;
-    --red-dim:  #9B0020;
-    --bg:       #0A0A0A;
-    --surface:  #141414;
-    --surface2: #1E1E1E;
-    --border:   #2A2A2A;
-    --text:     #F0F0F0;
-    --muted:    #7A7A7A;
-    --green:    #00C853;
-    --yellow:   #FFD600;
+    --red:      var(--accent);        /* #E8002D */
+    --red-dim:  var(--accent-press);  /* #9B0020 */
+    --bg:       var(--bg-base);       /* #0a0a0a */
+    --surface:  var(--bg-inset);      /* #141414 */
+    --surface2: var(--bg-raised);     /* #1E1E1E -> #1A1A1A */
+    --border:   var(--border-strong); /* #2A2A2A -> #333: bordi visibili coerenti */
+    --text:     var(--text-primary);  /* #F0F0F0 -> #FFFFFF */
+    --muted:    var(--text-muted);    /* #7A7A7A -> #666666 */
+    --green:    var(--status-ok);     /* #00C853 */
+    --yellow:   var(--status-warn);   /* #FFD600 -> #FFB300 */
 }
 
 header[data-testid="stHeader"] {
