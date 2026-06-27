@@ -544,7 +544,7 @@ def render_param_slider(key: str, param: dict, col=None) -> float | int:
         formatted_val = str(int(current_val))
 
     target.markdown(
-        f'<div class="slider-value-display" style="font-size:0.8rem;padding:0.1rem 0.3rem;margin-bottom:0.15rem;">{formatted_val}</div>',
+        f'<div class="slider-value-display">{formatted_val}</div>',
         unsafe_allow_html=True,
     )
 
@@ -723,7 +723,7 @@ with tab_analisi:
             key="sel_conditions",
         )
 
-        st.markdown('<div style="margin-top:0.8rem;font-size:0.85rem;color:#CCC;">🌡 Temperature</div>', unsafe_allow_html=True)
+        st.markdown('<div class="pw-field-label">🌡 Temperature</div>', unsafe_allow_html=True)
         ambient_temp = st.slider("Temp. Ambiente", 0, 50, 20, key="temp_amb")
         track_temp = st.slider("Temp. Pista", 0, 60, 30, key="temp_pista")
 

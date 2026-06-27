@@ -240,19 +240,24 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 1.5rem 0 1rem 0;
 }
 
-/* ── TABS ── */
+/* ── TABS ── (FASE 4.6: token-based) */
 [data-testid="stTabs"] > div > div > button {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.82rem;
     letter-spacing: 0.08em;
-    color: var(--muted) !important;
+    text-transform: uppercase;
+    color: var(--text-muted) !important;
     border-bottom: 2px solid transparent;
     padding: 0.5rem 1.2rem;
     background: transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+[data-testid="stTabs"] > div > div > button:hover {
+    color: var(--text-secondary) !important;
 }
 [data-testid="stTabs"] > div > div > button[aria-selected="true"] {
-    color: var(--red) !important;
-    border-bottom: 2px solid var(--red) !important;
+    color: var(--accent) !important;
+    border-bottom: 2px solid var(--accent) !important;
 }
 
 /* ── SLIDERS ── */
@@ -260,11 +265,11 @@ html, body, [data-testid="stAppViewContainer"] {
     background: var(--red) !important;
 }
 [data-baseweb="slider"] [role="slider"] {
-    background-color: #E8002D !important;
-    border-color: #E8002D !important;
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
 }
 [data-baseweb="slider"] [data-testid="stSliderTrackFill"] {
-    background-color: #E8002D !important;
+    background-color: var(--accent) !important;
 }
 
 /* ── BUTTONS ── */
@@ -284,15 +289,15 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 /* Sidebar primary button (logout) */
 section[data-testid="stSidebar"] div[data-testid="stButton"] button {
-    background: #E8002D !important;
-    color: #FFFFFF !important;
+    background: var(--accent) !important;
+    color: var(--text-primary) !important;
     border: none !important;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: var(--font-mono) !important;
     font-weight: 700 !important;
     letter-spacing: 0.12em !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
-    background: #CC0028 !important;
+    background: var(--accent-hover) !important;
 }
 [data-testid="stButton"] > button[kind="secondary"] {
     background: var(--surface2) !important;
@@ -307,16 +312,25 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
 
 /* ── PARAMETRI GROUPS ── */
 .param-group-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.6rem;
     font-weight: 600;
-    color: #666;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.18em;
     margin-top: 1.4rem;
     margin-bottom: 0.6rem;
     padding-top: 0.9rem;
-    border-top: 1px solid #222;
+    border-top: 1px solid var(--border);
+}
+/* etichetta di campo nel pannello setup (sostituisce div inline hardcoded) */
+.pw-field-label {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xsmall);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
 }
 .tip-text {
     font-size: 0.65rem;
@@ -328,15 +342,15 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
 
 /* ── SLIDER VALUE DISPLAY ── */
 .slider-value-display {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--accent);
     text-align: center;
     padding: 0.15rem 0.4rem;
-    background: var(--surface2);
+    background: var(--bg-inset);
     border: 1px solid var(--border);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     margin-bottom: 0.2rem;
 }
 
