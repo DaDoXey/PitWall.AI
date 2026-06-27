@@ -399,6 +399,48 @@ elif csv_file is None:
         if _skey in st.session_state:
             del st.session_state[_skey]
 
+def _sparkline_svg(series, status="ok"):
+    """Mini-grafico SVG inline (sparkline) da una serie numerica. Solo presentazione."""
+    pts = [float(v) for v in series if v is not None]
+    if len(pts) < 2:
+        return ""
+    lo, hi = min(pts), max(pts)
+    span = (hi - lo) or 1.0
+    w, h, pad = 100.0, 26.0, 3.0
+    n = len(pts)
+    coords = []
+    for i, v in enumerate(pts):
+        x = pad + (w - 2 * pad) * (i / (n - 1))
+        y = pad + (h - 2 * pad) * (1 - (v - lo) / span)
+        coords.append(f"{x:.1f},{y:.1f}")
+    poly = " ".join(coords)
+    last = coords[-1].split(",")
+    return (
+        f'<svg viewBox="0 0 {int(w)} {int(h)}" preserveAspectRatio="none" '
+        f'class="pw-mc-spark-{status}" aria-hidden="true">'
+        f'<polyline points="{poly}" fill="none" stroke="currentColor" '
+        f'stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'
+        f'<circle cx="{last[0]}" cy="{last[1]}" r="2" fill="currentColor"/></svg>'
+    )
+
+
+def _metric_card(label, value, unit, series=None, status="ok"):
+    """Card metrica: label + valore (+ unità) + mini-grafico o barra di stato.
+    Puramente presentazionale: non altera alcun dato."""
+    unit_html = f'<span class="pw-mc-unit">{unit}</span>' if unit else ""
+    spark = _sparkline_svg(series, status) if series else ""
+    chart = (
+        f'<div class="pw-mc-chart">{spark}</div>' if spark
+        else f'<div class="pw-mc-bar pw-mc-{status}"><span style="width:100%"></span></div>'
+    )
+    return (
+        '<div class="pw-metric-card">'
+        f'<div class="pw-mc-label">{label}</div>'
+        f'<div class="pw-mc-value">{value}{unit_html}</div>'
+        f'{chart}</div>'
+    )
+
+
 if "csv_parsed_result" in st.session_state:
     csv_result = st.session_state["csv_parsed_result"]
 
@@ -418,17 +460,34 @@ if "csv_parsed_result" in st.session_state:
     press_vals = [_get_stat(press_stats, p, "avg") for p in ["fl", "fr", "rl", "rr"]]
     press_avg_rr = _get_stat(press_stats, "rr", "avg")
 
-    metric_cols = st.columns(5)
-    with metric_cols[0]:
-        st.metric("🏁 Giri registrati", csv_result.get("laps_count", 0))
-    with metric_cols[1]:
-        st.metric("⛽ Consumo medio", f"{csv_result.get('fuel_cons_avg', 0):.2f} L/giro")
-    with metric_cols[2]:
-        st.metric("🌡 Temp max RR", f"{_get_stat(temp_stats, 'rr', 'max'):.1f}°C")
-    with metric_cols[3]:
-        st.metric("🔧 Press avg RR", f"{press_avg_rr:.1f} psi")
-    with metric_cols[4]:
-        st.metric("🔥 Temp max generale", f"{temp_max:.1f}°C")
+    # Card modulari (dato + mini-grafico). Solo presentazione: legge i valori
+    # già calcolati dal parser, nessuna modifica alla logica dati.
+    temp_series = csv_result.get("temperature_series") or {}
+    rr_temp_series = temp_series.get("rr") or []
+    # serie temp "generale" = max tra le 4 posizioni per ogni giro
+    pos_series = [s for s in temp_series.values() if s]
+    gen_temp_series = [max(vals) for vals in zip(*pos_series)] if pos_series else []
+    fuel_series = csv_result.get("fuel_cons_per_lap") or []
+
+    def _temp_status(v):
+        return "error" if v > 100 else ("warn" if v > 95 else "ok")
+
+    cards = [
+        _metric_card("🏁 Giri registrati", f"{csv_result.get('laps_count', 0)}", None,
+                     series=None, status="ok"),
+        _metric_card("⛽ Consumo medio", f"{csv_result.get('fuel_cons_avg', 0):.2f}", "L/giro",
+                     series=fuel_series, status="ok"),
+        _metric_card("🌡 Temp max RR", f"{_get_stat(temp_stats, 'rr', 'max'):.1f}", "°C",
+                     series=rr_temp_series, status=_temp_status(_get_stat(temp_stats, 'rr', 'max'))),
+        _metric_card("🔧 Press avg RR", f"{press_avg_rr:.1f}", "psi",
+                     series=None, status="ok"),
+        _metric_card("🔥 Temp max generale", f"{temp_max:.1f}", "°C",
+                     series=gen_temp_series, status=_temp_status(temp_max)),
+    ]
+    st.markdown(
+        '<div class="pw-metric-grid">' + "".join(cards) + "</div>",
+        unsafe_allow_html=True,
+    )
 
     # 2c — Alert visivo automatico
     if temp_max > 100:
