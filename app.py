@@ -12,6 +12,7 @@ import streamlit as st
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import pandas as pd
+import plotly.graph_objects as go
 
 # Import moduli PitWall
 from agent import get_ai_response, log_incident
@@ -425,6 +426,93 @@ def _metric_card(label, value, unit, series=None, status="ok"):
     )
 
 
+# ── Telemetria (FASE 5): grafici plotly, tema coerente col design system ──
+# Palette letterale (plotly non legge le CSS var del documento parent).
+_PLOT = {
+    "bg": "rgba(0,0,0,0)", "grid": "#222222", "axis": "#666666",
+    "text": "#999999", "accent": "#E8002D",
+    "tyres": {"fl": "#E8002D", "fr": "#FFB300", "rl": "#00C853", "rr": "#3B82F6"},
+}
+
+
+def _plot_layout(fig, title, ylabel):
+    """Applica il tema dark/token a una figura plotly. Solo presentazione."""
+    fig.update_layout(
+        title=dict(text=title, font=dict(family="JetBrains Mono, monospace",
+                                         size=13, color="#FFFFFF")),
+        paper_bgcolor=_PLOT["bg"], plot_bgcolor=_PLOT["bg"],
+        font=dict(family="Inter, sans-serif", color=_PLOT["text"], size=11),
+        margin=dict(l=50, r=20, t=44, b=40), height=300,
+        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="right", x=1,
+                    font=dict(size=10)),
+        hovermode="x unified",
+    )
+    fig.update_xaxes(title_text="Giro", gridcolor=_PLOT["grid"],
+                     zeroline=False, color=_PLOT["axis"], linecolor=_PLOT["grid"])
+    fig.update_yaxes(title_text=ylabel, gridcolor=_PLOT["grid"],
+                     zeroline=False, color=_PLOT["axis"], linecolor=_PLOT["grid"])
+    return fig
+
+
+def _temp_lines_fig(temp_series: dict):
+    """Line chart temperatura per giro, una linea per gomma."""
+    fig = go.Figure()
+    for pos in ("fl", "fr", "rl", "rr"):
+        vals = temp_series.get(pos) or []
+        if not vals:
+            continue
+        fig.add_trace(go.Scatter(
+            y=vals, x=list(range(1, len(vals) + 1)), mode="lines+markers",
+            name=pos.upper(), line=dict(color=_PLOT["tyres"][pos], width=2),
+            marker=dict(size=4),
+        ))
+    return _plot_layout(fig, "🌡 Temperatura gomme per giro", "°C")
+
+
+def _fuel_bars_fig(fuel_per_lap: list):
+    """Barre consumo carburante per giro + linea media."""
+    fig = go.Figure()
+    x = list(range(1, len(fuel_per_lap) + 1))
+    fig.add_trace(go.Bar(x=x, y=fuel_per_lap, name="Consumo",
+                         marker_color=_PLOT["accent"], opacity=0.85))
+    if fuel_per_lap:
+        avg = sum(fuel_per_lap) / len(fuel_per_lap)
+        fig.add_hline(y=avg, line=dict(color="#FFB300", width=1.5, dash="dash"),
+                      annotation_text=f"media {avg:.2f}",
+                      annotation_font=dict(color="#FFB300", size=10))
+    return _plot_layout(fig, "⛽ Consumo carburante per giro", "L/giro")
+
+
+def _tyre_heatmap_html(temp_stats: dict) -> str:
+    """Schema vettura 2×2 con i 4 corner colorati per temperatura max (status ACC)."""
+    def _col(v):
+        if v <= 0:
+            return "var(--bg-raised)"
+        if 85 <= v <= 95:
+            return "var(--status-ok)"
+        if 75 <= v < 85 or 95 < v <= 105:
+            return "var(--status-warn)"
+        return "var(--status-error)"
+
+    def _corner(pos):
+        v = 0.0
+        if temp_stats and pos in temp_stats:
+            v = temp_stats[pos].get("max", 0.0)
+        label = "—" if v <= 0 else f"{v:.0f}°"
+        return (f'<div class="pw-heat-corner" style="background:{_col(v)};">'
+                f'<span class="pw-heat-pos">{pos.upper()}</span>'
+                f'<span class="pw-heat-val">{label}</span></div>')
+
+    return (
+        '<div class="pw-heat">'
+        '<div class="pw-heat-title">🔥 Heatmap temperature (max)</div>'
+        '<div class="pw-heat-grid">'
+        f'{_corner("fl")}{_corner("fr")}'
+        f'{_corner("rl")}{_corner("rr")}'
+        '</div></div>'
+    )
+
+
 if "csv_parsed_result" in st.session_state:
     csv_result = st.session_state["csv_parsed_result"]
 
@@ -478,6 +566,22 @@ if "csv_parsed_result" in st.session_state:
         st.warning(f"⚠️ Temperatura critica rilevata: {temp_max:.1f}°C — analisi prioritaria raccomandata.")
     elif temp_max > 95:
         st.info(f"ℹ️ Temperature elevate: {temp_max:.1f}°C — monitorare in analisi.")
+
+    # 2b-bis — Telemetria (FASE 5): grafici interattivi della sessione
+    _tseries = csv_result.get("temperature_series") or {}
+    _fuel_lap = csv_result.get("fuel_cons_per_lap") or []
+    if _tseries or _fuel_lap:
+        st.markdown('<div class="section-title">📈 Telemetria Sessione</div>', unsafe_allow_html=True)
+        _tcol1, _tcol2 = st.columns([2, 1])
+        with _tcol1:
+            if _tseries:
+                st.plotly_chart(_temp_lines_fig(_tseries), use_container_width=True,
+                                config={"displayModeBar": False})
+        with _tcol2:
+            st.markdown(_tyre_heatmap_html(temp_stats), unsafe_allow_html=True)
+        if _fuel_lap:
+            st.plotly_chart(_fuel_bars_fig(_fuel_lap), use_container_width=True,
+                            config={"displayModeBar": False})
 
     # 2b — Tabella dati grezzi (collassabile)
     try:

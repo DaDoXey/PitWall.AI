@@ -899,3 +899,47 @@ section[data-testid="stSidebar"] a:hover {
     font-family: var(--font-mono); font-size: 9px;
     color: var(--text-secondary); text-align: center; margin-top: 6px;
 }
+
+/* ===== FASE 5 — Telemetria: heatmap gomme (schema 2x2) ===== */
+.pw-heat {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--sp-3);
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+.pw-heat-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-primary);
+    margin-bottom: var(--sp-3);
+}
+.pw-heat-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--sp-3);
+}
+.pw-heat-corner {
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #0a0a0a;
+}
+.pw-heat-pos {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+.pw-heat-val {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+}
