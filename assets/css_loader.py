@@ -19,6 +19,7 @@ import streamlit as st
 _ASSETS = Path(__file__).parent
 _FONTS_DIR = _ASSETS / "fonts"
 _DESIGN_SYSTEM = _ASSETS / "design_system.css"
+_APP_CSS = _ASSETS / "app.css"
 
 # (family, weight, file) — i pesi effettivamente usati
 _FONTS = [
@@ -51,7 +52,10 @@ def _build_style() -> str:
     if marker in css:
         css = css[css.index(marker):]
 
-    return "<style>" + "".join(faces) + css + "</style>"
+    # Stile principale dell'app (estratto da app.py in Lotto 2), dopo i token
+    app_css = _APP_CSS.read_text(encoding="utf-8") if _APP_CSS.exists() else ""
+
+    return "<style>" + "".join(faces) + css + app_css + "</style>"
 
 
 def inject_design_system() -> None:
