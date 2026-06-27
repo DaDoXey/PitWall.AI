@@ -749,3 +749,25 @@ section[data-testid="stSidebar"] a:hover {
 @media (max-width: 1100px) {
     .pw-metric-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ===== FASE 4.4 — Console Gigi: chat (avatar + bolle), su token ===== */
+.gchat-row { display:flex; align-items:flex-start; gap:10px; margin:10px 0; }
+.gchat-row.user { justify-content:flex-end; }
+.gbubble {
+    max-width:78%; padding:10px 14px; border-radius:var(--radius-md);
+    font-family:var(--font-body); font-size:var(--fs-small); line-height:1.6;
+}
+.gbubble.gigi {
+    background:var(--bg-raised); border:1px solid var(--border-strong);
+    border-left:3px solid var(--accent); color:var(--text-secondary);
+}
+.gbubble.user {
+    background:rgba(232,0,45,0.10); border:1px solid rgba(232,0,45,0.25);
+    color:var(--text-primary);
+}
+.gavatar { flex-shrink:0; }
+.gavatar .eye { fill:var(--accent); }
+.gavatar.think .eye { animation: gigiThink 0.9s ease-in-out infinite; }
+.gavatar.talk { animation: gigiTalk 0.6s ease-in-out infinite; }
+@keyframes gigiThink { 0%,100%{opacity:0.25;} 50%{opacity:1;} }
+@keyframes gigiTalk { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-2px);} }

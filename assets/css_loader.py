@@ -55,6 +55,30 @@ def _base_style() -> str:
     return "".join(faces) + css
 
 
+@functools.lru_cache(maxsize=8)
+def font_faces_css(*families: str) -> str:
+    """@font-face base64 per le sole famiglie richieste.
+
+    Pensato per gli iframe di st.components.v1.html(): un iframe è un documento
+    isolato, non eredita né i token né i font del parent, quindi va reso
+    autosufficiente. Embeddando i woff2 in base64 si evita il <link> a Google
+    Fonts (niente fetch a runtime, niente flash, affidabile su Cloud).
+    """
+    wanted = set(families) or {f[0] for f in _FONTS}
+    faces = []
+    for family, weight, filename in _FONTS:
+        if family not in wanted:
+            continue
+        data = (_FONTS_DIR / filename).read_bytes()
+        b64 = base64.b64encode(data).decode("ascii")
+        faces.append(
+            f"@font-face{{font-family:'{family}';font-style:normal;"
+            f"font-weight:{weight};font-display:swap;"
+            f"src:url(data:font/woff2;base64,{b64}) format('woff2');}}"
+        )
+    return "".join(faces)
+
+
 @functools.lru_cache(maxsize=1)
 def _app_style() -> str:
     """Stile principale dell'app (estratto da app.py in Lotto 2)."""

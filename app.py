@@ -35,7 +35,7 @@ st.set_page_config(
 # ─────────────────────────────────────────────
 # DESIGN SYSTEM — font self-hosted + token (iniettati una sola volta)
 # ─────────────────────────────────────────────
-from assets.css_loader import inject_design_system
+from assets.css_loader import inject_design_system, font_faces_css
 inject_design_system()
 
 # ─────────────────────────────────────────────
@@ -56,14 +56,16 @@ user_email = st.session_state.get("user_email")
 if not st.session_state.get("gigi_welcomed", False):
     import streamlit.components.v1 as components
     user_name_display = user_name if user_name else "Pilota"
+    # Font self-hosted base64: l'iframe è isolato, niente <link> a Google Fonts.
+    _iframe_fonts = font_faces_css("Orbitron", "Inter")
 
     gigi_html = f"""
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  {_iframe_fonts}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   body {{ background: transparent; font-family: 'Inter', sans-serif; padding: 0; }}
 
@@ -140,36 +142,18 @@ if not st.session_state.get("gigi_welcomed", False):
 <body>
 <div class="gigi-card">
 
-  <!-- Avatar SVG Gigi -->
+  <!-- Avatar Gigi (icona definitiva, assets/gigi.svg) -->
   <div class="gigi-avatar">
-    <svg width="58" height="74" viewBox="0 0 58 74" xmlns="http://www.w3.org/2000/svg">
-      <!-- Corpo uniforme -->
-      <rect x="13" y="40" width="32" height="28" rx="4" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1.5"/>
-      <!-- Banda rossa uniforme -->
-      <rect x="13" y="40" width="32" height="5" rx="2" fill="#E8002D"/>
-      <!-- Numero pettorale -->
-      <text x="29" y="58" text-anchor="middle" fill="#666" font-size="8" font-family="Inter">31</text>
-      <!-- Testa -->
-      <circle cx="29" cy="27" r="13.5" fill="#252525" stroke="#333" stroke-width="1.5"/>
-      <!-- Archetto cuffie -->
-      <path d="M16.5 25 Q16.5 11 29 11 Q41.5 11 41.5 25" fill="none" stroke="#E8002D" stroke-width="3" stroke-linecap="round"/>
-      <!-- Padiglione sx -->
-      <rect x="11" y="22" width="7" height="10" rx="3.5" fill="#E8002D"/>
-      <!-- Padiglione dx -->
-      <rect x="40" y="22" width="7" height="10" rx="3.5" fill="#E8002D"/>
-      <!-- Braccetto microfono -->
-      <path d="M40 29 Q47 31 49 35" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="49.5" cy="35.5" r="2.5" fill="#888"/>
-      <!-- Occhi -->
-      <circle cx="23.5" cy="27" r="2" fill="#E8002D" opacity="0.85"/>
-      <circle cx="34.5" cy="27" r="2" fill="#E8002D" opacity="0.85"/>
-      <!-- Sorriso -->
-      <path d="M23 33 Q29 37 35 33" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-      <!-- Tablet -->
-      <rect x="18" y="48" width="18" height="13" rx="2" fill="#0d0d0d" stroke="#E8002D" stroke-width="0.8"/>
-      <rect x="20" y="50" width="14" height="2" rx="1" fill="#E8002D" opacity="0.5"/>
-      <rect x="20" y="53.5" width="9" height="1.5" rx="0.5" fill="#2a2a2a"/>
-      <rect x="20" y="56" width="11" height="1.5" rx="0.5" fill="#2a2a2a"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="60" height="60" role="img" aria-label="Gigi - race engineer">
+      <rect x="1.5" y="1.5" width="61" height="61" rx="16" fill="#0a0a0a" stroke="#222222" stroke-width="1.5"/>
+      <circle cx="32" cy="32" r="25" fill="none" stroke="#E8002D" stroke-width="1.5" opacity="0.5"/>
+      <path d="M16 51c0-9 7.2-14.5 16-14.5S48 42 48 51z" fill="#FFFFFF"/>
+      <circle cx="32" cy="26" r="9.5" fill="#FFFFFF"/>
+      <path d="M20.5 26a11.5 11.5 0 0 1 23 0" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+      <rect x="18" y="24" width="4.6" height="7.5" rx="2.3" fill="#E8002D"/>
+      <rect x="41.4" y="24" width="4.6" height="7.5" rx="2.3" fill="#E8002D"/>
+      <path d="M20.3 30c-2.4 3.4-2.4 6.6-.4 9.4" fill="none" stroke="#E8002D" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="20" cy="40" r="2.3" fill="#E8002D"/>
     </svg>
   </div>
 
@@ -1006,23 +990,7 @@ with tab_analisi:
 
     st.session_state.setdefault("gigi_chat", [])
 
-    # CSS scoped: avatar (3 stati) + bolle chat, coerente col design system
-    st.markdown("""
-    <style>
-    .gchat-row { display:flex; align-items:flex-start; gap:10px; margin:10px 0; }
-    .gchat-row.user { justify-content:flex-end; }
-    .gbubble { max-width:78%; padding:10px 14px; border-radius:10px; font-family:'Inter',sans-serif;
-               font-size:13.5px; line-height:1.6; }
-    .gbubble.gigi { background:#1a1a1a; border:1px solid #2a2a2a; border-left:3px solid #E8002D; color:#CFCFCF; }
-    .gbubble.user { background:rgba(232,0,45,0.10); border:1px solid rgba(232,0,45,0.25); color:#FFFFFF; }
-    .gavatar { flex-shrink:0; }
-    .gavatar .eye { fill:#E8002D; }
-    .gavatar.think .eye { animation: gigiThink 0.9s ease-in-out infinite; }
-    .gavatar.talk { animation: gigiTalk 0.6s ease-in-out infinite; }
-    @keyframes gigiThink { 0%,100%{opacity:0.25;} 50%{opacity:1;} }
-    @keyframes gigiTalk { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-2px);} }
-    </style>
-    """, unsafe_allow_html=True)
+    # Stile chat (avatar 3 stati + bolle) ora in assets/app.css, su design token.
 
     def _gigi_avatar(state: str = "idle") -> str:
         """Mini-avatar SVG di Gigi (casco/cuffie). state: idle | think | talk."""
