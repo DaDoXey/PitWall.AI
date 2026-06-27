@@ -603,14 +603,85 @@ section[data-testid="stSidebar"] a:hover {
 }
 
 /* ── AI OUTPUT ── */
+/* =============================================================
+   REPORT ANALISI — .ai-output reso come report a 4 sezioni (FASE 4.5)
+   Il modello produce SEMPRE 4 header ## (Diagnosi, Causa, Correzione, Note):
+   qui solo tipografia/struttura, il testo non viene mai alterato.
+   ============================================================= */
 .ai-output {
     background: var(--surface);
     border: 1px solid var(--border);
     border-top: 3px solid var(--red);
-    border-radius: 6px;
-    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    padding: var(--sp-5) var(--sp-5) var(--sp-4);
+    font-family: var(--font-body);
     font-size: 0.93rem;
     line-height: 1.75;
+    color: var(--text-secondary);
+    counter-reset: pw-sec;
+}
+/* sezioni numerate */
+.ai-output h2 {
+    counter-increment: pw-sec;
+    position: relative;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin: var(--sp-5) 0 var(--sp-3);
+    padding: 0 0 var(--sp-2) 2.6rem;
+    border-bottom: 1px solid var(--border);
+}
+.ai-output h2::before {
+    content: counter(pw-sec, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: -0.05em;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--accent);
+}
+.ai-output > :first-child,
+.ai-output h2:first-of-type { margin-top: 0; }
+.ai-output h3 {
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: var(--sp-4) 0 var(--sp-2);
+}
+.ai-output p { margin: 0 0 var(--sp-3); }
+.ai-output strong { color: var(--text-primary); font-weight: 600; }
+.ai-output em { color: var(--text-primary); font-style: normal; }
+.ai-output ul,
+.ai-output ol { margin: 0 0 var(--sp-3); padding-left: 1.3rem; }
+.ai-output li { margin: 0.25rem 0; }
+.ai-output li::marker { color: var(--accent); }
+.ai-output code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.05em 0.4em;
+    color: var(--text-primary);
+}
+.ai-output hr { border: none; border-top: 1px solid var(--border); margin: var(--sp-4) 0; }
+.ai-output table {
+    width: 100%; border-collapse: collapse; margin: 0 0 var(--sp-3);
+    font-size: 0.88rem;
+}
+.ai-output th, .ai-output td {
+    border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left;
+}
+.ai-output th {
+    font-family: var(--font-mono); text-transform: uppercase;
+    letter-spacing: 0.06em; font-size: 0.72rem; color: var(--text-muted);
+    background: var(--bg-inset);
 }
 
 /* ── INPUT NUMERICO +/- ── */
