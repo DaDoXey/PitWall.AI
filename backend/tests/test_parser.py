@@ -13,8 +13,14 @@ import pathlib
 import sys
 from io import StringIO
 
-# Aggiungi la directory backend al path se necessario
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+# Forza output UTF-8 su console Windows (cp1252 non gestisce ✅ / box-drawing)
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except (AttributeError, ValueError):
+    pass
+
+# Aggiungi la root del progetto al path (parents[2]) per importare 'backend'
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from backend.parser import parse_session_csv, CSVParseError
 
