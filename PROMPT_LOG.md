@@ -300,3 +300,28 @@ toccare il core; placeholder navigabili per non rompere nulla.
 `ui/*` OK (vedi gate); navigazione cliccabile, nessuna pagina crasha.
 
 **Decisione:** mantenuto. Commit "fase 1: shell + navigazione".
+
+## Fase 2 — Telemetria
+
+**Data:** 30/06/2026 · branch `restyle-ui`
+
+**Modifiche:** `ui/telemetry.py` implementato con 3 visualizzazioni, tutte da
+`ui/demo_data.py` (sorgente unica):
+- **Line chart Plotly** "Temperatura gomme · 8 giri": 4 gomme (Ant.SX/Ant.DX/
+  Post.SX/Post.DX) + linea tratteggiata "Limite finestra" (95°C). Post.DX cresce
+  fino a 105°C al giro 8 e sfora il limite. Tooltip per giro (`hovermode=x unified`).
+- **4 gauge Plotly** pressioni a caldo: finestra 27.0–27.8 psi (banda verde);
+  anteriori in finestra (27.4/27.5, verdi · "IN FINESTRA"), posteriori basse
+  (26.2/26.0, rosse · "BASSA").
+- **Heatmap SVG** (`components.html`, stili inline + font base64): schema auto
+  vista dall'alto, gradiente blu→rosso su scala 80°–105°, valori 88/90/95/105,
+  Post.DX rossa.
+
+**Coerenza dati:** distinzione esplicita pressioni FREDDO (CSV/garage) vs CALDO
+(display); valori MAX heatmap derivati dalle serie → coerenti per costruzione.
+Vedi `SPEC_ERRATA.md` ERR-01/02/03.
+
+**Verifica:** import `ui/*` OK con venv; `_temp_line_fig` → 5 tracce, gauge e
+heatmap costruiti senza errori; valori coincidono (TEMP_MAX 88/90/95/105).
+
+**Decisione:** mantenuto. Commit "fase 2: telemetria".
