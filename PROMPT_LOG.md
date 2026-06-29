@@ -353,3 +353,33 @@ heatmap costruiti senza errori; valori coincidono (TEMP_MAX 88/90/95/105).
 mancanti → vuote senza crash) verificati; demo prompt riconosciuto.
 
 **Decisione:** mantenuto. Commit "fase 3: engineer console".
+
+## Fase 4 — Dashboard
+
+**Data:** 30/06/2026 · branch `restyle-ui`
+
+**Modifiche:** `ui/dashboard.py` + 2 helper mini-grafico in `ui/components.py`
+(`sparkline_svg`, `window_bar_svg`).
+- **Hero metrics** (components.html): "Ultima sessione · Monza · Tempio della
+  Velocità", "BMW M4 GT3 · 2024", "Giri completati 8 · Best 1:47.812", "Consumo
+  medio 3.2 L/giro · 25.6 L totali".
+- **3 card modulari** con mini-grafici: Temperatura gomme (sparkline RR + "105°C
+  sopra finestra"), Pressione media (window-bar + "26.8 psi · retrotreno sotto
+  finestra"), Consumo (sparkline + "stabile · 25.6 L totali"). Ogni card ha un
+  bottone **"Apri Telemetria"** (st.button) che naviga.
+- **Card "Chiedi a Gigi"** (avatar + testo) con bottone **"Apri Engineer Console"**.
+
+**Coerenza (checklist):** cross-check automatico PASS — temp RR 105°C identica su
+Dashboard/Telemetria/Heatmap; heatmap 88/90/95/105 = max delle serie; pressione
+media 26.8 = media dei 4 gauge; finestra 27.0–27.8 / limite 95 uniformi; la cache
+console cita gli stessi numeri.
+
+**Nota dati:** la card Pressione media mostra **26.8 psi** (media dei 4 valori a
+caldo) anziché il 26.6 del brief, per coerenza con i gauge della Telemetria —
+vedi `SPEC_ERRATA.md` ERR-04.
+
+**Verifica:** import di tutti i moduli `ui/*` OK; builder HTML costruiti coi
+numeri attesi; `py_compile` OK; bottoni "Apri" mappati su `nav.go_to`.
+
+**Decisione:** mantenuto. Commit "fase 4: dashboard". STOP CRITICO — core
+Login → Dashboard → Telemetria → Gigi DEMO-READY.

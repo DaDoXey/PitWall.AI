@@ -88,6 +88,51 @@ def placeholder_panel(message: str) -> str:
     )
 
 
+def sparkline_svg(series, color: str, w: int = 200, h: int = 46) -> str:
+    """Mini-grafico a linea (SVG inline) da una serie numerica. Solo presentazione."""
+    pts = [float(v) for v in series if v is not None]
+    if len(pts) < 2:
+        return ""
+    lo, hi = min(pts), max(pts)
+    span = (hi - lo) or 1.0
+    pad = 4.0
+    n = len(pts)
+    coords = []
+    for i, v in enumerate(pts):
+        x = pad + (w - 2 * pad) * (i / (n - 1))
+        y = pad + (h - 2 * pad) * (1 - (v - lo) / span)
+        coords.append((x, y))
+    poly = " ".join(f"{x:.1f},{y:.1f}" for x, y in coords)
+    lx, ly = coords[-1]
+    return (
+        f'<svg viewBox="0 0 {w} {h}" width="100%" height="{h}" '
+        f'preserveAspectRatio="none" aria-hidden="true">'
+        f'<polyline points="{poly}" fill="none" stroke="{color}" stroke-width="1.8" '
+        f'stroke-linejoin="round" stroke-linecap="round"/>'
+        f'<circle cx="{lx:.1f}" cy="{ly:.1f}" r="2.6" fill="{color}"/></svg>'
+    )
+
+
+def window_bar_svg(value: float, vmin: float, vmax: float, win_lo: float, win_hi: float,
+                   color: str, w: int = 200, h: int = 30) -> str:
+    """Barra orizzontale con finestra ottimale (verde) e marker sul valore."""
+    pad = 4.0
+    span = (vmax - vmin) or 1.0
+
+    def x(v):
+        return pad + (w - 2 * pad) * (_clamp((v - vmin) / span))
+
+    x_lo, x_hi, x_val = x(win_lo), x(win_hi), x(value)
+    return (
+        f'<svg viewBox="0 0 {w} {h}" width="100%" height="{h}" preserveAspectRatio="none">'
+        f'<rect x="{pad}" y="{h/2-3:.0f}" width="{w-2*pad:.0f}" height="6" rx="3" fill="{BG_RAISED}"/>'
+        f'<rect x="{x_lo:.1f}" y="{h/2-3:.0f}" width="{max(2,x_hi-x_lo):.1f}" height="6" rx="3" '
+        f'fill="{STATUS_OK}" opacity="0.45"/>'
+        f'<line x1="{x_val:.1f}" y1="3" x2="{x_val:.1f}" y2="{h-3}" stroke="{color}" stroke-width="2.4"/>'
+        f'<circle cx="{x_val:.1f}" cy="{h/2:.0f}" r="3.4" fill="{color}"/></svg>'
+    )
+
+
 def gigi_avatar_svg(size: int = 44) -> str:
     """SVG dell'avatar di Gigi (casco con cuffie). Stringa inseribile inline."""
     return (
