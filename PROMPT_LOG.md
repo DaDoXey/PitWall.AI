@@ -267,3 +267,36 @@ Per ogni iterazione del System Prompt o di un sotto-prompt, crea una nuova entry
 | 2026-06-04 08:27 UTC | BMW | Monza | ~100 | 2048 | claude |
 | 2026-06-04 10:46 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
 | 2026-06-11 15:59 UTC | BMW M4 GT3 | Monza | ~559 | 2048 | claude-sonnet-4-6 |
+
+---
+
+# RESTYLE UI/UX — Log fasi (branch `restyle-ui`)
+
+> Restyle della presentazione su Streamlit (cockpit telemetria dark). Core
+> blindato Monza/BMW. File protetti NON toccati: `agent.py`, parser
+> (`backend/parser/csv_parser.py`), prompt (`prompts/*`), logica fuel/gauge
+> (preservate verbatim in `app_legacy.py`). Audit dei path protetti reali: vedi
+> Fase 0 (il system prompt realmente caricato è `prompts/system_prompt_v4.txt`).
+
+## Fase 1 — Shell + navigazione
+
+**Data:** 30/06/2026 · branch `restyle-ui`
+
+**Modifiche:**
+- Branch `restyle-ui` creato; monolite precedente preservato verbatim in `app_legacy.py`.
+- `app.py` riscritto come shell/router minimale: gate auth invariato + iniezione
+  design system + dispatch pagine via `st.session_state["page"]`.
+- Nuovo pacchetto `ui/`: `nav.py` (routing), `sidebar.py` (logo, nav 4 voci,
+  box "SESSIONE ATTIVA", Esci), `router.py`, `components.py` (token hex, helper
+  colore heatmap, avatar Gigi, header pagina), `demo_data.py` (sorgente dati demo
+  UNICA Monza/BMW), e 4 pagine placeholder (`dashboard`, `telemetry`, `console`,
+  `setup_view`).
+- `.streamlit/config.toml` creato con `[theme] base="dark"` + palette brand.
+
+**Motivazione:** introdurre identità visiva e navigazione a 4 pagine senza
+toccare il core; placeholder navigabili per non rompere nulla.
+
+**Verifica:** `py_compile` su `app.py`/`app_legacy.py`/`ui/*` OK; import dei moduli
+`ui/*` OK (vedi gate); navigazione cliccabile, nessuna pagina crasha.
+
+**Decisione:** mantenuto. Commit "fase 1: shell + navigazione".

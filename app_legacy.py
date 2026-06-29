@@ -1,0 +1,1529 @@
+"""
+app.py — PitWall.AI v2
+Entry point Streamlit con:
+  - 5 tab setup completi (Tyres, Electronics, Mechanical Grip, Dampers, Aero)
+  - Input da screenshot tramite Claude Vision
+  - Input manuale con slider per ogni parametro
+  - Compatibile con agent.py e parser.py esistenti
+"""
+
+import os
+import streamlit as st
+from datetime import datetime, timezone
+from dotenv import load_dotenv
+import pandas as pd
+import plotly.graph_objects as go
+
+# Import moduli PitWall
+from agent import get_ai_response, log_incident
+from backend.parser.csv_parser import parse_session_csv
+from backend.database.manager import SessionDatabase
+from modules.setup_params import SETUP_SECTIONS, get_all_params_flat, format_setup_for_prompt, get_params_for_car
+from modules.vision_parser import parse_setup_from_image, summarize_parsed_setup
+
+# ─────────────────────────────────────────────
+# CONFIGURAZIONE
+# ─────────────────────────────────────────────
+load_dotenv()
+
+st.set_page_config(
+    page_title="PitWall.AI",
+    page_icon="🏁",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# ─────────────────────────────────────────────
+# DESIGN SYSTEM — font self-hosted + token (iniettati una sola volta)
+# ─────────────────────────────────────────────
+from assets.css_loader import inject_design_system, font_faces_css
+inject_design_system()
+
+# ─────────────────────────────────────────────
+# AUTENTICAZIONE GATE
+# ─────────────────────────────────────────────
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.switch_page("pages/login.py")
+    st.stop()
+
+user_id = st.session_state.get("user_id")
+user_name = st.session_state.get("user_name")
+user_email = st.session_state.get("user_email")
+
+# Benvenuto Gigi — mostra solo al primo accesso della sessione
+if not st.session_state.get("gigi_welcomed", False):
+    import streamlit.components.v1 as components
+    user_name_display = user_name if user_name else "Pilota"
+    # Font self-hosted base64: l'iframe è isolato, niente <link> a Google Fonts.
+    _iframe_fonts = font_faces_css("Orbitron", "Inter")
+
+    gigi_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  {_iframe_fonts}
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{ background: transparent; font-family: 'Inter', sans-serif; padding: 0; }}
+
+  .gigi-card {{
+    background: linear-gradient(135deg, #111111 0%, #1a1a1a 100%);
+    border: 1px solid #2a2a2a;
+    border-left: 3px solid #E8002D;
+    border-radius: 8px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    animation: fadeInDown 0.4s ease;
+  }}
+
+  @keyframes fadeInDown {{
+    from {{ opacity: 0; transform: translateY(-8px); }}
+    to   {{ opacity: 1; transform: translateY(0); }}
+  }}
+
+  .gigi-avatar {{ flex-shrink: 0; margin-top: 4px; }}
+
+  .gigi-body {{ flex: 1; }}
+
+  .gigi-header {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }}
+
+  .gigi-name {{
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #E8002D;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }}
+
+  .gigi-role {{
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }}
+
+  .gigi-message {{
+    font-size: 13.5px;
+    color: #BBBBBB;
+    line-height: 1.65;
+    margin-bottom: 14px;
+  }}
+
+  .gigi-message strong {{ color: #FFFFFF; }}
+
+  .gigi-tags {{
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }}
+
+  .tag {{
+    background: rgba(232, 0, 45, 0.08);
+    border: 1px solid rgba(232, 0, 45, 0.2);
+    border-radius: 4px;
+    padding: 3px 9px;
+    font-size: 11px;
+    color: #E8002D;
+    letter-spacing: 0.04em;
+  }}
+</style>
+</head>
+<body>
+<div class="gigi-card">
+
+  <!-- Avatar Gigi (icona definitiva, assets/gigi.svg) -->
+  <div class="gigi-avatar">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="60" height="60" role="img" aria-label="Gigi - race engineer">
+      <rect x="1.5" y="1.5" width="61" height="61" rx="16" fill="#0a0a0a" stroke="#222222" stroke-width="1.5"/>
+      <circle cx="32" cy="32" r="25" fill="none" stroke="#E8002D" stroke-width="1.5" opacity="0.5"/>
+      <path d="M16 51c0-9 7.2-14.5 16-14.5S48 42 48 51z" fill="#FFFFFF"/>
+      <circle cx="32" cy="26" r="9.5" fill="#FFFFFF"/>
+      <path d="M20.5 26a11.5 11.5 0 0 1 23 0" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+      <rect x="18" y="24" width="4.6" height="7.5" rx="2.3" fill="#E8002D"/>
+      <rect x="41.4" y="24" width="4.6" height="7.5" rx="2.3" fill="#E8002D"/>
+      <path d="M20.3 30c-2.4 3.4-2.4 6.6-.4 9.4" fill="none" stroke="#E8002D" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="20" cy="40" r="2.3" fill="#E8002D"/>
+    </svg>
+  </div>
+
+  <div class="gigi-body">
+    <div class="gigi-header">
+      <span class="gigi-name">GIGI</span>
+      <span class="gigi-role">// Race Engineer Virtuale</span>
+    </div>
+    <div class="gigi-message">
+      Bentornato nel box, <strong>{user_name_display}</strong>! Sono Gigi, il tuo ingegnere di pista.<br><br>
+      Carica i <strong>dati CSV di sessione</strong>, dimmi cosa provi in curva e ti restituisco
+      un'analisi tecnica precisa — bilanciamento, gomme, differenziale, carburante.
+      Tutto quello che serve per uscire dal box pi&ugrave; veloci di prima.
+    </div>
+    <div class="gigi-tags">
+      <span class="tag">📊 Telemetria CSV</span>
+      <span class="tag">🔧 Setup GT3</span>
+      <span class="tag">⛽ Strategia Carburante</span>
+      <span class="tag">🌡️ Monitor Gomme</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+"""
+    components.html(gigi_html, height=175, scrolling=False)
+    st.session_state["gigi_welcomed"] = True
+
+def normalize_markdown(text: str) -> str:
+    """
+    Normalizza SOLO la spaziatura del Markdown prodotto dal modello, per una resa
+    affidabile a schermo. Non altera mai testo, numeri o valori: inserisce solo
+    righe vuote dove servono.
+    - Garantisce una riga vuota prima di ogni header (## / ###).
+    - Garantisce una riga vuota prima dell'inizio di un elenco (*, -, 1.),
+      così il Markdown lo renderizza come lista.
+    """
+    import re
+
+    if not text:
+        return text
+
+    def _is_list(s: str) -> bool:
+        s = s.lstrip()
+        return bool(re.match(r"[-*]\s+", s)) or bool(re.match(r"\d+\.\s+", s))
+
+    lines = text.split("\n")
+    out: list[str] = []
+    for line in lines:
+        stripped = line.lstrip()
+        prev = out[-1] if out else ""
+        is_header = stripped.startswith("##")
+        # Riga vuota prima di un header
+        if is_header and out and prev.strip() != "":
+            out.append("")
+        # Riga vuota prima dell'inizio di un elenco (non se la precedente è già lista)
+        elif _is_list(line) and out and prev.strip() != "" and not _is_list(prev):
+            out.append("")
+        out.append(line)
+    return "\n".join(out)
+
+
+# Inizializza database sessioni (non cachato per evitare threading issues con SQLite)
+def get_session_db():
+    db = SessionDatabase()
+    db.init_db()
+    return db
+
+# Ottieni istanza DB per questa esecuzione
+db = get_session_db()
+
+# Verifica status DB
+def check_db_status() -> bool:
+    try:
+        db.connection.execute("SELECT 1")
+        return True
+    except Exception:
+        return False
+
+# ─────────────────────────────────────────────
+# STILE CSS — coerente con MVP (dark, rosso ACC)
+# ─────────────────────────────────────────────
+# Stile principale ora in assets/app.css, iniettato da inject_design_system()
+
+
+# ─────────────────────────────────────────────
+# HEADER (restored visual)
+# ─────────────────────────────────────────────
+db_status = "● DB ONLINE" if check_db_status() else "● DB OFFLINE"
+db_class = "pw-db-online" if check_db_status() else "pw-db-offline"
+
+st.markdown(
+    f"""
+    <div class="pw-header">
+        <div class="pw-header-left">
+            <span class="pw-badge">MVP V2.0</span>
+            <span style="font-size:1.4rem;">♟</span>
+            <div>
+                <div class="pw-logo-text">PITWALL<span class="pw-accent">.AI</span></div>
+                <div class="pw-subtitle">VIRTUAL RACE ENGINEER — ACC GT3</div>
+            </div>
+        </div>
+        <div class="{db_class}">{db_status}</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown("")
+
+
+# ─────────────────────────────────────────────
+# SIDEBAR — ristaurato stile e sezioni precedenti
+# ─────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("""
+    <div class="pw-side-block">
+        <div class="pw-side-kicker tight">Sessione</div>
+        <div class="pw-side-title">PITWALL<span class="accent">.</span>AI</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="pw-side-kicker">Dati Sessione</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="pw-side-label">📊 CSV Sessione</div>', unsafe_allow_html=True)
+    csv_file = st.file_uploader(
+        "Carica CSV",
+        type=["csv"],
+        key="csv_uploader",
+        label_visibility="collapsed",
+    )
+    if csv_file:
+        st.caption(f"📄 {csv_file.name}")
+    st.markdown("")
+
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="pw-side-label">📸 Screenshot Setup ACC</div>', unsafe_allow_html=True)
+    st.caption("Carica foto del menu setup.")
+    screenshot_file = st.file_uploader(
+        "Screenshot (JPG/PNG)",
+        type=["jpg", "jpeg", "png", "webp"],
+        key="screenshot_uploader",
+        label_visibility="collapsed",
+    )
+    if screenshot_file is not None:
+        if st.button("🔍 Leggi Parametri da Screenshot", type="secondary", use_container_width=True):
+            # st.secrets solleva se manca secrets.toml (locale): fallback robusto su .env
+            try:
+                api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+            except Exception:
+                api_key = os.getenv("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                st.error("ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
+            else:
+                with st.spinner("Analisi screenshot in corso..."):
+                    result = parse_setup_from_image(screenshot_file.getvalue(), api_key=api_key)
+                st.session_state["vision_params"] = result.get("params", {})
+                st.session_state["vision_summary"] = summarize_parsed_setup(result)
+                st.success(f"Riconosciuti {len(result['params'])} parametri.")
+    if "vision_summary" in st.session_state:
+        with st.expander("📋 Parametri riconosciuti", expanded=True):
+            st.markdown(st.session_state["vision_summary"])
+        if st.button("✅ Usa questi parametri nel form", use_container_width=True):
+            st.session_state["load_vision_params"] = True
+            st.rerun()
+
+    # ── USER INFO + LOGOUT ──
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="pw-side-user-kicker">Logged in as</div>
+    <div class="pw-side-user-name">{user_name}</div>
+    <div class="pw-side-user-mail">{user_email}</div>
+    """, unsafe_allow_html=True)
+    if st.button("🚪 Esci", type="primary", use_container_width=True, key="btn_logout"):
+        st.session_state.authenticated = False
+        st.session_state.user_id = None
+        st.session_state.user_name = None
+        st.session_state.user_email = None
+        st.session_state.gigi_welcomed = False
+        st.switch_page("pages/login.py")
+
+    # ── FOOTER (in fondo alla sidebar, in flusso normale) ──
+    st.markdown("""
+    <div class="pw-side-footer">
+        <div class="row">
+            <span class="ver">v0.2.0 — MVP</span>
+            <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank" class="gh">GitHub ↗</a>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────
+# CSV — PARSING IMMEDIATO + PREVIEW
+# ─────────────────────────────────────────────
+csv_filename = csv_file.name if csv_file else None
+if csv_file is not None and st.session_state.get("csv_filename") != csv_filename:
+    try:
+        from backend.parser.csv_parser import CSVParseError
+        st.session_state["csv_parsed_result"] = parse_session_csv(csv_file)
+        st.session_state["csv_filename"] = csv_filename
+        csv_result = st.session_state["csv_parsed_result"]
+        press = csv_result.get("pressures") or {}
+        temp = csv_result.get("temperatures") or {}
+        if press:
+            st.session_state["csv_pressures"] = {
+                k: press[k]["avg"] for k in ["fl", "fr", "rl", "rr"] if k in press
+            }
+        if temp:
+            st.session_state["csv_temps"] = {
+                k: temp[k]["avg"] for k in ["fl", "fr", "rl", "rr"] if k in temp
+            }
+    except CSVParseError as e:
+        st.warning(f"⚠️ CSV non valido: {str(e)}")
+
+# Inizializza slider pressioni con medie CSV (PRIMA del rendering dei widget)
+# Se il CSV non è caricato, resetta ai default di setup_params.py
+if "csv_pressures" in st.session_state and csv_file is not None:
+    _cp = st.session_state["csv_pressures"]
+    for _k in ["fl", "fr", "rl", "rr"]:
+        _skey = f"slider_tire_press_{_k}"
+        if _skey not in st.session_state and _k in _cp:
+            st.session_state[_skey] = round(_cp[_k], 2)
+elif csv_file is None:
+    for _k in ["fl", "fr", "rl", "rr"]:
+        _skey = f"slider_tire_press_{_k}"
+        if _skey in st.session_state:
+            del st.session_state[_skey]
+
+def _sparkline_svg(series, status="ok"):
+    """Mini-grafico SVG inline (sparkline) da una serie numerica. Solo presentazione."""
+    pts = [float(v) for v in series if v is not None]
+    if len(pts) < 2:
+        return ""
+    lo, hi = min(pts), max(pts)
+    span = (hi - lo) or 1.0
+    w, h, pad = 100.0, 26.0, 3.0
+    n = len(pts)
+    coords = []
+    for i, v in enumerate(pts):
+        x = pad + (w - 2 * pad) * (i / (n - 1))
+        y = pad + (h - 2 * pad) * (1 - (v - lo) / span)
+        coords.append(f"{x:.1f},{y:.1f}")
+    poly = " ".join(coords)
+    last = coords[-1].split(",")
+    return (
+        f'<svg viewBox="0 0 {int(w)} {int(h)}" preserveAspectRatio="none" '
+        f'class="pw-mc-spark-{status}" aria-hidden="true">'
+        f'<polyline points="{poly}" fill="none" stroke="currentColor" '
+        f'stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'
+        f'<circle cx="{last[0]}" cy="{last[1]}" r="2" fill="currentColor"/></svg>'
+    )
+
+
+def _metric_card(label, value, unit, series=None, status="ok"):
+    """Card metrica: label + valore (+ unità) + mini-grafico o barra di stato.
+    Puramente presentazionale: non altera alcun dato."""
+    unit_html = f'<span class="pw-mc-unit">{unit}</span>' if unit else ""
+    spark = _sparkline_svg(series, status) if series else ""
+    chart = (
+        f'<div class="pw-mc-chart">{spark}</div>' if spark
+        else f'<div class="pw-mc-bar pw-mc-{status}"><span style="width:100%"></span></div>'
+    )
+    return (
+        '<div class="pw-metric-card">'
+        f'<div class="pw-mc-label">{label}</div>'
+        f'<div class="pw-mc-value">{value}{unit_html}</div>'
+        f'{chart}</div>'
+    )
+
+
+# ── Telemetria (FASE 5): grafici plotly, tema coerente col design system ──
+# Palette letterale (plotly non legge le CSS var del documento parent).
+_PLOT = {
+    "bg": "rgba(0,0,0,0)", "grid": "#222222", "axis": "#666666",
+    "text": "#999999", "accent": "#E8002D",
+    "tyres": {"fl": "#E8002D", "fr": "#FFB300", "rl": "#00C853", "rr": "#3B82F6"},
+}
+
+
+def _plot_layout(fig, title, ylabel):
+    """Applica il tema dark/token a una figura plotly. Solo presentazione."""
+    fig.update_layout(
+        title=dict(text=title, font=dict(family="JetBrains Mono, monospace",
+                                         size=13, color="#FFFFFF")),
+        paper_bgcolor=_PLOT["bg"], plot_bgcolor=_PLOT["bg"],
+        font=dict(family="Inter, sans-serif", color=_PLOT["text"], size=11),
+        margin=dict(l=50, r=20, t=44, b=40), height=300,
+        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="right", x=1,
+                    font=dict(size=10)),
+        hovermode="x unified",
+    )
+    fig.update_xaxes(title_text="Giro", gridcolor=_PLOT["grid"],
+                     zeroline=False, color=_PLOT["axis"], linecolor=_PLOT["grid"])
+    fig.update_yaxes(title_text=ylabel, gridcolor=_PLOT["grid"],
+                     zeroline=False, color=_PLOT["axis"], linecolor=_PLOT["grid"])
+    return fig
+
+
+def _temp_lines_fig(temp_series: dict):
+    """Line chart temperatura per giro, una linea per gomma."""
+    fig = go.Figure()
+    for pos in ("fl", "fr", "rl", "rr"):
+        vals = temp_series.get(pos) or []
+        if not vals:
+            continue
+        fig.add_trace(go.Scatter(
+            y=vals, x=list(range(1, len(vals) + 1)), mode="lines+markers",
+            name=pos.upper(), line=dict(color=_PLOT["tyres"][pos], width=2),
+            marker=dict(size=4),
+        ))
+    return _plot_layout(fig, "🌡 Temperatura gomme per giro", "°C")
+
+
+def _fuel_bars_fig(fuel_per_lap: list):
+    """Barre consumo carburante per giro + linea media."""
+    fig = go.Figure()
+    x = list(range(1, len(fuel_per_lap) + 1))
+    fig.add_trace(go.Bar(x=x, y=fuel_per_lap, name="Consumo",
+                         marker_color=_PLOT["accent"], opacity=0.85))
+    if fuel_per_lap:
+        avg = sum(fuel_per_lap) / len(fuel_per_lap)
+        fig.add_hline(y=avg, line=dict(color="#FFB300", width=1.5, dash="dash"),
+                      annotation_text=f"media {avg:.2f}",
+                      annotation_font=dict(color="#FFB300", size=10))
+    return _plot_layout(fig, "⛽ Consumo carburante per giro", "L/giro")
+
+
+def _tyre_heatmap_html(temp_stats: dict) -> str:
+    """Schema vettura 2×2 con i 4 corner colorati per temperatura max (status ACC)."""
+    def _col(v):
+        if v <= 0:
+            return "var(--bg-raised)"
+        if 85 <= v <= 95:
+            return "var(--status-ok)"
+        if 75 <= v < 85 or 95 < v <= 105:
+            return "var(--status-warn)"
+        return "var(--status-error)"
+
+    def _corner(pos):
+        v = 0.0
+        if temp_stats and pos in temp_stats:
+            v = temp_stats[pos].get("max", 0.0)
+        label = "—" if v <= 0 else f"{v:.0f}°"
+        return (f'<div class="pw-heat-corner" style="background:{_col(v)};">'
+                f'<span class="pw-heat-pos">{pos.upper()}</span>'
+                f'<span class="pw-heat-val">{label}</span></div>')
+
+    return (
+        '<div class="pw-heat">'
+        '<div class="pw-heat-title">🔥 Heatmap temperature (max)</div>'
+        '<div class="pw-heat-grid">'
+        f'{_corner("fl")}{_corner("fr")}'
+        f'{_corner("rl")}{_corner("rr")}'
+        '</div></div>'
+    )
+
+
+if "csv_parsed_result" in st.session_state:
+    csv_result = st.session_state["csv_parsed_result"]
+
+    st.markdown('<div class="section-title">📊 Anteprima Dati Sessione</div>', unsafe_allow_html=True)
+
+    # 2a — Metriche aggregate
+    temp_stats = csv_result.get("temperatures", {})
+    press_stats = csv_result.get("pressures", {})
+
+    def _get_stat(stats_dict, pos, key):
+        if stats_dict and pos in stats_dict:
+            return stats_dict[pos].get(key, 0.0)
+        return 0.0
+
+    temp_vals = [_get_stat(temp_stats, p, "max") for p in ["fl", "fr", "rl", "rr"]]
+    temp_max = max(temp_vals) if temp_vals else 0.0
+    press_vals = [_get_stat(press_stats, p, "avg") for p in ["fl", "fr", "rl", "rr"]]
+    press_avg_rr = _get_stat(press_stats, "rr", "avg")
+
+    # Card modulari (dato + mini-grafico). Solo presentazione: legge i valori
+    # già calcolati dal parser, nessuna modifica alla logica dati.
+    temp_series = csv_result.get("temperature_series") or {}
+    rr_temp_series = temp_series.get("rr") or []
+    # serie temp "generale" = max tra le 4 posizioni per ogni giro
+    pos_series = [s for s in temp_series.values() if s]
+    gen_temp_series = [max(vals) for vals in zip(*pos_series)] if pos_series else []
+    fuel_series = csv_result.get("fuel_cons_per_lap") or []
+
+    def _temp_status(v):
+        return "error" if v > 100 else ("warn" if v > 95 else "ok")
+
+    cards = [
+        _metric_card("🏁 Giri registrati", f"{csv_result.get('laps_count', 0)}", None,
+                     series=None, status="ok"),
+        _metric_card("⛽ Consumo medio", f"{csv_result.get('fuel_cons_avg', 0):.2f}", "L/giro",
+                     series=fuel_series, status="ok"),
+        _metric_card("🌡 Temp max RR", f"{_get_stat(temp_stats, 'rr', 'max'):.1f}", "°C",
+                     series=rr_temp_series, status=_temp_status(_get_stat(temp_stats, 'rr', 'max'))),
+        _metric_card("🔧 Press avg RR", f"{press_avg_rr:.1f}", "psi",
+                     series=None, status="ok"),
+        _metric_card("🔥 Temp max generale", f"{temp_max:.1f}", "°C",
+                     series=gen_temp_series, status=_temp_status(temp_max)),
+    ]
+    st.markdown(
+        '<div class="pw-metric-grid">' + "".join(cards) + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    # 2c — Alert visivo automatico
+    if temp_max > 100:
+        st.warning(f"⚠️ Temperatura critica rilevata: {temp_max:.1f}°C — analisi prioritaria raccomandata.")
+    elif temp_max > 95:
+        st.info(f"ℹ️ Temperature elevate: {temp_max:.1f}°C — monitorare in analisi.")
+
+    # 2b-bis — Telemetria (FASE 5): grafici interattivi della sessione
+    _tseries = csv_result.get("temperature_series") or {}
+    _fuel_lap = csv_result.get("fuel_cons_per_lap") or []
+    if _tseries or _fuel_lap:
+        st.markdown('<div class="section-title">📈 Telemetria Sessione</div>', unsafe_allow_html=True)
+        _tcol1, _tcol2 = st.columns([2, 1])
+        with _tcol1:
+            if _tseries:
+                st.plotly_chart(_temp_lines_fig(_tseries), use_container_width=True,
+                                config={"displayModeBar": False})
+        with _tcol2:
+            st.markdown(_tyre_heatmap_html(temp_stats), unsafe_allow_html=True)
+        if _fuel_lap:
+            st.plotly_chart(_fuel_bars_fig(_fuel_lap), use_container_width=True,
+                            config={"displayModeBar": False})
+
+    # 2b — Tabella dati grezzi (collassabile)
+    try:
+        csv_file.seek(0)
+        df_preview = pd.read_csv(csv_file)
+        with st.expander("📊 Dati grezzi sessione", expanded=False):
+            st.dataframe(df_preview, use_container_width=True)
+    except Exception:
+        pass
+
+    st.markdown("---")
+
+
+# ─────────────────────────────────────────────
+# HELPERS
+# ─────────────────────────────────────────────
+
+def get_default_or_vision(key: str, default_val):
+    """
+    Se sono stati caricati parametri da Vision e l'utente ha confermato,
+    usa il valore riconosciuto come default dello slider. Altrimenti usa
+    il default standard del parametro.
+    """
+    if st.session_state.get("load_vision_params"):
+        vision = st.session_state.get("vision_params", {})
+        if key in vision:
+            return vision[key]
+    return default_val
+
+
+def render_param_slider(key: str, param: dict, col=None) -> float | int:
+    """
+    Renderizza uno slider per un parametro di setup.
+    Supporta float e int in modo automatico.
+    Mostra il valore corrente in evidenza sopra lo slider.
+    """
+    default = get_default_or_vision(key, param["default"])
+    label = param["label"]
+    unit_str = f" ({param['unit']})" if param["unit"] else ""
+    full_label = f"{label}{unit_str}"
+
+    is_float = isinstance(param["step"], float) or isinstance(param["min"], float)
+
+    target = col if col else st
+
+    p_min = float(param["min"]) if is_float else int(param["min"])
+    p_max = float(param["max"]) if is_float else int(param["max"])
+
+    # Recupera il valore corrente dallo session_state (se esiste)
+    current_val = st.session_state.get(f"slider_{key}", float(default) if is_float else int(default))
+
+    # Clamp: se il valore salvato è fuori dal nuovo range (es. dopo cambio vettura),
+    # riportalo entro [min,max]. Va riscritto in session_state PRIMA dello slider,
+    # altrimenti st.slider con key= solleverebbe per valore fuori range.
+    if current_val < p_min or current_val > p_max:
+        current_val = min(max(current_val, p_min), p_max)
+        current_val = float(current_val) if is_float else int(current_val)
+        st.session_state[f"slider_{key}"] = current_val
+
+    # Formatta il valore per display
+    if is_float:
+        formatted_val = f"{current_val:.2f}"
+    else:
+        formatted_val = str(int(current_val))
+
+    target.markdown(
+        f'<div class="slider-value-display">{formatted_val}</div>',
+        unsafe_allow_html=True,
+    )
+
+    value = target.slider(
+        full_label,
+        min_value=p_min,
+        max_value=p_max,
+        value=float(current_val) if is_float else int(current_val),
+        step=float(param["step"]) if is_float else int(param["step"]),
+        key=f"slider_{key}",
+        label_visibility="collapsed",
+    )
+
+    return value
+
+
+# ─────────────────────────────────────────────
+# LISTE AUTO E PISTA (per selectbox + auto-detect)
+# ─────────────────────────────────────────────
+
+CAR_LIST = [
+    "BMW M4 GT3",
+    "Ferrari 296 GT3",
+    "Ferrari 488 GT3 Evo",
+    "Porsche 992 GT3 R",
+    "Porsche 991 II GT3 R",
+    "Mercedes-AMG GT3 Evo",
+    "Audi R8 LMS Evo II GT3",
+    "Lamborghini Huracán GT3 EVO2",
+    "McLaren 720S GT3 Evo",
+    "Bentley Continental GT3",
+    "Honda NSX GT3 Evo",
+    "Nissan GT-R Nismo GT3",
+    "Lexus RC F GT3",
+    "Ford Mustang GT3",
+    "Aston Martin V8 Vantage GT3",
+]
+
+TRACK_LIST = [
+    "Monza", "Spa-Francorchamps", "Nürburgring GP", "Silverstone",
+    "Misano", "Barcelona", "Hungaroring", "Zandvoort", "Imola",
+    "Kyalami", "Mount Panorama", "Suzuka", "Zolder",
+    "Paul Ricard", "Brands Hatch",
+]
+
+
+def detect_car_and_track(text: str) -> dict:
+    """
+    Rileva auto e pista dal testo libero del pilota usando keyword matching.
+    Restituisce dict con chiavi 'car' e 'track' (None se non rilevati).
+    """
+    text_lower = text.lower()
+
+    CAR_KEYWORDS = {
+        "ferrari": "Ferrari 296 GT3",
+        "296": "Ferrari 296 GT3",
+        "488": "Ferrari 488 GT3 Evo",
+        "bmw": "BMW M4 GT3",
+        "m4": "BMW M4 GT3",
+        "porsche": "Porsche 992 GT3 R",
+        "992": "Porsche 992 GT3 R",
+        "991": "Porsche 991 II GT3 R",
+        "lamborghini": "Lamborghini Huracán GT3 EVO2",
+        "huracan": "Lamborghini Huracán GT3 EVO2",
+        "huracán": "Lamborghini Huracán GT3 EVO2",
+        "mercedes": "Mercedes-AMG GT3 Evo",
+        "amg": "Mercedes-AMG GT3 Evo",
+        "audi": "Audi R8 LMS Evo II GT3",
+        "r8": "Audi R8 LMS Evo II GT3",
+        "mclaren": "McLaren 720S GT3 Evo",
+        "720": "McLaren 720S GT3 Evo",
+        "bentley": "Bentley Continental GT3",
+        "continental": "Bentley Continental GT3",
+        "honda": "Honda NSX GT3 Evo",
+        "nsx": "Honda NSX GT3 Evo",
+        "nissan": "Nissan GT-R Nismo GT3",
+        "gtr": "Nissan GT-R Nismo GT3",
+        "gt-r": "Nissan GT-R Nismo GT3",
+        "lexus": "Lexus RC F GT3",
+        "ford": "Ford Mustang GT3",
+        "mustang": "Ford Mustang GT3",
+        "aston": "Aston Martin V8 Vantage GT3",
+        "vantage": "Aston Martin V8 Vantage GT3",
+    }
+
+    TRACK_KEYWORDS = {
+        "monza": "Monza",
+        "spa": "Spa-Francorchamps",
+        "francorchamps": "Spa-Francorchamps",
+        "nurburgring": "Nürburgring GP",
+        "nürburgring": "Nürburgring GP",
+        "nurburg": "Nürburgring GP",
+        "silverstone": "Silverstone",
+        "paul ricard": "Paul Ricard",
+        "ricard": "Paul Ricard",
+        "barcelona": "Barcelona",
+        "catalogna": "Barcelona",
+        "catalunya": "Barcelona",
+        "zandvoort": "Zandvoort",
+        "misano": "Misano",
+        "hungaroring": "Hungaroring",
+        "hungary": "Hungaroring",
+        "ungheria": "Hungaroring",
+        "imola": "Imola",
+        "kyalami": "Kyalami",
+        "mount panorama": "Mount Panorama",
+        "bathurst": "Mount Panorama",
+        "suzuka": "Suzuka",
+        "zolder": "Zolder",
+        "brands hatch": "Brands Hatch",
+        "brands": "Brands Hatch",
+    }
+
+    result = {"car": None, "track": None}
+
+    for keyword, car_value in CAR_KEYWORDS.items():
+        if keyword in text_lower:
+            result["car"] = car_value
+            break
+
+    for keyword, track_value in TRACK_KEYWORDS.items():
+        if keyword in text_lower:
+            result["track"] = track_value
+            break
+
+    return result
+
+
+# ─────────────────────────────────────────────
+# AREA PRINCIPALE — 2 colonne: feedback + setup
+# ─────────────────────────────────────────────
+
+tab_analisi, tab_carburante, tab_storico = st.tabs([
+    "✂ Analisi Setup",
+    "🗒 Strategia Carburante",
+    "🗒 Storico Sessioni",
+])
+
+with tab_analisi:
+    # Auto-detect auto/pista dal feedback pilota
+    _fb_text = st.session_state.get("feedback_text_area", "")
+    _detected = detect_car_and_track(_fb_text) if _fb_text else {"car": None, "track": None}
+    _last = st.session_state.get("_last_auto_detect", {"car": None, "track": None})
+    if _detected != _last:
+        if _detected["car"] and _detected["car"] in CAR_LIST:
+            st.session_state["sel_car"] = _detected["car"]
+        if _detected["track"] and _detected["track"] in TRACK_LIST:
+            st.session_state["sel_track"] = _detected["track"]
+        st.session_state["_last_auto_detect"] = _detected
+
+    col1, col2, col3 = st.columns([1, 1.2, 1.5], gap="medium")
+
+    # ══ COLONNA 1 — Configurazione Sessione ══
+    with col1:
+        st.markdown('<div class="section-title">1 — Configurazione Sessione</div>', unsafe_allow_html=True)
+        st.caption("Parametri ambientali e di pista")
+        st.divider()
+
+        # auto/pista: input manuale obbligatorio, il CSV ACC non contiene questi metadati
+        selected_car = st.selectbox(
+            "🏎 Auto",
+            options=CAR_LIST,
+            key="sel_car",
+        )
+
+        # auto/pista: input manuale obbligatorio, il CSV ACC non contiene questi metadati
+        selected_track = st.selectbox(
+            "🏁 Tracciato",
+            options=TRACK_LIST,
+            key="sel_track",
+        )
+
+        selected_conditions = st.selectbox(
+            "☁ Condizioni",
+            options=["Asciutto", "Umido", "Bagnato"],
+            key="sel_conditions",
+        )
+
+        st.markdown('<div class="pw-field-label">🌡 Temperature</div>', unsafe_allow_html=True)
+        ambient_temp = st.slider("Temp. Ambiente", 0, 50, 20, key="temp_amb")
+        track_temp = st.slider("Temp. Pista", 0, 60, 30, key="temp_pista")
+
+    # ══ COLONNA 2 — Feedback Pilota ══
+    with col2:
+        st.markdown('<div class="section-title">2 — Feedback Pilota</div>', unsafe_allow_html=True)
+        st.caption("Descrivi il comportamento della vettura in pista")
+        st.divider()
+
+        feedback = st.text_area(
+            "📻 Descrivi il problema riscontrato in pista",
+            height=200,
+            placeholder=(
+                "Es: 'Ho troppo sottosterzo a centro curva sulle curve lente. "
+                "L'auto non ruota e devo aprire il volante. "
+                "Accade soprattutto nelle curve a destra, principalmente nel settore 2.'"
+            ),
+            help="Più sei specifico (fase della curva, tipo di curva, condizioni), migliore sarà l'analisi.",
+            key="feedback_text_area",
+        )
+
+        # ── INC-002: distinzione obbligatoria pressioni freddo / caldo ──
+        # Le pressioni a caldo (MFD) sono ~2.5-3.5 PSI sopra quelle a freddo (garage).
+        # Senza questo contesto il modello classifica le pressioni con la finestra sbagliata.
+        pressure_context_label = st.radio(
+            "🌡 Le pressioni inserite/lette sono:",
+            options=[
+                "A freddo (impostate in garage prima della sessione)",
+                "A caldo (lette dal MFD in pista — tasto N)",
+            ],
+            horizontal=False,
+            key="pressure_context_radio",
+            help="A freddo: target 26.7 PSI (range 26.0–27.0). A caldo: target 29.0 PSI (range 28.5–30.0).",
+        )
+        st.session_state["pressure_context"] = (
+            "cold" if "freddo" in pressure_context_label else "hot"
+        )
+
+        btn_analizza = st.button("🔍 ANALIZZA SESSIONE", type="primary", use_container_width=True)
+
+    # ══ COLONNA 3 — Setup Corrente ══
+    with col3:
+        st.markdown('<div class="section-title">3 — Setup Corrente</div>', unsafe_allow_html=True)
+        st.caption("Contesto numerico di partenza per l'analisi")
+        st.divider()
+
+        # Dizionario per raccogliere tutti i valori del setup
+        current_setup = {}
+
+        # Range/default specifici per vettura (e circuito) con fallback ai generici
+        car_sections = get_params_for_car(selected_car, selected_track)
+
+        # Render dei 5 tab — stessa struttura del gioco ACC
+        tab_keys = list(car_sections.keys())
+        tab_labels = [car_sections[k]["label"] for k in tab_keys]
+        tabs = st.tabs(tab_labels)
+
+        for tab, section_key in zip(tabs, tab_keys):
+            with tab:
+                section = car_sections[section_key]
+                params = section["params"]
+
+                # ── TYRES: griglia 2×2 per le 4 ruote ──
+                if section_key == "tyres":
+                    st.markdown('<div class="param-group-title">PRESSIONI</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["tire_press_fl"] = render_param_slider("tire_press_fl", params["tire_press_fl"], c1)
+                    current_setup["tire_press_fr"] = render_param_slider("tire_press_fr", params["tire_press_fr"], c2)
+                    c3, c4 = st.columns(2)
+                    current_setup["tire_press_rl"] = render_param_slider("tire_press_rl", params["tire_press_rl"], c3)
+                    current_setup["tire_press_rr"] = render_param_slider("tire_press_rr", params["tire_press_rr"], c4)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">CAMBER</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["camber_fl"] = render_param_slider("camber_fl", params["camber_fl"], c1)
+                    current_setup["camber_fr"] = render_param_slider("camber_fr", params["camber_fr"], c2)
+                    c3, c4 = st.columns(2)
+                    current_setup["camber_rl"] = render_param_slider("camber_rl", params["camber_rl"], c3)
+                    current_setup["camber_rr"] = render_param_slider("camber_rr", params["camber_rr"], c4)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">TOE</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["toe_fl"] = render_param_slider("toe_fl", params["toe_fl"], c1)
+                    current_setup["toe_fr"] = render_param_slider("toe_fr", params["toe_fr"], c2)
+                    c3, c4 = st.columns(2)
+                    current_setup["toe_rl"] = render_param_slider("toe_rl", params["toe_rl"], c3)
+                    current_setup["toe_rr"] = render_param_slider("toe_rr", params["toe_rr"], c4)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">CASTER</div>', unsafe_allow_html=True)
+                    current_setup["caster"] = render_param_slider("caster", params["caster"])
+
+                elif section_key == "electronics":
+                    for key, param in params.items():
+                        current_setup[key] = render_param_slider(key, param)
+
+                elif section_key == "mechanical_grip":
+                    st.markdown('<div class="param-group-title">BARRE ANTIROLLIO</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["arb_front"] = render_param_slider("arb_front", params["arb_front"], c1)
+                    current_setup["arb_rear"] = render_param_slider("arb_rear", params["arb_rear"], c2)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">WHEEL RATE</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["wheel_rate_front"] = render_param_slider("wheel_rate_front", params["wheel_rate_front"], c1)
+                    current_setup["wheel_rate_rear"] = render_param_slider("wheel_rate_rear", params["wheel_rate_rear"], c2)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">BUMPSTOP RATE</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["bumpstop_rate_front"] = render_param_slider("bumpstop_rate_front", params["bumpstop_rate_front"], c1)
+                    current_setup["bumpstop_rate_rear"] = render_param_slider("bumpstop_rate_rear", params["bumpstop_rate_rear"], c2)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">BUMPSTOP RANGE</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["bumpstop_range_front"] = render_param_slider("bumpstop_range_front", params["bumpstop_range_front"], c1)
+                    current_setup["bumpstop_range_rear"] = render_param_slider("bumpstop_range_rear", params["bumpstop_range_rear"], c2)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">DIFFERENZIALE</div>', unsafe_allow_html=True)
+                    current_setup["preload"] = render_param_slider("preload", params["preload"])
+
+                elif section_key == "dampers":
+                    damper_corners = [
+                        ("FL", "Anteriore Sinistra"),
+                        ("FR", "Anteriore Destra"),
+                        ("RL", "Posteriore Sinistra"),
+                        ("RR", "Posteriore Destra"),
+                    ]
+                    for suffix, corner_label in damper_corners:
+                        st.markdown(
+                            f'<div class="param-group-title" style="margin-top:0.8rem">{corner_label.upper()}</div>',
+                            unsafe_allow_html=True,
+                        )
+                        c1, c2, c3, c4 = st.columns(4)
+                        cols = [c1, c2, c3, c4]
+                        damper_params = [
+                            f"bump_{suffix.lower()}",
+                            f"fast_bump_{suffix.lower()}",
+                            f"rebound_{suffix.lower()}",
+                            f"fast_rebound_{suffix.lower()}",
+                        ]
+                        for param_key, col in zip(damper_params, cols):
+                            current_setup[param_key] = render_param_slider(
+                                param_key, params[param_key], col
+                            )
+
+                elif section_key == "aero":
+                    st.markdown('<div class="param-group-title">RIDE HEIGHT & DEPORTANZA</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["ride_height_front"] = render_param_slider("ride_height_front", params["ride_height_front"], c1)
+                    current_setup["ride_height_rear"] = render_param_slider("ride_height_rear", params["ride_height_rear"], c2)
+
+                    rake = current_setup["ride_height_rear"] - current_setup["ride_height_front"]
+                    rake_color = "#E8002D" if rake < 10 or rake > 35 else "#4CAF50"
+                    st.markdown(
+                        f'<p style="font-family:JetBrains Mono,monospace;font-size:0.85rem;color:{rake_color};">'
+                        f'📐 Rake attuale: {rake:.0f} mm</p>',
+                        unsafe_allow_html=True,
+                    )
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">CARICO AERODINAMICO</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["splitter"] = render_param_slider("splitter", params["splitter"], c1)
+                    current_setup["wing"] = render_param_slider("wing", params["wing"], c2)
+
+                    st.markdown('<div class="param-group-title" style="margin-top:1rem">BRAKE DUCTS</div>', unsafe_allow_html=True)
+                    c1, c2 = st.columns(2)
+                    current_setup["brake_duct_front"] = render_param_slider("brake_duct_front", params["brake_duct_front"], c1)
+                    current_setup["brake_duct_rear"] = render_param_slider("brake_duct_rear", params["brake_duct_rear"], c2)
+
+    # ── Visualizzatore Live Gomme (full-width) ──
+    st.markdown('<div class="section-separator" style="margin:0.5rem 0 1.2rem 0;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Visualizzazione Live Gomme</div>', unsafe_allow_html=True)
+
+    def _tyre_color(val: float, metric: str) -> str:
+        if metric == "pressure":
+            if 26.0 <= val <= 27.5:
+                return "#00C853"
+            if 25.0 <= val < 26.0 or 27.5 < val <= 28.5:
+                return "#FFD600"
+            return "#E8002D"
+        if metric == "temp":
+            if 85 <= val <= 95:
+                return "#00C853"
+            if 75 <= val < 85 or 95 < val <= 105:
+                return "#FFD600"
+            return "#E8002D"
+        return "#7A7A7A"
+
+    def _tyre_bar(label: str, val: float, delta: float, metric: str) -> str:
+        color = _tyre_color(val, metric)
+        pct = max(5, min(100, int((val - 25.0) / (30.0 - 25.0) * 100))) if metric == "pressure" else max(5, min(100, int((val - 50.0) / (120.0 - 50.0) * 100)))
+        unit = "PSI" if metric == "pressure" else "°C"
+        dsign = "+" if delta > 0 else ""
+        dcol = "#00C853" if delta > 0 else "#E8002D" if delta < 0 else "#7A7A7A"
+        return (
+            f'<div class="pw-tyre">'
+            f'<div class="pw-tyre-tube">'
+            f'<div class="pw-tyre-fill" style="height:{pct}%;background:{color};"></div></div>'
+            f'<div class="pw-tyre-label">{label}</div>'
+            f'<div class="pw-tyre-val">{val:.1f} {unit}</div>'
+            f'<div class="pw-tyre-delta" style="color:{dcol};">{dsign}{delta:.1f} {unit}</div></div>'
+        )
+
+    slider_fl = st.session_state.get("slider_tire_press_fl")
+    slider_fr = st.session_state.get("slider_tire_press_fr")
+    slider_rl = st.session_state.get("slider_tire_press_rl")
+    slider_rr = st.session_state.get("slider_tire_press_rr")
+    csv_pressures = st.session_state.get("csv_pressures", {})
+    live_press = {
+        "fl": slider_fl if slider_fl is not None else csv_pressures.get("fl", 26.7),
+        "fr": slider_fr if slider_fr is not None else csv_pressures.get("fr", 26.7),
+        "rl": slider_rl if slider_rl is not None else csv_pressures.get("rl", 26.7),
+        "rr": slider_rr if slider_rr is not None else csv_pressures.get("rr", 26.7),
+    }
+    csv_temps = st.session_state.get("csv_temps", {"fl": 85.0, "fr": 85.0, "rl": 85.0, "rr": 85.0})
+    TARGET_PRESS_CENTER = 26.75
+    CENTER_TEMP = 90.0
+
+    col_press_panel, col_temp_panel = st.columns(2)
+
+    with col_press_panel:
+        fl_p, fr_p, rl_p, rr_p = (live_press.get(k, 26.7) for k in ("fl", "fr", "rl", "rr"))
+        bars = "".join(_tyre_bar(l, v, v - TARGET_PRESS_CENTER, "pressure") for l, v in [("FL", fl_p), ("FR", fr_p), ("RL", rl_p), ("RR", rr_p)])
+        st.markdown(
+            f'<div class="pw-tyre-panel">'
+            f'<div class="pw-tyre-panel-title">♟ Pressioni Gomme</div>'
+            f'<div class="pw-tyre-grid">{bars}</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    with col_temp_panel:
+        fl_t, fr_t, rl_t, rr_t = (csv_temps.get(k, 85.0) for k in ("fl", "fr", "rl", "rr"))
+        bars_t = "".join(_tyre_bar(l, v, v - CENTER_TEMP, "temp") for l, v in [("FL", fl_t), ("FR", fr_t), ("RL", rl_t), ("RR", rr_t)])
+        csv_note = "" if csv_file else '<div class="pw-tyre-note">Dati CSV non caricati — valori di esempio</div>'
+        st.markdown(
+            f'<div class="pw-tyre-panel">'
+            f'<div class="pw-tyre-panel-title">🌡 Temperature Gomme</div>'
+            f'<div class="pw-tyre-grid">{bars_t}</div>'
+            f'{csv_note}</div>',
+            unsafe_allow_html=True,
+        )
+
+    # ── AI Output (full-width below) ──
+    if "last_response" in st.session_state:
+        st.markdown("---")
+        st.markdown('<div class="section-title">▶ Analisi PitWall.AI</div>', unsafe_allow_html=True)
+        # Le righe vuote attorno al contenuto chiudono il blocco HTML grezzo,
+        # così il Markdown interno (header, liste) viene renderizzato correttamente.
+        st.markdown(
+            f'<div class="ai-output">\n\n{normalize_markdown(st.session_state["last_response"])}\n\n</div>',
+            unsafe_allow_html=True,
+        )
+
+    # ─────────────────────────────────────────────
+    # CHAT GIGI — canale conversazionale (memoria di sessione, separato dall'analisi)
+    # ─────────────────────────────────────────────
+    import html as _html
+
+    st.markdown("---")
+    st.markdown('<div class="section-title">💬 Parla con Gigi</div>', unsafe_allow_html=True)
+    st.caption("Chiacchiera col tuo ingegnere: domande di approfondimento, dubbi sul setup. La chat si azzera a ogni login.")
+
+    st.session_state.setdefault("gigi_chat", [])
+
+    # Stile chat (avatar 3 stati + bolle) ora in assets/app.css, su design token.
+
+    def _gigi_avatar(state: str = "idle") -> str:
+        """Mini-avatar SVG di Gigi (casco/cuffie). state: idle | think | talk."""
+        return (
+            f'<span class="gavatar {state}"><svg width="34" height="40" viewBox="0 0 58 64" '
+            f'xmlns="http://www.w3.org/2000/svg">'
+            f'<circle cx="29" cy="30" r="14" fill="#252525" stroke="#333" stroke-width="1.5"/>'
+            f'<path d="M16 28 Q16 13 29 13 Q42 13 42 28" fill="none" stroke="#E8002D" stroke-width="3" stroke-linecap="round"/>'
+            f'<rect x="11" y="25" width="7" height="10" rx="3.5" fill="#E8002D"/>'
+            f'<rect x="40" y="25" width="7" height="10" rx="3.5" fill="#E8002D"/>'
+            f'<circle class="eye" cx="23.5" cy="30" r="2"/>'
+            f'<circle class="eye" cx="34.5" cy="30" r="2"/>'
+            f'<path d="M23 36 Q29 40 35 36" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>'
+            f'</svg></span>'
+        )
+
+    def _build_gigi_context() -> str:
+        """Contesto utile per Gigi (ultima analisi, setup, CSV) — senza rieseguire l'analisi."""
+        parts = []
+        last = st.session_state.get("last_response")
+        if last:
+            parts.append("Ultima analisi generata:\n" + last[:1500])
+        car = st.session_state.get("sel_car")
+        track = st.session_state.get("sel_track")
+        cond = st.session_state.get("sel_conditions")
+        if car or track:
+            parts.append(f"Sessione corrente: auto={car}, pista={track}, condizioni={cond}")
+        csv_res = st.session_state.get("csv_parsed_result")
+        if csv_res:
+            parts.append(
+                f"Dati CSV: giri={csv_res.get('laps_count')}, "
+                f"pressioni={csv_res.get('pressures')}, temperature={csv_res.get('temperatures')}"
+            )
+        return "\n\n".join(parts)
+
+    # Storico chat — reso STATICAMENTE (nessuna ri-animazione ai rerun)
+    for _m in st.session_state["gigi_chat"]:
+        if _m["role"] == "user":
+            st.markdown(
+                f'<div class="gchat-row user"><div class="gbubble user">{_html.escape(_m["content"])}</div></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                f'<div class="gchat-row">{_gigi_avatar("idle")}'
+                f'<div class="gbubble gigi">{_html.escape(_m["content"])}</div></div>',
+                unsafe_allow_html=True,
+            )
+
+    # Turno in sospeso: l'ultimo messaggio è dell'utente → genera la risposta (streaming, animata UNA volta)
+    if st.session_state["gigi_chat"] and st.session_state["gigi_chat"][-1]["role"] == "user":
+        # st.secrets solleva se manca secrets.toml (locale): fallback robusto su .env
+        try:
+            _api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+        except Exception:
+            _api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not _api_key:
+            st.error("❌ ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
+        else:
+            from agent import chat_with_gigi
+
+            # Stato "pensa"
+            _think = st.empty()
+            _think.markdown(
+                f'<div class="gchat-row">{_gigi_avatar("think")}'
+                f'<div class="gbubble gigi"><em style="color:#777;">Gigi sta pensando…</em></div></div>',
+                unsafe_allow_html=True,
+            )
+
+            _context = _build_gigi_context()
+            _history = st.session_state["gigi_chat"][-12:]  # cap contesto: ultimi 12 messaggi
+
+            _think.empty()
+            # Stato "parla" + streaming
+            st.markdown(
+                f'<div class="gchat-row">{_gigi_avatar("talk")}'
+                f'<div class="gbubble gigi" style="padding-bottom:2px;"><strong style="color:#E8002D;">Gigi</strong></div></div>',
+                unsafe_allow_html=True,
+            )
+            _full = st.write_stream(chat_with_gigi(_history, _api_key, _context))
+            st.session_state["gigi_chat"].append({"role": "assistant", "content": _full})
+            st.rerun()
+
+    # Input chat (nativo, invio con Enter) — non interferisce con "ANALIZZA SESSIONE"
+    _user_msg = st.chat_input("Chiedi a Gigi…")
+    if _user_msg:
+        st.session_state["gigi_chat"].append({"role": "user", "content": _user_msg})
+        st.rerun()
+
+    # ─────────────────────────────────────────────
+    # TAB: Strategia Carburante
+    # ─────────────────────────────────────────────
+with tab_carburante:
+    st.markdown('<div class="section-title">Strategia Carburante</div>', unsafe_allow_html=True)
+
+    import math
+    import re
+
+    def parse_mm_ss(time_str: str) -> float | None:
+        """
+        Converte formato mm:ss in minuti decimali.
+        Es: "1:52" -> 1.8667 minuti
+        Ritorna None se il formato non è valido.
+        """
+        if not time_str or not isinstance(time_str, str):
+            return None
+        
+        # Rimuovi spazi e prova a parsare
+        time_str = time_str.strip()
+        match = re.match(r'^(\d{1,2}):(\d{2})$', time_str)
+        if not match:
+            return None
+        
+        try:
+            minutes = int(match.group(1))
+            seconds = int(match.group(2))
+            
+            if seconds >= 60:
+                return None
+            
+            return minutes + seconds / 60.0
+        except (ValueError, IndexError):
+            return None
+
+    def parse_lap_time(lap_time_str: str) -> float | None:
+        """
+        Converte una stringa 'mm:ss' o 'm:ss' in minuti decimali.
+        Restituisce None se il formato non è valido.
+        """
+        match = re.match(r'^(\d{1,2}):([0-5]\d)$', lap_time_str.strip())
+        if not match:
+            return None
+        minutes = int(match.group(1))
+        seconds = int(match.group(2))
+        return minutes + seconds / 60.0
+
+    # Input fields in columns
+    col_sc1, col_sc2, col_sc3 = st.columns(3)
+    
+    with col_sc1:
+        st.markdown("**Durata Gara (min)**")
+        if "fuel_durata" not in st.session_state:
+            st.session_state["fuel_durata"] = 60
+        
+        st.markdown(
+            f'<div class="slider-value-display">{st.session_state["fuel_durata"]}</div>',
+            unsafe_allow_html=True,
+        )
+        
+        cm1, cp1 = st.columns(2)
+        with cm1:
+            if st.button("−", key="fd_minus", use_container_width=True):
+                st.session_state["fuel_durata"] = max(1, st.session_state["fuel_durata"] - 5)
+                st.rerun()
+        with cp1:
+            if st.button("+", key="fd_plus", use_container_width=True):
+                st.session_state["fuel_durata"] = min(300, st.session_state["fuel_durata"] + 5)
+                st.rerun()
+
+    with col_sc2:
+        st.markdown("**Tempo Giro Medio**")
+        st.markdown('<div style="font-size:0.75rem;color:#999;">Formato: mm:ss</div>', unsafe_allow_html=True)
+        lap_time_str = st.text_input(
+            "Tempo giro",
+            value="1:52",
+            key="fuel_laptime",
+            label_visibility="collapsed",
+            placeholder="Es. 1:52"
+        )
+        
+        # Validazione formato
+        parsed_time = parse_mm_ss(lap_time_str)
+        if lap_time_str and not parsed_time:
+            st.error("❌ Formato non valido. Usa mm:ss (es. 1:52)")
+
+    with col_sc3:
+        st.markdown("**Consumo/Giro (L)**")
+        if "fuel_cons" not in st.session_state:
+            st.session_state["fuel_cons"] = 3.20
+        
+        st.markdown(
+            f'<div class="slider-value-display">{st.session_state["fuel_cons"]:.2f}</div>',
+            unsafe_allow_html=True,
+        )
+        
+        cm3, cp3 = st.columns(2)
+        with cm3:
+            if st.button("−", key="fc_minus", use_container_width=True):
+                st.session_state["fuel_cons"] = max(0.1, round(st.session_state["fuel_cons"] - 0.1, 2))
+                st.rerun()
+        with cp3:
+            if st.button("+", key="fc_plus", use_container_width=True):
+                st.session_state["fuel_cons"] = min(10.0, round(st.session_state["fuel_cons"] + 0.1, 2))
+                st.rerun()
+
+    st.markdown("")
+    
+    # Bottone calcolo
+    btn_col = st.columns([0.3])[0]
+    with btn_col:
+        calc_btn = st.button("⛽ CALCOLA", type="primary", use_container_width=True)
+
+    if calc_btn:
+        # Validazione
+        if not lap_time_str or not parse_mm_ss(lap_time_str):
+            st.error("⚠️ Formato tempo giro non valido. Usa mm:ss (es. 1:52).")
+        else:
+            try:
+                lap_min = parse_mm_ss(lap_time_str)
+                durata = st.session_state["fuel_durata"]
+                cons = st.session_state["fuel_cons"]
+                
+                if lap_min <= 0:
+                    st.error("⚠️ Tempo giro deve essere positivo.")
+                else:
+                    n_giri = math.ceil(durata / lap_min)
+                    carb_necessario = n_giri * cons
+                    carico_consigliato = carb_necessario * 1.05
+                    
+                    st.markdown("")
+                    result_html = f"""
+                    <div style="background:#111111;border:1px solid #E8002D;border-radius:8px;
+                                padding:24px;margin-top:16px;text-align:center;">
+                        <div style="font-family:JetBrains Mono,monospace;font-size:10px;
+                                    letter-spacing:2px;color:#666;text-transform:uppercase;
+                                    margin-bottom:12px;">⛽ CARICO CARBURANTE CONSIGLIATO</div>
+                        <div style="font-family:JetBrains Mono,monospace;font-size:42px;
+                                    font-weight:700;color:#FFFFFF;margin-bottom:12px;">
+                            {carico_consigliato:.1f} <span style="font-size:20px;color:#999;">L</span>
+                        </div>
+                        <div style="font-family:Inter,sans-serif;font-size:13px;color:#666;
+                                    border-top:1px solid #1e1e1e;padding-top:12px;">
+                            Giri stimati: <span style="color:#999;">{n_giri}</span>
+                            &nbsp;|&nbsp;
+                            Consumo base: <span style="color:#999;">{carb_necessario:.1f} L</span>
+                            &nbsp;|&nbsp;
+                            Margine 5%: <span style="color:#999;">+{carico_consigliato - carb_necessario:.1f} L</span>
+                        </div>
+                    </div>
+                    """
+                    st.markdown(result_html, unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"❌ Errore nel calcolo: {str(e)}")
+
+    # ─────────────────────────────────────────────
+    # TAB: Storico Sessioni
+    # ─────────────────────────────────────────────
+with tab_storico:
+    st.markdown('<div class="section-title">Storico Sessioni</div>', unsafe_allow_html=True)
+
+    # Pulsante aggiorna
+    col_refresh = st.columns([1])[0]
+    with col_refresh:
+        if st.button("🔄 AGGIORNA", type="secondary", key="btn_aggiorna_storico"):
+            st.rerun()
+
+    st.markdown("")
+
+    # Filtri
+    col_fa, col_ft = st.columns(2)
+    
+    unique_cars = db.get_unique_cars()
+    unique_tracks = db.get_unique_tracks()
+    
+    with col_fa:
+        filtro_auto = st.selectbox(
+            "Filtra per Auto",
+            options=["Tutte"] + unique_cars,
+            key="filtro_auto"
+        )
+    
+    with col_ft:
+        filtro_track = st.selectbox(
+            "Filtra per Tracciato",
+            options=["Tutti"] + unique_tracks,
+            key="filtro_track"
+        )
+
+    # Recupera sessioni filtrate
+    sessions = db.get_sessions_filtered(
+        car=filtro_auto if filtro_auto != "Tutte" else None,
+        track=filtro_track if filtro_track != "Tutti" else None,
+        limit=100
+    )
+
+    if not sessions:
+        st.info("📭 Nessuna sessione registrata con i filtri selezionati.")
+    else:
+        st.markdown(f"**Sessioni trovate:** {len(sessions)}")
+        st.markdown("---")
+        
+        for idx, session in enumerate(sessions):
+            with st.expander(
+                f"🏎 {session['car']} @ {session['track']} — {session['timestamp']}"
+                + (" 📊 CSV" if session.get('csv_present') else "")
+                + (" 📸 SCR" if session.get('screenshot_presente') else ""),
+                expanded=(idx == 0)
+            ):
+                # Dettagli sessione
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.caption("🌡 Ambiente")
+                    st.markdown(f"**{session['temp_ambient']:.0f}°C**")
+                with col2:
+                    st.caption("🛣 Pista")
+                    st.markdown(f"**{session['temp_track']:.0f}°C**")
+                with col3:
+                    st.caption("☁ Condizioni")
+                    st.markdown(f"**{session['conditions']}**")
+                with col4:
+                    st.caption("♟ PSI Input")
+                    st.markdown(f"**{session['psi_input']:.2f} psi**" if session['psi_input'] else "**N/D**")
+                
+                st.markdown("---")
+                
+                # Feedback pilota
+                st.caption("📋 Feedback Pilota")
+                st.markdown(f"> {session['feedback_text']}")
+                
+                st.markdown("---")
+                
+                # Risposta AI
+                st.caption("🤖 Analisi Race Engineer")
+                st.markdown(session['llm_response'], unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────
+# ELABORAZIONE — bottone Analizza
+# ─────────────────────────────────────────────
+
+if btn_analizza:
+    if not feedback.strip():
+        st.warning("⚠️ Descrivi il problema riscontrato in pista prima di procedere.")
+        st.stop()
+
+    # Recupera API key — compatibile con locale (.env) e Streamlit Cloud (Secrets)
+    # st.secrets solleva se manca secrets.toml (locale): fallback robusto su .env
+    try:
+        api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+    except Exception:
+        api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        st.error("❌ ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
+        st.stop()
+
+    # Parsing CSV (usa risultato pre-parsed dalla preview)
+    csv_context = ""
+    if csv_file is not None and "csv_parsed_result" in st.session_state:
+        csv_result = st.session_state["csv_parsed_result"]
+        csv_context = f"""
+### Dati Sessione CSV
+- **Giri**: {csv_result.get('laps_count', 0)}
+- **Consumo medio**: {csv_result.get('fuel_cons_avg', 0):.2f} L/giro
+- **Pressioni gomme**: {csv_result.get('pressures', {})}
+- **Temperature gomme**: {csv_result.get('temperatures', {})}
+"""
+
+    # Formattazione setup
+    setup_context = format_setup_for_prompt(current_setup)
+
+    # Costruzione contesto completo (include session state)
+    full_context = (
+        f"Auto: {selected_car}\n"
+        f"Tracciato: {st.session_state.get('sel_track', 'N/D')}\n"
+        f"Condizioni: {st.session_state.get('sel_conditions', 'Asciutto')}\n"
+        f"Temp. Ambiente: {st.session_state.get('temp_amb', 20)}°C\n"
+        f"Temp. Pista: {st.session_state.get('temp_pista', 30)}°C\n\n"
+        f"{setup_context}"
+    )
+    if csv_context:
+        full_context += f"\n\n{csv_context}"
+
+    # ── INC-002: contesto pressioni freddo/caldo iniettato nel prompt ──
+    _pctx = st.session_state.get("pressure_context", "cold")
+    if _pctx == "hot":
+        full_context += (
+            "\n\nCONTESTO PRESSIONI: A CALDO (lette dal MFD in pista).\n"
+            "Finestra operativa GT3 a caldo: target 29.0 PSI, range sicuro 28.5–30.0 PSI.\n"
+            "Classifica le pressioni con questa finestra: NON usare il target a freddo (26.7 PSI)."
+        )
+    else:
+        full_context += (
+            "\n\nCONTESTO PRESSIONI: A FREDDO (impostate in garage).\n"
+            "Finestra a freddo GT3: target 26.7 PSI, range sicuro 26.0–27.0 PSI.\n"
+            "A freddo le pressioni saliranno di ~2.5–3.5 PSI a caldo: tienine conto nei consigli."
+        )
+
+    full_context += f"\n\nFeedback pilota: {feedback.strip()}"
+
+    # Chiamata LLM
+    with st.spinner("🔄 Race Engineer in analisi..."):
+        response = get_ai_response(
+            user_input=full_context,
+            api_key=api_key,
+            auto=selected_car,
+            tracciato=selected_track,
+        )
+
+    st.session_state["last_response"] = response
+
+    # Salva sessione nel DB usando SessionDatabase
+    try:
+        _press_vals = [
+            current_setup.get("tire_press_fl", 0),
+            current_setup.get("tire_press_fr", 0),
+            current_setup.get("tire_press_rl", 0),
+            current_setup.get("tire_press_rr", 0),
+        ]
+        _psi_in = round(sum(_press_vals) / len(_press_vals), 2) if _press_vals else None
+        
+        session_data = {
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+            "car": selected_car,
+            "track": selected_track,
+            "conditions": st.session_state.get("sel_conditions", "Asciutto"),
+            "temp_ambient": st.session_state.get("temp_amb", 20),
+            "temp_track": st.session_state.get("temp_pista", 30),
+            "psi_input": _psi_in,
+            "psi_suggested": None,
+            "feedback_text": feedback.strip()[:500],
+            "llm_response": response,
+            "csv_present": csv_file is not None,
+            "screenshot_presente": screenshot_file is not None,
+        }
+        db.save_session(session_data)
+    except Exception as e:
+        st.warning(f"⚠️ Sessione non salvata nel database: {str(e)}")
+        log_incident(f"Errore salvataggio sessione DB: {e}")
+
+    # Reset caricamento vision params
+    if st.session_state.get("load_vision_params"):
+        st.session_state["load_vision_params"] = False
+
+    st.rerun()
+
