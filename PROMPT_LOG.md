@@ -325,3 +325,31 @@ Vedi `SPEC_ERRATA.md` ERR-01/02/03.
 heatmap costruiti senza errori; valori coincidono (TEMP_MAX 88/90/95/105).
 
 **Decisione:** mantenuto. Commit "fase 2: telemetria".
+
+## Fase 3 — Engineer Console (Gigi)
+
+**Data:** 30/06/2026 · branch `restyle-ui`
+
+**Modifiche:** `ui/console.py` + `ui/flags.py`.
+- **Header Gigi** (avatar SVG casco/ingegnere) via `components.html`: "Gigi ·
+  Race Engineer · online" con pallino di stato verde.
+- **Parsing 4 sezioni → 4 card** numerate (header rosso + icona). Regex tollerante
+  sugli header reali (`## Diagnosi`, `## Causa Meccanica Probabile`, `## Correzione
+  Setup Consigliata`, `## Note Aggiuntive`); **degrada con grazia** se una sezione
+  manca (card vuota, nessun errore). La Correzione è resa nel box **"SCHEDA SETUP"**
+  evidenziato (bordo/badge accento).
+- **Quick-chips** (Sottosterzo · Calcola carburante · Analizza gomme ·
+  Bilanciamento freni) come `st.button` in colonne + **chat input nativo** (send
+  rosso dal theme).
+- **DEMO-MODE** (`ui/flags.py`, default ON): risposta **cache pre-validata** per
+  lo scenario "L'auto scivola dietro in accelerazione", usata sempre in demo-mode
+  e come fallback automatico se l'API fallisce. La console è SEMPRE popolata
+  (mai vuota). `agent.py` NON toccato: la cache vive nella UI.
+
+**Coerenza:** la risposta cache cita i numeri della telemetria (pressioni post.
+26.0/26.2 sotto finestra 27.0–27.8, Post.DX 105°C oltre limite 95°C).
+
+**Verifica:** import OK; parsing completo 4/4 e parsing parziale (2 sezioni
+mancanti → vuote senza crash) verificati; demo prompt riconosciuto.
+
+**Decisione:** mantenuto. Commit "fase 3: engineer console".
