@@ -396,6 +396,17 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button[data-testid=
 }
 /* Sidebar divider — duplicate kept for safety */
 
+/* ── SIDEBAR — nasconde la navigazione AUTOMATICA di Streamlit ──
+   Con una cartella pages/ Streamlit inietta da solo l'elenco pagine in cima
+   alla sidebar. Qui usiamo una nav custom (ui/sidebar.py), quindi va nascosta
+   su TUTTA l'app (login.py la nasconde solo sulla sua pagina). */
+section[data-testid="stSidebar"] [data-testid="stSidebarNav"],
+section[data-testid="stSidebar"] [data-testid="stSidebarNavItems"],
+section[data-testid="stSidebar"] [data-testid="stSidebarNavSeparator"],
+div[data-testid="stSidebarNav"] {
+    display: none !important;
+}
+
 /* ── SIDEBAR — background e bordo ── */
 section[data-testid="stSidebar"] {
     background-color: #0f0f0f !important;
