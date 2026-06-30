@@ -287,17 +287,41 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stButton"] > button[kind="primary"]:hover {
     background: var(--red-dim) !important;
 }
-/* Sidebar primary button (logout) */
+/* ── SIDEBAR — bottoni di navigazione / logout ──
+   Label SEMPRE visibile (testo bianco, allineata a sinistra con icona).
+   L'accento rosso è SOLO uno stato (attivo=primary / hover), mai un fill
+   che copre tutto e nasconde il testo. */
 section[data-testid="stSidebar"] div[data-testid="stButton"] button {
-    background: var(--accent) !important;
-    color: var(--text-primary) !important;
-    border: none !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
     font-family: var(--font-mono) !important;
     font-weight: 700 !important;
-    letter-spacing: 0.12em !important;
+    letter-spacing: 0.08em !important;
 }
-section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
-    background: var(--accent-hover) !important;
+/* la label vive in un <p> dentro stMarkdownContainer: forzala bianca e visibile
+   (specificità > regola grigia generica della sidebar) */
+section[data-testid="stSidebar"] div[data-testid="stButton"] button p {
+    color: #FFFFFF !important;
+    display: block !important;
+    margin: 0 !important;
+}
+/* inattivo (secondary): superficie scura, bordo tenue */
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="secondary"] {
+    background: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="secondary"]:hover {
+    background: #1a1010 !important;
+    border-color: #E8002D !important;
+}
+/* attivo (primary): fill accento, testo bianco sopra */
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"] {
+    background: #E8002D !important;
+    border: 1px solid #E8002D !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"]:hover {
+    background: #CC0028 !important;
+    border-color: #CC0028 !important;
 }
 [data-testid="stButton"] > button[kind="secondary"] {
     background: var(--surface2) !important;
@@ -461,8 +485,11 @@ section[data-testid="stSidebar"] .stNumberInput button:hover {
     color: #E8002D !important;
 }
 
-/* ── SIDEBAR — file uploader: nasconde il <p>Upload</p> duplicato ── */
-section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+/* ── SIDEBAR — file uploader: nasconde il <p>Upload</p> duplicato ──
+   IMPORTANTE: limitato al solo file uploader. Senza lo scope, questa regola
+   colpiva anche il <p> delle label dei bottoni (nav/logout), lasciando
+   rettangoli rossi senza testo. */
+section[data-testid="stSidebar"] [data-testid="stFileUploader"] [data-testid="stMarkdownContainer"] p {
     display: none !important;
 }
 
