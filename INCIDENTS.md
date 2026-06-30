@@ -148,7 +148,44 @@ contesto.
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP*
+## INC-003 — Gigi "non risponde" sul deploy online (input bloccato)
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-003 |
+| Data rilevamento | 30/06/2026 |
+| Severità | Alta (demo d'esame) |
+| Stato | RISOLTO (azione: ri-deploy) |
+| File coinvolti | nessuno (disallineamento deploy ↔ `main`) |
+
+### Descrizione
+Sul deploy `pitwall-ai-dado.streamlit.app` la Engineer Console non restituiva
+risposta e l'input risultava bloccato. Il prompt di lavoro v2 ipotizzava un
+`disabled=True` o un flag "display-only" nel codice.
+
+### Causa
+**Falso allarme di codice.** Tracciando il percorso reale nel branch `main`
+(`app.py` → `ui/router.py` → `ui/console.py`): l'input è `st.chat_input` (mai
+disabilitato), demo-mode è ON di default e serve sempre la risposta-cache a 4
+sezioni, con fallback su errore API. Il sintomo proveniva dal **deploy fermo a un
+commit precedente al merge del restyle**: il sito live eseguiva codice vecchio.
+
+### Impatto
+- Rischio di mostrare in sede d'esame una console muta, pur avendo il fix in `main`.
+
+### Fix Applicato
+Nessuna modifica di codice. **Ri-deploy / reboot** dell'app su Streamlit Cloud per
+allinearla a `origin/main`. Verifica post-deploy: input attivo, 4 sezioni rese in
+demo-mode senza API.
+
+### Lezione Appresa
+Prima di diagnosticare un bug "nel codice", verificare che l'ambiente che mostra il
+sintomo (deploy) sia allineato al commit che si sta leggendo. Un deploy stale
+riproduce bug già risolti.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 30/06/2026 (INC-003)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |

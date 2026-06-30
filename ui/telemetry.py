@@ -2,7 +2,7 @@
 
 Tre visualizzazioni, tutte alimentate da ui/demo_data.py (sorgente unica):
   1. Line chart Plotly  — temperatura 4 gomme su 8 giri + limite finestra 95°C;
-  2. 4 gauge Plotly     — pressioni a CALDO, finestra 27.0–27.8 psi;
+  2. 4 gauge Plotly     — pressioni a CALDO, finestra 28.5–30.0 psi;
   3. Heatmap SVG        — schema auto vista dall'alto (components.html, inline).
 
 COERENZA pressioni (vedi SPEC_ERRATA.md): i gauge mostrano le pressioni a CALDO
@@ -69,7 +69,7 @@ def _temp_line_fig() -> go.Figure:
 
 
 # ─────────────────────────────────────────────
-# 2) GAUGE PRESSIONI (a caldo) — finestra 27.0–27.8 psi
+# 2) GAUGE PRESSIONI (a caldo) — finestra 28.5–30.0 psi
 # ─────────────────────────────────────────────
 def _pressure_gauge_fig(value: float, in_window: bool) -> go.Figure:
     color = c.STATUS_OK if in_window else c.STATUS_ERROR
@@ -80,7 +80,7 @@ def _pressure_gauge_fig(value: float, in_window: bool) -> go.Figure:
         number={"font": {"family": "JetBrains Mono, monospace", "size": 24, "color": color},
                 "suffix": " psi", "valueformat": ".1f"},
         gauge={
-            "axis": {"range": [25.5, 28.5], "tickwidth": 1, "tickcolor": c.BORDER_STRONG,
+            "axis": {"range": [27.0, 30.5], "tickwidth": 1, "tickcolor": c.BORDER_STRONG,
                      "tickfont": {"size": 8, "color": c.TEXT_MUTED}, "dtick": 0.5},
             "bar": {"color": color, "thickness": 0.30},
             "bgcolor": "rgba(0,0,0,0)",
@@ -185,7 +185,7 @@ def render() -> None:
         'letter-spacing:0.14em;text-transform:uppercase;color:#999;margin:6px 0 2px 0;">'
         'Pressioni gomme · a caldo (display)</div>'
         '<div style="font-family:\'Inter\',sans-serif;font-size:0.72rem;color:#666;'
-        'margin-bottom:10px;">Finestra ottimale 27.0–27.8 psi · valori a freddo (garage) '
+        'margin-bottom:10px;">Finestra ottimale 28.5–30.0 psi · valori a freddo (garage) '
         'distinti, vedi CSV</div>',
         unsafe_allow_html=True,
     )

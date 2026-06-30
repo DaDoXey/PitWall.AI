@@ -40,3 +40,16 @@ def inputs_enabled() -> bool:
 
 def set_inputs_enabled(value: bool) -> None:
     st.session_state["inputs_enabled"] = bool(value)
+
+
+# ─────────────────────────────────────────────
+# SCREENSHOT SETUP (vision, Fase 2.3): lettura automatica del setup da immagine.
+# Non pronta per la demo → stub "Prossimamente". Funzione reale dietro flag,
+# OFF di default; attivabile via env FEATURE_SCREENSHOT.
+# ─────────────────────────────────────────────
+_FEATURE_SCREENSHOT_DEFAULT = os.getenv("FEATURE_SCREENSHOT", "0").strip().lower() in ("1", "true", "yes", "on")
+
+
+def feature_screenshot() -> bool:
+    """True se la lettura setup da screenshot è abilitata (default False = stub)."""
+    return bool(st.session_state.get("feature_screenshot", _FEATURE_SCREENSHOT_DEFAULT))

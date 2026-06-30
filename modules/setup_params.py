@@ -21,7 +21,7 @@ SETUP_SECTIONS = {
     # TAB 1 — TYRES
     # ══════════════════════════════════════════
     "tyres": {
-        "label": "🏎 Tyres",
+        "label": "Gomme",
         "params": {
             # Pressioni (freddo, psi)
             "tire_press_fl": {
@@ -112,7 +112,7 @@ SETUP_SECTIONS = {
     # TAB 2 — ELECTRONICS
     # ══════════════════════════════════════════
     "electronics": {
-        "label": "⚡ Electronics",
+        "label": "Elettronica",
         "params": {
             "tc1": {
                 "label": "TC1 (Traction Control)",
@@ -151,7 +151,7 @@ SETUP_SECTIONS = {
     # TAB 3 — MECHANICAL GRIP
     # ══════════════════════════════════════════
     "mechanical_grip": {
-        "label": "🔧 Mechanical Grip",
+        "label": "Meccanica",
         "params": {
             "arb_front": {
                 "label": "ARB Anteriore",
@@ -203,7 +203,7 @@ SETUP_SECTIONS = {
             },
             "preload": {
                 "label": "Precarico Differenziale",
-                "min": 20, "max": 200, "step": 5,
+                "min": 20, "max": 300, "step": 10,
                 "unit": "Nm", "default": 60,
                 "tip": "Resistenza minima del differenziale. Valori alti = più stabilità in accelerazione, meno rotazione."
             },
@@ -214,7 +214,7 @@ SETUP_SECTIONS = {
     # TAB 4 — DAMPERS
     # ══════════════════════════════════════════
     "dampers": {
-        "label": "📐 Dampers",
+        "label": "Ammortizzatori",
         "params": {
             # ANTERIORE SINISTRO
             "bump_fl": {
@@ -323,7 +323,7 @@ SETUP_SECTIONS = {
     # TAB 5 — AERO
     # ══════════════════════════════════════════
     "aero": {
-        "label": "💨 Aero",
+        "label": "Aerodinamica",
         "params": {
             "ride_height_front": {
                 "label": "Ride Height Ant.",

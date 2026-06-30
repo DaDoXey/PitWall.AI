@@ -31,7 +31,7 @@ from ui import demo_data as dd
 DEMO_PROMPT = "L'auto scivola dietro in accelerazione"
 
 DEMO_RESPONSE = """## Diagnosi
-L'auto perde il posteriore in uscita di curva, quando apri il gas. La telemetria conferma il quadro: le **pressioni posteriori sono sotto la finestra** (26.2 / 26.0 psi a caldo, finestra 27.0–27.8) e la **Post.DX tocca i 105°C**, oltre il limite di 95°C. Una posteriore sgonfia flette troppo: impronta instabile e poco grip proprio in trazione.
+L'auto perde il posteriore in uscita di curva, quando apri il gas. La telemetria conferma il quadro: le **pressioni posteriori sono sotto la finestra** (28.2 / 28.0 psi a caldo, finestra 28.5–30.0) e la **Post.DX tocca i 105°C**, oltre il limite di 95°C. Una posteriore sgonfia flette troppo: impronta instabile e poco grip proprio in trazione.
 
 ## Causa Meccanica Probabile
 Causa primaria: **pressioni posteriori troppo basse** → la gomma lavora fuori finestra, scalda in modo anomalo (Post.DX) e perde aderenza quando carichi la trazione.
@@ -43,7 +43,7 @@ In subordine, alza il **precarico differenziale · 60 → 75 Nm** per stabilizza
 Una modifica per volta: parti dalle pressioni.
 
 ## Note Aggiuntive
-- Verifica dopo 2–3 giri che le posteriori entrino in finestra a caldo (27.0–27.8 psi).
+- Verifica dopo 2–3 giri che le posteriori entrino in finestra a caldo (28.5–30.0 psi).
 - Controlla che la Post.DX scenda sotto i 100°C.
 - Le pressioni nel setup ACC sono a freddo: a caldo salgono di ~2.5–3.5 psi.
 """

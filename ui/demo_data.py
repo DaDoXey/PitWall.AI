@@ -59,16 +59,23 @@ TYRE_TEMP_MAX = {pos: max(vals) for pos, vals in TYRE_TEMP_SERIES.items()}
 # ─────────────────────────────────────────────
 # PRESSIONI (psi)
 # ─────────────────────────────────────────────
-# A CALDO — display telemetria. Finestra ottimale 27.0–27.8 psi.
-HOT_PRESSURES = {"fl": 27.4, "fr": 27.5, "rl": 26.2, "rr": 26.0}
-HOT_PRESS_WINDOW = (27.0, 27.8)   # psi
+# A CALDO — display telemetria. Finestra ACC reale 28.5–30.0 psi (target 29.0,
+# vedi prompts/system_prompt_v4.txt e INC-002). I valori a caldo sono SEMPRE
+# superiori a quelli a freddo (+2.5–3.5 psi tipico): anteriori in finestra,
+# posteriori sotto finestra → caso didattico "retrotreno scarico / sovrasterzo".
+HOT_PRESSURES = {"fl": 29.0, "fr": 29.2, "rl": 28.2, "rr": 28.0}
+HOT_PRESS_WINDOW = (28.5, 30.0)   # psi (finestra operativa GT3 a caldo)
 
 # A FREDDO — riferimento CSV/garage (NON usato nei gauge "a caldo").
 COLD_PRESSURES = {"fl": 26.5, "fr": 26.5, "rl": 26.2, "rr": 26.0}
 
 # Pressione media (a caldo) per la card Dashboard.
 # Coerente con i 4 gauge: media aritmetica dei 4 valori HOT.
-PRESS_AVG_HOT = round(sum(HOT_PRESSURES.values()) / 4, 1)   # → 26.8
+PRESS_AVG_HOT = round(sum(HOT_PRESSURES.values()) / 4, 1)   # → 28.6
+
+# Parametri evidenziati da Gigi nella correzione demo (rosso negli slider Setup).
+# Coerenti con la DEMO_RESPONSE della console: pressioni posteriori + precarico.
+SUGGESTED_PARAMS = {"tire_press_rl", "tire_press_rr", "preload"}
 
 # ─────────────────────────────────────────────
 # CARBURANTE — consumo per giro (L), "stabile" attorno a 3.2

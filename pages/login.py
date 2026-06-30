@@ -91,6 +91,7 @@ st.markdown("""
 <div class="pw-ruler"></div>
 <div class="pw-hero" style="padding-top:0;">
     <div class="pw-hero-sub">Virtual Race Engineer · ACC GT3</div>
+    <div class="pw-hero-tagline" style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#999999;font-style:italic;margin-top:6px;">Il tuo ingegnere di pista, sempre al muretto</div>
     <div class="pw-badge-status"><span class="pulse">●</span>MVP V2.0</div>
 </div>
 """, unsafe_allow_html=True)

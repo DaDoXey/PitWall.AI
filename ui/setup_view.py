@@ -52,16 +52,25 @@ def _slider(params: dict, key: str, target=None):
         st.session_state[skey] = current
 
     unit = f" {p['unit']}" if p["unit"] else ""
-    disp = f"{current:.2f}" if is_float else str(int(current))
+    if is_float:
+        # 1 decimale per pressioni/camber/caster/brake-bias (step ≥ 0.1);
+        # 2 decimali solo dove serve davvero (toe, step 0.01).
+        decimals = 1 if p_step >= 0.1 else 2
+        disp = f"{current:.{decimals}f}"
+    else:
+        disp = str(int(current))
 
-    # Riga nome (mono, muted) + valore (accent) — stili inline, nessun selettore interno.
+    # Valore bianco di default; rosso SOLO sui parametri suggeriti da Gigi (FASE 6.2).
+    val_color = "#E8002D" if key in dd.SUGGESTED_PARAMS else "#FFFFFF"
+
+    # Riga nome (mono, muted) + valore — stili inline, nessun selettore interno.
     target.markdown(
         '<div style="display:flex;justify-content:space-between;align-items:baseline;'
         'margin:0.7rem 0 0.15rem 0;">'
         f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.66rem;'
         f'letter-spacing:0.08em;color:#999;text-transform:uppercase;">{p["label"]}</span>'
         f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.82rem;'
-        f'font-weight:600;color:#E8002D;">{disp}{unit}</span>'
+        f'font-weight:600;color:{val_color};">{disp}{unit}</span>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -229,8 +238,8 @@ def _apply_vision_to_sliders(vision_params: dict) -> int:
 
 
 def _csv_upload() -> None:
-    st.markdown('<div class="pw-field-label">CSV sessione</div>', unsafe_allow_html=True)
-    f = st.file_uploader("CSV sessione", type=["csv"], key="setup_csv",
+    st.markdown('<div class="pw-field-label">Carica CSV sessione</div>', unsafe_allow_html=True)
+    f = st.file_uploader("Carica CSV sessione", type=["csv"], key="setup_csv",
                          label_visibility="collapsed")
     if not f:
         return
@@ -255,6 +264,15 @@ def _csv_upload() -> None:
 
 def _screenshot_upload() -> None:
     st.markdown('<div class="pw-field-label">Screenshot setup ACC</div>', unsafe_allow_html=True)
+
+    # FASE 2.3 — stub "Prossimamente": la lettura da screenshot resta dietro
+    # feature-flag (OFF di default), non cancellata. In demo si mostra disattivata.
+    if not flags.feature_screenshot():
+        st.file_uploader("Screenshot setup (non attivo)", type=["jpg", "jpeg", "png", "webp"],
+                         key="setup_shot_stub", label_visibility="collapsed", disabled=True)
+        st.caption("🔒 Prossimamente — lettura automatica del setup da screenshot ACC.")
+        return
+
     img = st.file_uploader("Screenshot setup", type=["jpg", "jpeg", "png", "webp"],
                            key="setup_shot", label_visibility="collapsed")
     if img is not None and st.button("Leggi parametri dallo screenshot",

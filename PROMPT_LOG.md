@@ -476,3 +476,61 @@ flat; tutte le helper presenti.
 
 **Decisione:** mantenuto. Commit "fase 7: selettori + upload dietro flag". Restyle
 fasi 1–7 completo. TODO post-fasi: rivedere stile tasti login (vedi richiesta utente).
+
+---
+
+# PUNCH-LIST v2 — Fix Gigi online + correzioni (branch `main`)
+
+**Data:** 30/06/2026 · branch `main` (restyle già merged, `origin/main == origin/restyle-ui`)
+
+## Prompt ricevuti (catalogo messaggi)
+1. Standby ("aspetta che ti dia delle istruzioni").
+2. Incollato il **Prompt v2** ("Gigi non risponde + Correzioni Restyle", FASE 0–7).
+3. "procedi seguendo le fasi e con tutto quello che è necessario".
+
+## Ricognizione (FASE 0) — discrepanze prompt v2 ↔ repo reale
+- Branch reale `main` (non `restyle-ui`); file reali `backend/parser/csv_parser.py`,
+  `prompts/system_prompt_v4.txt`, font in `assets/fonts/` (non `static/`). `plotly` OK.
+- **FASE 1 (Gigi non risponde): già risolta in `main`.** Input = `st.chat_input`
+  (mai `disabled`), demo-mode ON di default → cache 4 sezioni sempre servita,
+  fallback su errore API. Sintomo presente solo sul **deploy stale** → vedi INC-003.
+
+## Interventi eseguiti (file presentazione/dati, ZERO file protetti)
+- **2.1** Tab Setup in italiano (`modules/setup_params.py`): Gomme / Elettronica /
+  Meccanica / Ammortizzatori / Aerodinamica (solo label visibili; chiavi invariate).
+- **2.2** Precarico differenziale → **20–300 Nm step 10** (`setup_params.py`).
+  ⚠️ Divergenza col prompt protetto (20–200) **documentata in SPEC_ERRATA ERR-05**;
+  il file protetto NON è stato toccato. (Il brief diceva "prompt a 20–100": verificato,
+  è 20–200.)
+- **2.3** Screenshot upload → **stub "Prossimamente"** dietro flag `FEATURE_SCREENSHOT`
+  (OFF di default) in `ui/flags.py` + `ui/setup_view._screenshot_upload` (uploader
+  `disabled=True`, funzione reale gated non cancellata).
+- **3.1 / ERR-01/02/04** Pressioni a caldo riallineate alla finestra ACC reale/protetta
+  **28.5–30.0 psi** (`ui/demo_data.py`): HOT `{fl 29.0, fr 29.2, rl 28.2, rr 28.0}`,
+  media **28.6**. Ora a caldo > a freddo (prima 26.2/26.0 a caldo era < a freddo:
+  impossibile). Caso didattico "retrotreno sotto finestra → sovrasterzo" preservato.
+  Risincronizzati: `ui/telemetry.py` (gauge axis [27.0, 30.5], testi), `ui/dashboard.py`
+  (window-bar + nota), `ui/console.DEMO_RESPONSE` (numeri di Gigi).
+- **3.2** Tooltip giro 8 Post.DX = 105 (no 103 vagante): già coerente da `TYRE_TEMP_SERIES`.
+- **4.1** Toggle "Input sessione" OFF di default: già a posto.
+- **4.2** 3 bottoni Dashboard differenziati (`ui/dashboard.py`): Temp → Telemetria ·
+  Pressione → **Regola Setup** · Consumo → **Strategia carburante** (Engineer Console).
+  Consumo non punta più a Telemetria.
+- **5** Login: aggiunta tagline **"Il tuo ingegnere di pista, sempre al muretto"**
+  (`pages/login.py`); SVG auto animata + ruler già presenti.
+- **6.1** Label upload CSV → "Carica CSV sessione" (`ui/setup_view.py`).
+- **6.2** Slider Setup: valore **bianco**, **1 decimale** (2 solo per toe, step 0.01);
+  **rosso solo sui parametri suggeriti da Gigi** (`ui/demo_data.SUGGESTED_PARAMS` =
+  {tire_press_rl, tire_press_rr, preload}).
+- **6.3** Slider Temp: valore sul cursore già nativo (st.slider).
+
+## Verifica
+`py_compile` OK su tutti i file editati; check dati: HOT > COLD per ogni gomma,
+anteriori in finestra / posteriori sotto, media 28.6, tab IT, preload 20–300 step 10,
+nessun override BMW nel DB (il generico vale per la demo). File protetti invariati.
+
+## Azione fuori-codice
+- **Ri-deploy** `pitwall-ai-dado.streamlit.app` per allinearlo a `main` (chiude INC-003).
+
+**Stato:** punch-list v2 completata lato codice. In attesa di "ok push" per commit
+su `main` (regola git: nessun commit/push senza conferma esplicita).

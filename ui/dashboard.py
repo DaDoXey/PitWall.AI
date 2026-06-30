@@ -82,8 +82,8 @@ def _cards_html() -> str:
     )
     press_card = _metric_card(
         "Pressione media", dd.PRESS_AVG_HOT, "psi",
-        "Retrotreno sotto finestra (27.0–27.8)", c.ACCENT,
-        c.window_bar_svg(dd.PRESS_AVG_HOT, 25.5, 28.5,
+        "Retrotreno sotto finestra (28.5–30.0)", c.ACCENT,
+        c.window_bar_svg(dd.PRESS_AVG_HOT, 27.0, 30.5,
                          dd.HOT_PRESS_WINDOW[0], dd.HOT_PRESS_WINDOW[1], c.ACCENT),
     )
     fuel_card = _metric_card(
@@ -145,14 +145,15 @@ def render() -> None:
     )
     components.html(_cards_html(), height=210, scrolling=False)
 
-    # Bottoni "Apri" allineati sotto le 3 card → navigano alla Telemetria.
+    # Bottoni "Apri" sotto le 3 card → ognuno alla destinazione coerente con la card.
+    # Temp → Telemetria · Pressione → Setup (regolazione) · Consumo → Gigi (strategia).
     b1, b2, b3 = st.columns(3)
     if b1.button("Apri Telemetria", key="open_temp", use_container_width=True):
         nav.go_to("Telemetria")
-    if b2.button("Apri Telemetria", key="open_press", use_container_width=True):
-        nav.go_to("Telemetria")
-    if b3.button("Apri Telemetria", key="open_fuel", use_container_width=True):
-        nav.go_to("Telemetria")
+    if b2.button("Regola Setup", key="open_press", use_container_width=True):
+        nav.go_to("Setup")
+    if b3.button("Strategia carburante", key="open_fuel", use_container_width=True):
+        nav.go_to("Engineer Console")
 
     st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
     components.html(_gigi_card_html(), height=120, scrolling=False)
