@@ -383,3 +383,36 @@ numeri attesi; `py_compile` OK; bottoni "Apri" mappati su `nav.go_to`.
 
 **Decisione:** mantenuto. Commit "fase 4: dashboard". STOP CRITICO — core
 Login → Dashboard → Telemetria → Gigi DEMO-READY.
+
+## Fase 5 — Setup (5 tab ACC funzionali)
+
+**Data:** 30/06/2026 · branch `restyle-ui` + `main`
+
+**Scelta committente:** Setup **funzionale** (non solo demo) — ricollego la logica
+reale; ritmo **una fase alla volta con verifica online**.
+
+**Modifiche:** `ui/setup_view.py` da placeholder a pagina funzionale:
+- 5 tab orizzontali (`st.tabs`, stile cockpit da `app.css`): Tyres / Electronics /
+  Mechanical Grip / Dampers / Aero, **stessa struttura del menu setup ACC**.
+- Slider alimentati da `modules.setup_params.get_params_for_car(car, track)`
+  (modulo dati protetto: **chiamato, non riscritto**) → range/step/default/unit e
+  override per vettura+circuito vengono dalla fonte di verità.
+- Renderer presentazionale `_slider()`: riga nome (mono) + valore (accent) +
+  slider nativo con label nascosta; clamp del valore salvato se fuori range
+  (pattern del legacy). Tip ACC come `help`. Raggruppamenti fedeli al legacy
+  (tyres 2×2 pressioni/camber/toe + caster; mechanical a gruppi; dampers 4 corner
+  ×4 col; aero con readout rake informativo).
+- Valori raccolti in `st.session_state["setup_current"]` per le fasi successive.
+- Auto/pista da `session_state` (`setup_car`/`setup_track`) con **fallback ai
+  default demo** (BMW M4 GT3 · Monza): i selettori e l'upload restano per la
+  Fase 7 (dietro feature-flag) e si innesteranno senza riscrivere qui.
+
+**File protetti:** nessuno toccato. `agent.py`, parser, prompt, logica fuel/gauge
+invariati; `setup_params.py` solo chiamato.
+
+**Verifica:** `py_compile` OK; import del modulo pagina + API OK; tutte le 5
+sezioni hanno un renderer; **tutti i `param_key` referenziati esistono** e nessun
+parametro del modulo resta non renderizzato (test di coerenza chiavi PASS).
+
+**Decisione:** mantenuto. Commit "fase 5: setup". Attesa verifica online prima
+della Fase 6 (restyle Login).
