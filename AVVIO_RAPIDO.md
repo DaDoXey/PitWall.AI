@@ -1,0 +1,112 @@
+# PitWall.AI — Avvio rapido (lavorare da un altro PC)
+
+Mini-guida per riprendere il lavoro su un secondo computer e tenere i due PC in
+sincronia tramite GitHub.
+
+Repo: <https://github.com/DaDoXey/PitWall.AI>
+Branch attivi: `main` (deploy Streamlit Cloud) e `restyle-ui` (allineato a `main`).
+Rollback disponibile: branch `backup-pre-restyle`.
+
+---
+
+## 1. Primo trasferimento (una volta sola)
+
+Il codice è tutto su GitHub, **ma** due cose NON sono nel repo (sono in
+`.gitignore`): il file `.env` (con la `ANTHROPIC_API_KEY`) e i database locali
+(`pitwall_auth.db`, `pitwall_sessions.db`). Per averli sull'altro PC:
+
+- Usa lo zip di backup (`PitWall.AI_backup_2026-06-30.zip`, già in OneDrive), che
+  contiene **tutto** incluso `.env` e i DB, **oppure**
+- clona da GitHub (passo 2) e copia a mano solo `.env` (e, se ti servono, i `.db`).
+
+> Lo zip **non** include `.venv` (446 MB, specifico di questo PC) né i
+> `__pycache__`: si rigenerano (passo 3).
+
+---
+
+## 2. Clonare il repo (se parti da GitHub)
+
+```bash
+git clone https://github.com/DaDoXey/PitWall.AI.git
+cd PitWall.AI
+```
+
+Se la cartella esiste già (da zip), salta il clone: è già un repo collegato.
+
+---
+
+## 3. Creare l'ambiente Python
+
+```bash
+python -m venv .venv
+
+# Windows (PowerShell/CMD)
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Variabili d'ambiente
+
+Serve un file `.env` nella radice del progetto con almeno:
+
+```
+ANTHROPIC_API_KEY=la_tua_chiave
+```
+
+(Se hai usato lo zip, il `.env` c'è già. Riferimento: `.env.example`.)
+
+> Nota: in **demo-mode** (default ON) la Engineer Console usa una risposta cache
+> pre-validata, quindi gira anche senza chiave. La chiave serve per le risposte
+> LLM reali e per la lettura screenshot (vision).
+
+---
+
+## 5. Avviare l'app
+
+```bash
+streamlit run app.py
+```
+
+Login: **Quick Login → "Demo Pilot"**.
+
+---
+
+## 6. Sincronizzare i due PC (d'ora in poi)
+
+Niente più zip: si lavora con git.
+
+**Prima di iniziare** a lavorare su un PC:
+```bash
+git pull
+```
+
+**Quando hai finito** (per portare le modifiche sull'altro PC):
+```bash
+git add -A
+git commit -m "descrizione modifiche"
+git push
+```
+
+Lavora sul branch che preferisci; ricorda di tenere allineati `main` e
+`restyle-ui` se modifichi solo uno dei due:
+```bash
+git checkout main && git merge --ff-only restyle-ui && git push origin main
+```
+
+---
+
+## In sospeso (promemoria)
+
+- Rivedere lo stile dei **tasti del login** (`styles/login.css`, sezione "FASE 6").
+- Decisioni dati da confermare: **ERR-02** (finestra pressioni a caldo) e
+  **ERR-04** (pressione media Dashboard) — vedi `SPEC_ERRATA.md`.
+
+## File da NON committare (già in `.gitignore`)
+
+`.env`, `.venv/`, `__pycache__/`, `*.db` locali. Trasferiscili solo via zip o copia
+manuale, mai con `git add`.
