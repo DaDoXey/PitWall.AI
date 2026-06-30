@@ -288,38 +288,42 @@ html, body, [data-testid="stAppViewContainer"] {
     background: var(--red-dim) !important;
 }
 /* ── SIDEBAR — bottoni di navigazione / logout ──
-   Label SEMPRE visibile (testo bianco, allineata a sinistra con icona).
-   L'accento rosso è SOLO uno stato (attivo=primary / hover), mai un fill
-   che copre tutto e nasconde il testo. */
+   BASE (vale per TUTTI, NON dipende da kind/versione): superficie scura +
+   testo bianco, allineato a sinistra. Così non possono mai restare
+   "rettangoli rossi senza testo", a prescindere dalla versione di Streamlit.
+   Il rosso è SOLO un override sullo stato attivo (primary) / hover. */
 section[data-testid="stSidebar"] div[data-testid="stButton"] button {
     justify-content: flex-start !important;
     text-align: left !important;
+    background: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    color: #FFFFFF !important;
     font-family: var(--font-mono) !important;
     font-weight: 700 !important;
     letter-spacing: 0.08em !important;
 }
 /* la label vive in un <p> dentro stMarkdownContainer: forzala bianca e visibile
    (specificità > regola grigia generica della sidebar) */
-section[data-testid="stSidebar"] div[data-testid="stButton"] button p {
+section[data-testid="stSidebar"] div[data-testid="stButton"] button p,
+section[data-testid="stSidebar"] div[data-testid="stButton"] button div,
+section[data-testid="stSidebar"] div[data-testid="stButton"] button span:not([data-testid="stIconMaterial"]) {
     color: #FFFFFF !important;
     display: block !important;
     margin: 0 !important;
 }
-/* inattivo (secondary): superficie scura, bordo tenue */
-section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="secondary"] {
-    background: #1a1a1a !important;
-    border: 1px solid #333333 !important;
-}
-section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="secondary"]:hover {
+section[data-testid="stSidebar"] div[data-testid="stButton"] button:hover {
     background: #1a1010 !important;
     border-color: #E8002D !important;
 }
-/* attivo (primary): fill accento, testo bianco sopra */
-section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"] {
+/* ATTIVO — copre sia l'attributo kind sia il data-testid delle versioni recenti */
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"],
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primaryFormSubmit"],
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[data-testid="stBaseButton-primary"] {
     background: #E8002D !important;
-    border: 1px solid #E8002D !important;
+    border-color: #E8002D !important;
 }
-section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"]:hover {
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[kind="primary"]:hover,
+section[data-testid="stSidebar"] div[data-testid="stButton"] button[data-testid="stBaseButton-primary"]:hover {
     background: #CC0028 !important;
     border-color: #CC0028 !important;
 }
