@@ -12,11 +12,14 @@ Per ora car/track sono letti da session_state con fallback ai default demo
 (BMW M4 GT3 · Monza), così la Fase 7 potrà valorizzarli senza riscrivere qui.
 """
 
+import os
+
 import streamlit as st
 
 from ui import components as c
 from ui import demo_data as dd
-from modules.setup_params import get_params_for_car
+from ui import flags, catalog
+from modules.setup_params import get_params_for_car, get_all_params_flat
 
 
 # ─────────────────────────────────────────────
@@ -200,17 +203,134 @@ _RENDERERS = {
 
 
 # ─────────────────────────────────────────────
+# INPUT SESSIONE (Fase 7) — dietro feature-flag, OFF in demo
+# ─────────────────────────────────────────────
+def _apply_vision_to_sliders(vision_params: dict) -> int:
+    """Applica i parametri letti da screenshot agli slider (clamp nei range).
+
+    Imposta le chiavi `setup_<param>` in session_state; ritorna quanti applicati.
+    """
+    flat = get_all_params_flat()
+    applied = 0
+    for key, val in (vision_params or {}).items():
+        if key not in flat:
+            continue
+        p = flat[key]
+        try:
+            num = float(val)
+        except (TypeError, ValueError):
+            continue
+        is_float = isinstance(p["step"], float) or isinstance(p["min"], float)
+        num = num if is_float else int(round(num))
+        num = min(max(num, p["min"]), p["max"])
+        st.session_state[f"setup_{key}"] = float(num) if is_float else int(num)
+        applied += 1
+    return applied
+
+
+def _csv_upload() -> None:
+    st.markdown('<div class="pw-field-label">CSV sessione</div>', unsafe_allow_html=True)
+    f = st.file_uploader("CSV sessione", type=["csv"], key="setup_csv",
+                         label_visibility="collapsed")
+    if not f:
+        return
+    try:
+        from backend.parser.csv_parser import parse_session_csv, CSVParseError
+    except Exception as e:  # import difensivo: la demo non deve mai rompersi
+        st.error(f"Parser CSV non disponibile: {e}")
+        return
+    try:
+        res = parse_session_csv(f)
+    except CSVParseError as e:
+        st.warning(f"CSV non valido: {e}")
+        return
+    except Exception as e:
+        st.warning(f"Impossibile leggere il CSV: {e}")
+        return
+    st.session_state["csv_parsed_result"] = res
+    laps = res.get("laps_count", 0)
+    fuel = res.get("fuel_cons_avg", 0) or 0.0
+    st.success(f"CSV letto: {laps} giri · consumo medio {fuel:.2f} L/giro")
+
+
+def _screenshot_upload() -> None:
+    st.markdown('<div class="pw-field-label">Screenshot setup ACC</div>', unsafe_allow_html=True)
+    img = st.file_uploader("Screenshot setup", type=["jpg", "jpeg", "png", "webp"],
+                           key="setup_shot", label_visibility="collapsed")
+    if img is not None and st.button("Leggi parametri dallo screenshot",
+                                     use_container_width=True, key="btn_vision"):
+        # st.secrets solleva se manca secrets.toml (locale): fallback su .env.
+        try:
+            api_key = st.secrets.get("ANTHROPIC_API_KEY", os.getenv("ANTHROPIC_API_KEY", ""))
+        except Exception:
+            api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            st.error("ANTHROPIC_API_KEY non trovata — verifica .env (locale) o Streamlit Secrets (cloud)")
+        else:
+            try:
+                from modules.vision_parser import parse_setup_from_image, summarize_parsed_setup
+                with st.spinner("Analisi screenshot in corso…"):
+                    result = parse_setup_from_image(img.getvalue(), api_key=api_key)
+                st.session_state["vision_params"] = result.get("params", {})
+                st.session_state["vision_summary"] = summarize_parsed_setup(result)
+                st.success(f"Riconosciuti {len(result.get('params', {}))} parametri.")
+            except Exception as e:
+                st.error(f"Lettura screenshot fallita: {e}")
+
+    if st.session_state.get("vision_summary"):
+        st.markdown(st.session_state["vision_summary"])
+        if st.button("Usa questi parametri negli slider", use_container_width=True,
+                     key="btn_apply_vision"):
+            n = _apply_vision_to_sliders(st.session_state.get("vision_params", {}))
+            st.success(f"{n} parametri applicati agli slider.")
+            st.rerun()
+
+
+def _session_inputs() -> tuple[str, str]:
+    """Selettori auto/pista/condizioni + temperature + upload. Ritorna (car, track)."""
+    _group("CONFIGURAZIONE SESSIONE")
+    c1, c2, c3 = st.columns(3)
+    car = c1.selectbox("Auto", options=catalog.CAR_LIST, key="setup_car")
+    track = c2.selectbox("Tracciato", options=catalog.TRACK_LIST, key="setup_track")
+    c3.selectbox("Condizioni", options=catalog.CONDITIONS, key="setup_conditions")
+
+    t1, t2 = st.columns(2)
+    t1.slider("Temp. Ambiente (°C)", 0, 50, 20, key="setup_temp_amb")
+    t2.slider("Temp. Pista (°C)", 0, 60, 30, key="setup_temp_track")
+
+    with st.expander("Dati sessione — CSV / screenshot setup", expanded=False):
+        _csv_upload()
+        st.markdown('<div class="section-separator"></div>', unsafe_allow_html=True)
+        _screenshot_upload()
+
+    return car, track
+
+
+# ─────────────────────────────────────────────
 # RENDER PAGINA
 # ─────────────────────────────────────────────
 def render() -> None:
-    # Auto/pista: da session_state (Fase 7 li valorizzerà coi selettori) o default demo.
-    car = st.session_state.get("setup_car", dd.SESSION["car"])
-    track = st.session_state.get("setup_track", dd.SESSION["track"])
-
+    # Sottotitolo coerente con la selezione corrente (o default demo).
+    car_sub = st.session_state.get("setup_car", dd.SESSION["car"])
+    track_sub = st.session_state.get("setup_track", dd.SESSION["track"])
     st.markdown(
-        c.page_header("Setup", f"{car} · {track} · range ACC"),
+        c.page_header("Setup", f"{car_sub} · {track_sub} · range ACC"),
         unsafe_allow_html=True,
     )
+
+    # Feature-flag (Fase 7): default OFF → demo pulita. Toggle = override runtime.
+    st.session_state.setdefault("inputs_enabled", flags.inputs_enabled())
+    show_inputs = st.toggle(
+        "Input sessione (selettori auto/pista · upload CSV/screenshot)",
+        key="inputs_enabled",
+    )
+
+    if show_inputs:
+        car, track = _session_inputs()
+        st.markdown('<div class="section-separator"></div>', unsafe_allow_html=True)
+    else:
+        car = st.session_state.get("setup_car", dd.SESSION["car"])
+        track = st.session_state.get("setup_track", dd.SESSION["track"])
 
     # Override per vettura/circuito dal modulo dati (chiamato, non riscritto).
     sections = get_params_for_car(car, track)

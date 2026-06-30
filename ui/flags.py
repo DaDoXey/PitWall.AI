@@ -23,3 +23,20 @@ def demo_mode() -> bool:
 
 def set_demo_mode(value: bool) -> None:
     st.session_state["demo_mode"] = bool(value)
+
+
+# ─────────────────────────────────────────────
+# INPUT SESSIONE (Fase 7): selettori auto/pista + upload CSV/screenshot.
+# Default OFF: la demo resta pulita (niente controlli funzionali a video).
+# Attivabile a runtime (toggle in Setup) o via env PITWALL_SHOW_INPUTS.
+# ─────────────────────────────────────────────
+_INPUTS_ENV_DEFAULT = os.getenv("PITWALL_SHOW_INPUTS", "0").strip().lower() in ("1", "true", "yes", "on")
+
+
+def inputs_enabled() -> bool:
+    """True se i controlli di input sessione (selettori/upload) sono attivi."""
+    return bool(st.session_state.get("inputs_enabled", _INPUTS_ENV_DEFAULT))
+
+
+def set_inputs_enabled(value: bool) -> None:
+    st.session_state["inputs_enabled"] = bool(value)

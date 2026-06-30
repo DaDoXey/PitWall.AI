@@ -440,3 +440,39 @@ toccato. `login.css` caricato dopo i token → regole vincenti.
 
 **Decisione:** mantenuto. Commit "fase 6: restyle login". Attesa verifica online
 prima della Fase 7 (selettori auto/pista + upload dietro feature-flag).
+
+## Fase 7 — Selettori auto/pista + upload dietro feature-flag
+
+**Data:** 30/06/2026 · branch `restyle-ui` + `main`
+
+**Obiettivo:** re-introdurre i controlli funzionali (selettori vettura/circuito,
+upload CSV/screenshot) **dietro feature-flag**, OFF in demo (priorità #1: demo
+pulita e che non si rompe).
+
+**Modifiche:**
+- `ui/flags.py`: nuovo flag `inputs_enabled()` / `set_inputs_enabled()` — default
+  OFF, override via env `PITWALL_SHOW_INPUTS` o toggle a runtime.
+- `ui/catalog.py` (NUOVO): `CAR_LIST` (15), `TRACK_LIST` (15), `CONDITIONS` —
+  liste statiche importabili **senza importare `app_legacy.py`** (che all'import
+  eseguirebbe l'intera app Streamlit).
+- `ui/setup_view.py`: toggle "Input sessione" in cima (default = flag). Quando ON:
+  - selettori **Auto / Tracciato / Condizioni** (scrivono `setup_car`/`setup_track`
+    → i 5 tab si ricostruiscono coi range della vettura via `get_params_for_car`),
+    + slider Temp. Ambiente/Pista;
+  - expander upload: **CSV** (parser reale `backend.parser.parse_session_csv`,
+    import difensivo + gestione `CSVParseError`, salva `csv_parsed_result` e mostra
+    giri/consumo) e **screenshot** (`modules.vision_parser.parse_setup_from_image`,
+    richiede `ANTHROPIC_API_KEY`; "Usa negli slider" applica i parametri letti via
+    `get_all_params_flat`, con clamp nei range).
+  Quando OFF: car/track = default demo (BMW M4 GT3 · Monza), nessun controllo.
+
+**File protetti:** nessuno toccato. Parser/vision/setup_params solo **chiamati**;
+logica fuel/gauge invariata. Gli import dei parser sono **lazy** (dentro gli
+handler) per non appesantire/rischiare l'import della pagina.
+
+**Verifica:** `py_compile` OK (setup_view/flags/catalog); import dell'intera catena
+OK; flag default OFF; catalogo 15/15; 49 parametri flat; chiavi vision presenti nel
+flat; tutte le helper presenti.
+
+**Decisione:** mantenuto. Commit "fase 7: selettori + upload dietro flag". Restyle
+fasi 1–7 completo. TODO post-fasi: rivedere stile tasti login (vedi richiesta utente).
