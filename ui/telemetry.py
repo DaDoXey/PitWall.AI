@@ -52,7 +52,7 @@ def _temp_line_fig() -> go.Figure:
                    font=dict(family="JetBrains Mono, monospace", size=14, color=c.TEXT_PRIMARY)),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, sans-serif", color=c.TEXT_SECONDARY, size=11),
-        margin=dict(l=52, r=20, t=48, b=44), height=320,
+        margin=dict(l=52, r=20, t=48, b=44), height=410,
         hovermode="x unified",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
                     font=dict(size=10), bgcolor="rgba(0,0,0,0)"),

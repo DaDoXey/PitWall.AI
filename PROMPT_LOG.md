@@ -534,3 +534,17 @@ nessun override BMW nel DB (il generico vale per la demo). File protetti invaria
 
 **Stato:** punch-list v2 completata lato codice. In attesa di "ok push" per commit
 su `main` (regola git: nessun commit/push senza conferma esplicita).
+
+### Addendum — fix post-verifica online (commit `dbcfb92` deployato)
+
+Verifica visiva utente sul deploy → due problemi reali (vedi INC-004):
+- **Engineer Console percepita statica / "non risponde":** in demo-mode tornava
+  sempre la stessa analisi e l'input (`st.chat_input`) era ancorato in fondo,
+  poco visibile. **Fix:** 5 risposte-cache per scenario (sottosterzo / sovrasterzo /
+  carburante / gomme / freni) con router `_pick_demo_response()`; input sostituito
+  da **campo + bottone «⚙ ANALIZZA»** in linea, con guardia anti ri-trigger.
+- **Telemetria disallineata:** line chart `height=320 → 410` (= heatmap).
+
+File toccati: `ui/console.py`, `ui/telemetry.py`, `INCIDENTS.md` (INC-004), questo log.
+Verifica: `py_compile` OK; routing testato (ogni chip → scenario giusto); 5 risposte
+con 4 sezioni piene. **NON ancora committato** — in attesa di conferma utente.

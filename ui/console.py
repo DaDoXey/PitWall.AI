@@ -48,6 +48,88 @@ Una modifica per volta: parti dalle pressioni.
 - Le pressioni nel setup ACC sono a freddo: a caldo salgono di ~2.5–3.5 psi.
 """
 
+# ─────────────────────────────────────────────
+# RISPOSTE CACHE PER SCENARIO — demo offline INTERATTIVA
+# Ogni quick-chip / parola chiave seleziona una risposta diversa a 4 sezioni,
+# così la demo risponde davvero all'input senza dipendere dalla rete.
+# ─────────────────────────────────────────────
+DEMO_UNDERSTEER = """## Diagnosi
+In ingresso e percorrenza l'anteriore non gira: l'auto va larga e devi raddrizzare lo sterzo. Quadro tipico di un avantreno poco caricato rispetto al retrotreno.
+
+## Causa Meccanica Probabile
+Anteriore troppo rigido in rollio (**barra antirollio anteriore alta**) e/o poco carico aerodinamico davanti: l'anteriore perde aderenza prima del posteriore.
+
+## Correzione Setup Consigliata
+Ammorbidisci la barra antirollio anteriore **ARB Ant. · 5 → 4**.
+In subordine, **+1 allo splitter** per più carico sull'avantreno. Una modifica per volta.
+
+## Note Aggiuntive
+- Controlla le temperature anteriori: se restano basse rispetto alle posteriori, l'anteriore lavora poco.
+- A Monza, con le curve veloci, non esagerare per non perdere stabilità in frenata.
+"""
+
+DEMO_FUEL = """## Diagnosi
+Consumo medio **stabile a 3.2 L/giro** su 8 giri (25.6 L totali). Nessuna anomalia: la richiesta è di strategia carburante, non un problema meccanico.
+
+## Causa Meccanica Probabile
+Il consumo è regolare. Le uniche leve sono la **mappa motore (ECU Map)** e la gestione del gas in uscita di curva.
+
+## Correzione Setup Consigliata
+Per un long run, sali a una **mappa più economica · ECU Map 1 → 2** se la potenza lo consente.
+Carburante = giri × 3.2 L + 1 giro di margine.
+
+## Note Aggiuntive
+- Gara da 20 giri: 20 × 3.2 = 64 L + ~3.2 L di riserva ≈ **68 L**.
+- Ridurre il pattinamento in trazione (TC) limita anche i consumi.
+"""
+
+DEMO_TYRES = """## Diagnosi
+La **Post.DX tocca i 105°C**, oltre il limite finestra di 95°C, mentre le altre gomme restano in range (88–95°C). Asse posteriore destro in sofferenza termica.
+
+## Causa Meccanica Probabile
+**Pressioni posteriori sotto la finestra a caldo** (28.2 / 28.0 psi, finestra 28.5–30.0): la gomma flette e scalda in modo anomalo, soprattutto la destra, caricata dalle curve di Monza.
+
+## Correzione Setup Consigliata
+Pressione gomme posteriori (a freddo) **+0.5 psi · 26.0 → 26.5**, per riportarle in finestra a caldo e abbassare la temperatura.
+
+## Note Aggiuntive
+- Verifica che la Post.DX scenda sotto i 100°C dopo la modifica.
+- Se persiste, apri di un punto i condotti freno posteriori per smaltire calore.
+"""
+
+DEMO_BRAKES = """## Diagnosi
+Richiesta sul bilanciamento freni. Con il retrotreno instabile, una ripartizione troppo arretrata peggiora il bloccaggio posteriore in staccata.
+
+## Causa Meccanica Probabile
+**Brake bias troppo indietro** rispetto al grip posteriore attuale (posteriori sotto finestra): tendenza al bloccaggio e instabilità in frenata.
+
+## Correzione Setup Consigliata
+Sposta il bilanciamento freni in avanti **Brake Bias · 58.0% → 58.5–59.0%**, per stabilizzare la staccata. Una modifica per volta.
+
+## Note Aggiuntive
+- A Monza le staccate di prima e seconda chicane sono severe: priorità alla stabilità.
+- Rivaluta dopo aver sistemato le pressioni posteriori.
+"""
+
+# (parole chiave) → testo. Ordine = priorità di match. Default = scenario sovrasterzo.
+_DEMO_ROUTES = [
+    (("sottosterz", "sotto sterz", "non gira", "va largo", "anteriore"), DEMO_UNDERSTEER),
+    (("carburant", "benzina", "fuel", "consum", "strategia"), DEMO_FUEL),
+    (("gomm", "pneumatic", "tyre", "temperatur", "termic"), DEMO_TYRES),
+    (("fren", "brake", "bilanciament", "staccata", "bloccagg"), DEMO_BRAKES),
+    (("sovrasterz", "scivola", "perde il posteriore", "trazione", "dietro"), DEMO_RESPONSE),
+]
+
+
+def _pick_demo_response(prompt: str) -> str:
+    """Sceglie la risposta cache più pertinente all'input (demo interattiva)."""
+    p = (prompt or "").lower()
+    for keys, text in _DEMO_ROUTES:
+        if any(k in p for k in keys):
+            return text
+    return DEMO_RESPONSE
+
+
 # Quick-chips (prompt preset) — come da brief.
 CHIPS = ["Sottosterzo", "Calcola carburante", "Analizza gomme", "Bilanciamento freni"]
 
@@ -145,12 +227,12 @@ def get_console_analysis(prompt: str):
     """Ritorna (testo_4_sezioni, sorgente). sorgente ∈ {demo, cache, api, fallback}."""
     # 1) demo-mode attivo o prompt = scenario demo → cache (sempre, niente rete)
     if flags.demo_mode() or _is_demo_prompt(prompt):
-        return DEMO_RESPONSE, ("demo" if flags.demo_mode() else "cache")
+        return _pick_demo_response(prompt), ("demo" if flags.demo_mode() else "cache")
 
     # 2) tentativo API reale, con fallback alla cache
     api_key = _api_key()
     if not api_key:
-        return DEMO_RESPONSE, "fallback"
+        return _pick_demo_response(prompt), "fallback"
     try:
         from agent import get_ai_response  # file protetto: solo chiamata
         context = (
@@ -166,9 +248,9 @@ def get_console_analysis(prompt: str):
                                auto=dd.SESSION["car"], tracciato=dd.SESSION["track"])
         # validazione minima: deve contenere le 4 sezioni
         ok = all(re.search(pat, resp or "", re.IGNORECASE) for _t, pat, _i in _SECTIONS)
-        return (resp, "api") if ok else (DEMO_RESPONSE, "fallback")
+        return (resp, "api") if ok else (_pick_demo_response(prompt), "fallback")
     except Exception:
-        return DEMO_RESPONSE, "fallback"
+        return _pick_demo_response(prompt), "fallback"
 
 
 # ─────────────────────────────────────────────
@@ -278,16 +360,32 @@ def render() -> None:
             if col.button(chip, key=f"chip_{chip}", use_container_width=True):
                 pending = chip
 
-    # Chat input nativo (send rosso dal theme primaryColor)
-    user_msg = st.chat_input("Descrivi il problema in pista… (es. «L'auto scivola dietro in accelerazione»)")
-    if user_msg:
-        pending = user_msg
+    # Input in linea + bottone ANALIZZA (evidente e collegato a Gigi).
+    st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
+    in_col, btn_col = st.columns([4, 1])
+    with in_col:
+        typed = st.text_input(
+            "Descrivi il problema",
+            key="console_input",
+            placeholder="Descrivi il problema in pista… (es. «L'auto scivola dietro in accelerazione»)",
+            label_visibility="collapsed",
+        )
+    with btn_col:
+        analyze = st.button("⚙ ANALIZZA", key="btn_analyze", type="primary",
+                            use_container_width=True)
+    # Invio col bottone o con Enter, ma SOLO se il testo è nuovo rispetto all'ultimo
+    # analizzato (così un chip non viene sovrascritto dal testo residuo al rerun).
+    # I chip hanno comunque priorità (pending già valorizzato).
+    last_input = st.session_state.get("console_last_input", "")
+    if not pending and typed.strip() and (analyze or typed.strip() != last_input):
+        pending = typed.strip()
 
     if pending:
         resp, src = get_console_analysis(pending)
         st.session_state["console_question"] = pending
         st.session_state["console_response"] = resp
         st.session_state["console_source"] = src
+        st.session_state["console_last_input"] = typed.strip()  # blocca i ri-trigger
         st.rerun()
 
     # Domanda corrente

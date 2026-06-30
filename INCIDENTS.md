@@ -185,7 +185,47 @@ riproduce bug già risolti.
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 30/06/2026 (INC-003)*
+## INC-004 — Console percepita "statica/non funzionante" + telemetria disallineata
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-004 |
+| Data rilevamento | 30/06/2026 (post-deploy verifica visiva) |
+| Severità | Alta (demo d'esame) |
+| Stato | RISOLTO |
+| File coinvolti | `ui/console.py`, `ui/telemetry.py` |
+
+### Descrizione
+Alla verifica online: (1) la Engineer Console "non rispondeva" — qualunque input
+restituiva sempre la stessa analisi (sovrasterzo), e l'input era un `st.chat_input`
+ancorato in fondo alla pagina, poco visibile e percepito come scollegato → demo
+"solo visiva". (2) In Telemetria le due colonne della prima riga (line chart vs
+heatmap) erano di altezza diversa → grafici disallineati.
+
+### Causa
+1. In demo-mode `get_console_analysis()` ritornava **sempre** `DEMO_RESPONSE`,
+   indipendentemente dall'input → nessuna reattività percepita. Inoltre
+   `st.chat_input` si fissa in fondo al viewport, lontano dalle card.
+2. `ui/telemetry.py`: line chart `height=320` accanto a heatmap `height=410`.
+
+### Fix Applicato
+1. **Risposte cache per scenario** (`ui/console.py`): 5 risposte a 4 sezioni
+   (sottosterzo, sovrasterzo, carburante, gomme, freni) con router per parole
+   chiave `_pick_demo_response()`; ogni chip / frase seleziona l'analisi pertinente
+   → demo interattiva e offline. Input sostituito da **campo + bottone «⚙ ANALIZZA»**
+   in linea, con guardia anti ri-trigger (`console_last_input`).
+2. **Allineamento** line chart `height=320 → 410` (= heatmap).
+
+Nessun file protetto toccato; la chiamata `agent.py` resta invariata (path live).
+
+### Lezione Appresa
+Una demo "blindata" su cache non deve sembrare finta: differenziare le risposte per
+input la rende credibile. E l'elemento d'azione (Analizza) va reso visibile e
+contiguo all'output, non delegato a un input ancorato fuori vista.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 30/06/2026 (INC-003, INC-004)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |
