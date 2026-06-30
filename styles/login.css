@@ -203,3 +203,79 @@
   color: var(--accent);
   text-transform: uppercase;
 }
+
+/* ==============================================
+   FASE 6 — controlli login coerenti col cockpit
+   (il login carica solo font+token, non app.css: lo stile dei widget vive qui)
+   Selettori robusti: coprono attributo kind e data-testid delle versioni recenti.
+   ============================================== */
+
+/* ── BOTTONI ── base comune (testo sempre visibile, mono, allineato al centro) */
+[data-testid="stButton"] button,
+[data-testid="stFormSubmitButton"] button {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  font-size: 0.78rem !important;
+  border-radius: 6px !important;
+  padding: 0.6rem 1rem !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease !important;
+}
+[data-testid="stButton"] button p,
+[data-testid="stFormSubmitButton"] button p {
+  color: inherit !important;
+  margin: 0 !important;
+}
+
+/* Inattivo (secondary) → superficie scura, bordo tenue, testo bianco */
+[data-testid="stButton"] button[kind="secondary"],
+[data-testid="stButton"] button[data-testid="stBaseButton-secondary"] {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+[data-testid="stButton"] button[kind="secondary"]:hover,
+[data-testid="stButton"] button[data-testid="stBaseButton-secondary"]:hover {
+  border-color: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+/* Attivo (primary) e submit del form → accento rosso, testo bianco */
+[data-testid="stButton"] button[kind="primary"],
+[data-testid="stButton"] button[data-testid="stBaseButton-primary"],
+[data-testid="stFormSubmitButton"] button[kind="primary"],
+[data-testid="stFormSubmitButton"] button[kind="primaryFormSubmit"],
+[data-testid="stFormSubmitButton"] button[data-testid="stBaseButton-primaryFormSubmit"] {
+  background: var(--accent) !important;
+  border: 1px solid var(--accent) !important;
+  color: #ffffff !important;
+}
+[data-testid="stButton"] button[kind="primary"]:hover,
+[data-testid="stButton"] button[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stFormSubmitButton"] button[kind="primary"]:hover,
+[data-testid="stFormSubmitButton"] button[kind="primaryFormSubmit"]:hover,
+[data-testid="stFormSubmitButton"] button[data-testid="stBaseButton-primaryFormSubmit"]:hover {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+/* ── INPUT TESTO (Custom User) ── dark + mono + focus rosso ── */
+[data-testid="stTextInput"] label p {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.62rem !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--text-tertiary) !important;
+}
+[data-testid="stTextInput"] input {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+[data-testid="stTextInput"] input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent) !important;
+}

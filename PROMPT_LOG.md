@@ -416,3 +416,27 @@ parametro del modulo resta non renderizzato (test di coerenza chiavi PASS).
 
 **Decisione:** mantenuto. Commit "fase 5: setup". Attesa verifica online prima
 della Fase 6 (restyle Login).
+
+## Fase 6 — Restyle Login
+
+**Data:** 30/06/2026 · branch `restyle-ui` + `main`
+
+**Contesto:** il login carica solo font+token (`inject_design_system(include_app_css=False)`),
+quindi i widget (bottoni/input) restavano con lo stile Streamlit di default —
+incoerenti col cockpit. Hero/ruler/badge erano già allineati.
+
+**Modifiche:** solo `styles/login.css` (nessuna riga di logica auth toccata):
+- **Bottoni** (Demo Pilot / Custom User / submit form) in stile cockpit: mono
+  uppercase, radius, primary = accento rosso (testo bianco), secondary =
+  superficie scura con bordo, hover rosso. Selettori robusti che coprono sia
+  l'attributo `kind` sia i `data-testid` (`stBaseButton-*`, `primaryFormSubmit`)
+  delle versioni recenti. `button p { color: inherit }` → label sempre visibile.
+- **Input testo** (form Custom User): superficie scura, mono, focus rosso; label
+  mono uppercase muted.
+
+**Garanzie:** `login.py` invariato → flusso Demo Pilot / Custom User / switch_page
+identico (priorità #1 "login sempre funzionante" salva). Nessun file protetto
+toccato. `login.css` caricato dopo i token → regole vincenti.
+
+**Decisione:** mantenuto. Commit "fase 6: restyle login". Attesa verifica online
+prima della Fase 7 (selettori auto/pista + upload dietro feature-flag).
