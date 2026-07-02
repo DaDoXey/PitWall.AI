@@ -532,8 +532,8 @@ nessun override BMW nel DB (il generico vale per la demo). File protetti invaria
 ## Azione fuori-codice
 - **Ri-deploy** `pitwall-ai-dado.streamlit.app` per allinearlo a `main` (chiude INC-003).
 
-**Stato:** punch-list v2 completata lato codice. In attesa di "ok push" per commit
-su `main` (regola git: nessun commit/push senza conferma esplicita).
+**Stato:** punch-list v2 completata e **committata** (`dbcfb92`, poi pushata su
+`origin/main`). Regola git rispettata: commit/push eseguiti dopo conferma utente.
 
 ### Addendum — fix post-verifica online (commit `dbcfb92` deployato)
 
@@ -547,4 +547,86 @@ Verifica visiva utente sul deploy → due problemi reali (vedi INC-004):
 
 File toccati: `ui/console.py`, `ui/telemetry.py`, `INCIDENTS.md` (INC-004), questo log.
 Verifica: `py_compile` OK; routing testato (ogni chip → scenario giusto); 5 risposte
-con 4 sezioni piene. **NON ancora committato** — in attesa di conferma utente.
+con 4 sezioni piene. **Committato** come `e9115cb` (HEAD attuale = `origin/main`) e
+deployato su Streamlit Cloud (chiude INC-003/INC-004).
+
+> Nota manutenzione (02/07/2026): ref Git locale corrotta (`.git/refs/heads/main` +
+> `refs/remotes/origin/main` azzerate da crash filesystem) — ripristinata a `e9115cb`
+> senza perdita dati; working tree identico al commit, locale allineato a `origin/main`.
+
+---
+
+## Entry #007 — Manutenzione Git + Restyle Login "Marchio soft" (02/07/2026)
+
+| Campo | Valore |
+|---|---|
+| Data | 02/07/2026 |
+| Modello | claude-opus-4-8 (Claude Code) |
+| Versione app | v0.2.0 MVP (branch `main`) |
+| Contesto | Ripresa lavori: allineamento status, recupero Git, prossima task = login minimal |
+
+### Catalogo messaggi di questa iterazione
+1. **Setup/metodo (status):** leggere per intero prompt log + breakdown + progetto,
+   verificare discordanze, controllare allineamento Git con `origin`, elaborare il
+   prossimo passo, esporre il piano e attendere approvazione; non inventare/costruire
+   senza ok. Subtask iniziale: nessuna, attendere comando.
+2. **Utente:** «Approvo passo 1+2, poi procedi col login minimal, ricordati inoltre
+   che dopo ti incollerò un prompt più massiccio.»
+3. **Utente (scelta guidata):** grado di minimal per la login = **«Marchio soft»**
+   (rimuovere solo auto animata + badge MVP; tenere hero, ruler, sottotitolo, tagline).
+4. *(Atteso)* prompt più corposo in arrivo, da lavorare successivamente.
+
+### Interventi eseguiti
+- **Passo 1 — Recupero Git:** `.git/refs/heads/main` e `refs/remotes/origin/main`
+  erano azzerate (null byte). Rimosse e ricreate: `update-ref` di `main` → `e9115cb`,
+  `fetch origin` per rigenerare `origin/main`, upstream reimpostato. `git status` =
+  `main...origin/main` allineato, `fsck` senza ref rotte. **Nessuna perdita dati**
+  (working tree già identico a `e9115cb`).
+- **Passo 2 — Allineamento log:** aggiornate le note stale di punch-list v2 (→ committata
+  `dbcfb92`) e addendum INC-004 (→ committato `e9115cb`, deployato); aggiunta nota di
+  manutenzione Git.
+- **Passo 3 — Login "Marchio soft"** (solo presentazione, **logica auth invariata**):
+  - `pages/login.py`: rimosso l'intero blocco SVG **auto GT3 animata** + track line CSS
+    (e l'import `streamlit.components.v1` non più usato); rimosso il **badge `● MVP V2.0`**
+    dall'hero. Restano wordmark, ruler rosso, sottotitolo e tagline.
+  - `styles/login.css`: rimosse le regole ora inutili `.pw-badge-status`/`.pulse`;
+    `.pw-hero` top padding `8px → 40px` per compensare l'auto rimossa e dare respiro.
+
+### File protetti
+Nessuno toccato. Flusso login (Demo Pilot / Custom User / `switch_page`) **identico**
+→ priorità #1 "login sempre funzionante" preservata.
+
+### Verifica
+`py_compile pages/login.py` OK; grep senza residui (`components` / `pw-badge-status` /
+`ferrari-track` / `gt3_svg`).
+
+**Decisione:** ☑ Mantenuto. In attesa del prompt più corposo per la prossima iterazione.
+Commit/push su `main` solo dopo tuo «ok push» esplicito (regola git).
+
+### Addendum — Prompt "Correzione Punch-List Restyle" + FASE 4 sulla login (02/07/2026)
+
+**Messaggi:**
+1. Utente: «il prompt te lo incollerò alla prossima richiesta; controllami prima se la
+   FASE 1 è stata eseguita, fammi un report sul prompt e poi ti dirò come proseguire».
+2. Utente: incollato il prompt completo "Correzione Punch-List Restyle UI" (FASI 0–6).
+3. Utente: «verifica anche le altre fasi (2–6) contro il codice».
+4. Utente: «tieni il login minimal di oggi ed implementa anche le linee della FASE 4;
+   voglio il logo minimal ma anche come richiesto — oppure gestiscila tu e proponi».
+
+**Verifica prompt ↔ repo (sola lettura):** l'intero prompt risulta **già implementato**
+dalla punch-list v2 (30/06). Note: branch reale `main` (non `restyle-ui`); path reali
+`backend/parser/csv_parser.py`, `prompts/system_prompt_v4.txt`, font in `assets/fonts/`;
+precarico system_prompt reale = **20–200** (non 20–100). Voce 2.1: caldo > freddo su tutte,
+ma posteriori a +2.0 (non +2.5) **per scelta didattica** (retrotreno sotto finestra, ERR-01).
+
+**FASE 4 su login (scelte utente: traccia telemetria + SVG ingegnere minimale):**
+- `pages/login.py`: reintrodotti `import components` + `from ui import components as c`;
+  **avatar ingegnere** (`c.gigi_avatar_svg(48)`, riuso, opacity 0.9) reso via
+  `components.html` sotto la tagline; **traccia telemetria** decorativa (polyline inline
+  full-width) come `<div class="pw-telemetry-trace">` in fondo.
+- `styles/login.css`: nuova classe `.pw-telemetry-trace` (fixed bottom, tenue opacity 0.18,
+  mask che sfuma ai bordi). Solo classi custom: nessun selettore interno Streamlit / wildcard.
+- Login minimal di oggi **mantenuto** (niente auto animata, niente badge). Logica auth invariata.
+
+**Verifica:** `py_compile pages/login.py` OK; import `ui.components` risolto da `pages/`.
+Da fare prima del commit: `streamlit run app.py` e check visivo su Cloud.

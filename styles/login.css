@@ -84,7 +84,7 @@
    ============================================== */
 .pw-hero {
   text-align: center;
-  padding: 8px 0 4px 0;
+  padding: 40px 0 4px 0;
 }
 
 .pw-hero-title {
@@ -117,26 +117,6 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   margin: 0;
-}
-
-/* Badge stato [ ● MVP V2.0 ] */
-.pw-badge-status {
-  display: inline-block;
-  margin: 18px auto 6px auto;
-  padding: 5px 14px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--bg-tertiary);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-}
-
-.pw-badge-status .pulse {
-  color: var(--accent);
-  margin-right: 6px;
 }
 
 /* Etichetta "Quick Login · DEV" dentro la card */
@@ -278,4 +258,27 @@
 [data-testid="stTextInput"] input:focus {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 1px var(--accent) !important;
+}
+
+/* ==============================================
+   FASE 4 — traccia telemetria decorativa in basso
+   Full-width, tenue, dietro il contenuto; sfuma ai bordi. Solo classe custom,
+   nessun selettore interno Streamlit / wildcard.
+   ============================================== */
+.pw-telemetry-trace {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 78px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.18;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+.pw-telemetry-trace svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
