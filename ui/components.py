@@ -136,9 +136,9 @@ def window_bar_svg(value: float, vmin: float, vmax: float, win_lo: float, win_hi
 def gigi_avatar_svg(size: int = 44) -> str:
     """Icona di Gigi: headset minimale a contorno (archetto + padiglioni + mic).
 
-    Line-art, sfondo trasparente (nessuna tile/anello): struttura bianca, microfono
-    in accento rosso. Pensata per rendere bene a 44–50px su superfici scure.
-    Stringa SVG inseribile inline.
+    Line-art, sfondo trasparente (nessuna tile/anello): interamente bianca (archetto,
+    padiglioni, braccetto e capsula mic). Pensata per rendere bene a 44–50px su
+    superfici scure. Stringa SVG inseribile inline.
     """
     return (
         f'<svg width="{size}" height="{size}" viewBox="0 0 64 64" '

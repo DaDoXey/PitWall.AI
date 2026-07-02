@@ -660,3 +660,25 @@ e vedi se ci sono altri errori».
 - Padiglioni più compatti (h `20→18`), capsula mic riempita `stroke="none"` (non più ingrossata).
 
 **Verifica:** `py_compile` OK; nessun `#E8002D` residuo nell'icona (headset 100% bianco).
+
+### Entry #008 — Check generale repo + igiene codice (02/07/2026)
+
+**Messaggio utente:** «vedi se ci sta della roba da fixare facendo un check generale su tutto
+(file e repo) e dimmi cosa migliorare» → poi «procedi con tutto 1→4».
+
+**Diagnosi (repo allineato `origin/main` 0/0, tree clean, tutti i moduli attivi compilano):**
+- **Bug reale:** `frontend/__init__.py` non compilava — dentro c'era incollato il contenuto di
+  `.env.example` (compresa API key placeholder) con la docstring appiccicata → `SyntaxError`.
+  Nessun impatto in produzione perché il package `frontend` non è mai importato.
+- **Zavorra tracciata da Git:** cartella `files/` (6 copie stantie del 10/06 di agent/app/
+  setup_params/system_prompt_v4/vision_parser/README), `files.zip` (blob 18 KB),
+  `assets/gt3_silhouette.svg` (orfano, era l'auto della login rimossa).
+- **Doc:** docstring di `gigi_avatar_svg` diceva ancora "microfono in accento rosso" (ora bianco).
+
+**Interventi:**
+1. `frontend/__init__.py` → ridotto alla sola docstring pulita.
+2. `ui/components.py` → docstring `gigi_avatar_svg` allineata (icona interamente bianca).
+3. `git rm` di `files/`, `files.zip`, `assets/gt3_silhouette.svg`. **Tenuti** `assets/gigi.svg`
+   (usato da `app_legacy.py`) e `app_legacy.py` (monolite di riferimento, mai importato).
+
+**Verifica:** `py_compile frontend/__init__.py ui/components.py` OK; tree coerente. Committato/pushato.
