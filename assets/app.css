@@ -97,8 +97,11 @@ footer {
     fill: #ffffff !important;
 }
 
-/* Fix icone file uploader sidebar — centratura assoluta */
-[data-testid="stFileUploaderDropzone"] button {
+/* Fix icone file uploader — centratura assoluta.
+   SCOPATO ALLA SIDEBAR: senza lo scope, la larghezza forzata a 40px + overflow
+   hidden colpiva ANCHE gli uploader del Setup (area principale), troncando il
+   bottone "Browse/Upload" in "Uplo…" e sovrapponendovi l'icona nativa. */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {
     position: relative !important;
     width: 40px !important;
     height: 40px !important;
@@ -106,7 +109,7 @@ footer {
     margin: 0 !important;
     overflow: hidden !important;
 }
-[data-testid="stFileUploaderDropzone"] button span[data-testid="stIconMaterial"] {
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button span[data-testid="stIconMaterial"] {
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
@@ -116,7 +119,7 @@ footer {
     opacity: 1 !important;
     font-size: 1.2rem !important;
 }
-[data-testid="stFileUploaderDropzone"] button:hover span[data-testid="stIconMaterial"] {
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button:hover span[data-testid="stIconMaterial"] {
     color: #ffffff !important;
 }
 .block-container {

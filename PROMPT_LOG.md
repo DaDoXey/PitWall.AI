@@ -476,3 +476,49 @@ flat; tutte le helper presenti.
 
 **Decisione:** mantenuto. Commit "fase 7: selettori + upload dietro flag". Restyle
 fasi 1–7 completo. TODO post-fasi: rivedere stile tasti login (vedi richiesta utente).
+
+---
+
+## UI-FIX-2 — Bug visivi Telemetria + upload Setup (02/07/2026)
+
+**Data:** 02/07/2026 · branch `restyle-ui`
+
+**Richiesta utente:** "procedi con FASE 1 e 2" (prompt FASE UI-FIX-2). Scope: solo bug
+visivi/cosmetici. FASE 3 (rosso RL/RR) rinviata (chiarimento), FASE 4 (logo `.AI`)
+non in questo giro (root-cause individuata, vedi sotto).
+
+**FASE 1 — Telemetria (`ui/telemetry.py`), solo presentazione (valori/soglie invariati):**
+- **"°C" storto:** rimosso il titolo asse Y (Plotly lo ruota di 90°); "°C" ora è
+  un'annotazione orizzontale in alto a sinistra dell'asse.
+- **Legenda sovrapposta al titolo:** legenda spostata SOTTO il grafico
+  (`orientation=h, y=-0.26`), margine inferiore aumentato; titolo ancorato in alto.
+- **Gauge/heatmap clippati:** heatmap ora riempie l'iframe (`.wrap height:100%`,
+  `html,body height:100%`, svg in `.svgbox` flessibile con `height:100%`) invece di
+  un'altezza fissa che poteva eccedere → niente taglio/scroll al primo render.
+  Gauge: `height 170→180` e `margin-top 8→18` così il numero non viene tagliato.
+- **Numeri sulla silhouette non allineati:** riquadri gomma riposizionati simmetrici
+  rispetto al centro-scocca (anteriori `y=52`, posteriori `y=166`).
+
+**FASE 2 — Setup:**
+- **Icona upload sovrapposta a "Uplo…" (`assets/app.css`):** la regola
+  `[data-testid="stFileUploaderDropzone"] button {width:40px;overflow:hidden}`
+  (pensata per la sidebar) era GLOBALE e troncava il bottone Browse/Upload degli
+  uploader del Setup. Scopata a `section[data-testid="stSidebar"] …`.
+- **Toggle "Input sessione" default OFF:** verificato già corretto
+  (`flags.py` default `PITWALL_SHOW_INPUTS=0` → False, `setup_view.py` `setdefault`).
+  Nessuna modifica.
+
+**Note collaterali (non modificate, solo registrate):**
+- FASE 3: nessuna logica colore per-ruota nel Setup — in `setup_view.py` il valore
+  di *ogni* slider è reso rosso `#E8002D` (presentazione). Il rosso RL/RR osservato è
+  dei gauge Telemetria (BASSA = sotto finestra, intenzionale). Non-incident.
+- FASE 4: root-cause del `.AI` bianco → regole sidebar con `!important`
+  (`app.css` `section[data-testid="stSidebar"] span:not([data-testid=stIconMaterial]) {color:#999 !important}`
+  e `[data-testid="stSidebar"] * {color:var(--text) !important}`) sovrascrivono lo
+  stile inline `color:#E8002D` del `.AI`. Fix rinviato al prossimo giro.
+
+**File protetti:** nessuno toccato (agent/parser/prompt/gauge-logic/fuel).
+
+**Verifica:** `py_compile ui/telemetry.py` OK; nessuna regola dropzone globale residua
+in `app.css` (tutte scopate alla sidebar). Verifica visiva finale a carico della
+pagina online (redeploy).
