@@ -83,8 +83,11 @@ dichiara invece **20–200 Nm** come range di riferimento per i consigli dell'LL
 (Nota: il brief affermava "il prompt clampa a 20–100"; verificato — il prompt è a
 **20–200**, non 20–100.)
 
-**Decisione:** adottato **20–300 step 10** in `modules/setup_params.py` (default 60,
-in range), come da brief. Il file protetto **non è stato toccato** e resta 20–200.
-→ **Divergenza nota e accettata:** se in demo si imposta un precarico > 200 Nm, il
-consiglio dell'LLM potrebbe ragionare entro 200. Da confermare al committente se si
-vuole allineare anche il prompt (richiede modifica a file protetto, fuori scope).
+**Decisione (iniziale):** adottato 20–300 step 10 in `modules/setup_params.py`, in
+divergenza col prompt protetto (20–200). Rischio: precarico > 200 Nm in demo mentre
+l'LLM ragiona entro 200.
+
+**CHIUSO (02/07/2026):** su decisione del committente lo slider UI è stato allineato al
+prompt protetto → `modules/setup_params.py` riga 206 ora **`min:20, max:200, step:10`**
+(default 60, in range). Nessun file protetto toccato (`system_prompt_v4.txt` era già a
+20–200). Divergenza risolta. **Stato: RISOLTO.**

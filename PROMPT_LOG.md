@@ -682,3 +682,14 @@ e vedi se ci sono altri errori».
    (usato da `app_legacy.py`) e `app_legacy.py` (monolite di riferimento, mai importato).
 
 **Verifica:** `py_compile frontend/__init__.py ui/components.py` OK; tree coerente. Committato/pushato.
+
+### Entry #009 — Chiusura ERR-05: precarico UI allineato a 20–200 (02/07/2026)
+
+**Messaggio utente:** «chiudiamo ERR-05 mettendo il precarico UI a 20-200».
+
+**Intervento:** `modules/setup_params.py` riga 206 → slider Precarico Differenziale da
+`max:300` a **`max:200`** (min 20, step 10, default 60 → in range). Unico punto con 300 nel
+codice; `prompts/system_prompt_v4.txt` era già a 20–200 (file protetto non toccato). Aggiornato
+`SPEC_ERRATA.md` ERR-05 → **RISOLTO**.
+
+**Verifica:** `py_compile modules/setup_params.py` OK. Committato/pushato.
