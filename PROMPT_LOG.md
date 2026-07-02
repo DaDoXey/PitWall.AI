@@ -753,3 +753,15 @@ Riconciliazione conservativa (backup tag `backup-main-premerge`/`backup-restyle-
 **Verifica:** `py_compile` OK (telemetry/demo_data/setup_view/dashboard/console); dati
 `main` preservati; nessun marker di conflitto residuo. Merge commit su `main`, poi
 `restyle-ui` riallineato a `main`.
+
+**Rifinitura post-verifica utente (02/07/2026):** l'utente ha segnalato testo ancora
+troppo vicino/sovrapposto in Telemetria. Correzioni strutturali su `ui/telemetry.py`:
+- titolo grafico spostato FUORI figura (markdown sopra il grafico) → legenda in alto
+  senza overlap, asse "Giro" libero in basso;
+- unità °C come **suffisso dei tick Y** (`88°`, `95°`…) invece dell'etichetta flottante
+  → orizzontale, mai sovrapposta;
+- heatmap: riquadri gomma allargati (34→40), font numero 17→14 e spaziatura
+  numero/etichetta aumentata → niente più crowding; X riallineate simmetriche (38/162).
+
+**FASE 4 (logo `.AI`):** `ui/sidebar.py` — aggiunto `!important` inline al `.AI` (batte
+l'`!important` delle regole sidebar). Doc INC-007.

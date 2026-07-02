@@ -48,25 +48,22 @@ def _temp_line_fig() -> go.Figure:
         hoverinfo="skip",
     ))
     fig.update_layout(
-        title=dict(text="Temperatura gomme · 8 giri",
-                   font=dict(family="JetBrains Mono, monospace", size=14, color=c.TEXT_PRIMARY)),
+        # Titolo NON in figura: reso come markdown sopra il grafico (vedi render()).
+        # Così la legenda torna in alto senza sovrapporsi al titolo e l'asse "Giro"
+        # resta libero in basso (niente più legenda a ridosso di "Giro").
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, sans-serif", color=c.TEXT_SECONDARY, size=11),
-        margin=dict(l=54, r=20, t=46, b=100), height=410,
+        margin=dict(l=46, r=20, t=30, b=48), height=410,
         hovermode="x unified",
-        # Legenda spostata SOTTO il grafico (prima, in alto, si sovrapponeva al titolo).
-        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5,
+        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0,
                     font=dict(size=10), bgcolor="rgba(0,0,0,0)"),
     )
     fig.update_xaxes(title_text="Giro", gridcolor=c.BORDER, zeroline=False,
                      color=c.TEXT_MUTED, linecolor=c.BORDER, dtick=1)
-    # Nessun titolo asse Y (Plotly lo ruoterebbe di 90°, rendendo "°C" storto):
-    # lo mostriamo come etichetta orizzontale in alto a sinistra dell'asse.
-    fig.update_yaxes(title_text="", gridcolor=c.BORDER, zeroline=False,
+    # Unità come SUFFISSO dei tick dell'asse Y ("88°", "95°"…): orizzontale, non può
+    # sovrapporsi (niente più titolo asse ruotato né etichetta "°C" flottante).
+    fig.update_yaxes(ticksuffix="°", title_text="", gridcolor=c.BORDER, zeroline=False,
                      color=c.TEXT_MUTED, linecolor=c.BORDER, range=[74, 110])
-    fig.add_annotation(xref="paper", yref="paper", x=0, y=1, xshift=-34, yshift=12,
-                       text="°C", showarrow=False,
-                       font=dict(family="JetBrains Mono, monospace", size=10, color=c.TEXT_SECONDARY))
     # Annotazione sul limite finestra.
     fig.add_annotation(x=dd.lap_axis()[0], y=dd.TEMP_LIMIT, text="95°C",
                        showarrow=False, yshift=10, xshift=4,
@@ -110,13 +107,13 @@ def _heat_corner_svg(x: int, y: int, pos: str) -> str:
     label = dd.TYRE_LABELS[pos]
     return (
         f'<g>'
-        f'<rect x="{x}" y="{y}" width="34" height="74" rx="11" fill="{fill}" '
+        f'<rect x="{x}" y="{y}" width="40" height="74" rx="12" fill="{fill}" '
         f'stroke="#000000" stroke-opacity="0.35" stroke-width="1"/>'
-        f'<text x="{x + 17}" y="{y + 34}" text-anchor="middle" '
-        f'font-family="JetBrains Mono, monospace" font-size="17" font-weight="700" '
+        f'<text x="{x + 20}" y="{y + 31}" text-anchor="middle" '
+        f'font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" '
         f'fill="#FFFFFF">{val}°</text>'
-        f'<text x="{x + 17}" y="{y + 52}" text-anchor="middle" '
-        f'font-family="JetBrains Mono, monospace" font-size="8.5" '
+        f'<text x="{x + 20}" y="{y + 55}" text-anchor="middle" '
+        f'font-family="JetBrains Mono, monospace" font-size="8" '
         f'fill="#FFFFFF" opacity="0.85">{label}</text>'
         f'</g>'
     )
@@ -129,10 +126,10 @@ def _heatmap_html() -> str:
     # Posizioni gomme simmetriche rispetto al centro-scocca (y≈146): anteriori e
     # posteriori equidistanti, così i 4 riquadri risultano allineati alle 4 ruote.
     corners = (
-        _heat_corner_svg(40, 52, "fl")
-        + _heat_corner_svg(166, 52, "fr")
-        + _heat_corner_svg(40, 166, "rl")
-        + _heat_corner_svg(166, 166, "rr")
+        _heat_corner_svg(38, 52, "fl")
+        + _heat_corner_svg(162, 52, "fr")
+        + _heat_corner_svg(38, 166, "rl")
+        + _heat_corner_svg(162, 166, "rr")
     )
     grad_lo = c.temp_to_color(lo, dd.TEMP_SCALE)
     grad_hi = c.temp_to_color(hi, dd.TEMP_SCALE)
@@ -188,6 +185,12 @@ def render() -> None:
     # Riga 1: line chart (2/3) + heatmap (1/3)
     col_line, col_heat = st.columns([2, 1], gap="medium")
     with col_line:
+        st.markdown(
+            '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.8rem;'
+            'letter-spacing:0.05em;color:#FFFFFF;margin:2px 0 0 4px;">'
+            'Temperatura gomme · 8 giri</div>',
+            unsafe_allow_html=True,
+        )
         st.plotly_chart(_temp_line_fig(), use_container_width=True,
                         config={"displayModeBar": False})
     with col_heat:
