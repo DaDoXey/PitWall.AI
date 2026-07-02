@@ -714,3 +714,42 @@ preservata, più realistico. **Scelta: B** (raccomandata).
 
 **Verifica:** `py_compile ui/demo_data.py ui/console.py` OK; caldo/heatmap/media 28.6 invariati.
 Committato/pushato.
+
+---
+
+## UI-FIX-2 — Bug visivi Telemetria/Setup + merge `restyle-ui` → `main` (02/07/2026)
+
+**Data:** 02/07/2026 · branch `restyle-ui` (lavoro) → merge in `main` (deploy)
+
+**Richiesta utente:** fix bug visivi (FASE 1 Telemetria, FASE 2 upload Setup, FASE 3
+rosso RL/RR) su `restyle-ui`, poi "fai un merge" per portare tutto su `main`
+(il branch effettivamente deployato), "attento a non cancellare/sovrascrivere".
+
+**FASE 1 — `ui/telemetry.py` (solo presentazione):**
+- "°C" da titolo asse ruotato → annotazione orizzontale in alto a sx.
+- Legenda spostata SOTTO il grafico (`y=-0.15`) → niente overlap col titolo.
+- Heatmap che riempie l'iframe (`.wrap`/`body height:100%`, svg in `.svgbox`) → no
+  clipping; gauge `height 170→180`, `margin-top 8→18`.
+- Riquadri gomma simmetrici al centro-scocca (ant. `y=52`, post. `y=166`).
+
+**FASE 2 — `assets/app.css`:** regola dropzone `width:40px/overflow` scopata alla
+sidebar (fix "Uplo…" nel Setup). Toggle "Input sessione" già OFF, nessuna modifica.
+
+**FASE 3 — evidenziazione param suggeriti (RL/RR + precarico):** confermata
+INTENZIONALE (`SUGGESTED_PARAMS`, rosso=suggeriti / bianco=resto). Già presente su
+`main`; su `restyle-ui` era regredita e l'avevo ri-portata prima del merge.
+
+**MERGE `restyle-ui` → `main`:** i due branch erano divergenti — `main` (deploy) aveva
+i dati demo corretti (finestra 28.5–30.0, FASE 2.1, ERR-05, icona Gigi, login) ma NON
+le fix visive; `restyle-ui` aveva le fix visive su dati vecchi (27.0–27.8).
+Riconciliazione conservativa (backup tag `backup-main-premerge`/`backup-restyle-premerge`):
+- **dati/logica**: tenuta la versione `main` (`demo_data.py`, `setup_view.py` con
+  `val_color`, gauge axis 27.0–30.5, finestra 28.5–30.0) — nessun dato regredito;
+- **fix visive**: riapplicate su `telemetry.py` di `main`; `app.css` (upload) merge pulito;
+- **doc**: mie voci rinumerate **INC-005/INC-006** (main aveva già INC-003/004 diversi).
+
+**File protetti:** nessuno toccato (agent/parser/prompt/gauge-logic/fuel).
+
+**Verifica:** `py_compile` OK (telemetry/demo_data/setup_view/dashboard/console); dati
+`main` preservati; nessun marker di conflitto residuo. Merge commit su `main`, poi
+`restyle-ui` riallineato a `main`.

@@ -52,16 +52,22 @@ def _temp_line_fig() -> go.Figure:
                    font=dict(family="JetBrains Mono, monospace", size=14, color=c.TEXT_PRIMARY)),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, sans-serif", color=c.TEXT_SECONDARY, size=11),
-        margin=dict(l=52, r=20, t=48, b=44), height=410,
+        margin=dict(l=54, r=20, t=46, b=100), height=410,
         hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0,
+        # Legenda spostata SOTTO il grafico (prima, in alto, si sovrapponeva al titolo).
+        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5,
                     font=dict(size=10), bgcolor="rgba(0,0,0,0)"),
     )
     fig.update_xaxes(title_text="Giro", gridcolor=c.BORDER, zeroline=False,
                      color=c.TEXT_MUTED, linecolor=c.BORDER, dtick=1)
-    fig.update_yaxes(title_text="°C", gridcolor=c.BORDER, zeroline=False,
+    # Nessun titolo asse Y (Plotly lo ruoterebbe di 90°, rendendo "°C" storto):
+    # lo mostriamo come etichetta orizzontale in alto a sinistra dell'asse.
+    fig.update_yaxes(title_text="", gridcolor=c.BORDER, zeroline=False,
                      color=c.TEXT_MUTED, linecolor=c.BORDER, range=[74, 110])
-    # Annotazione sul limite.
+    fig.add_annotation(xref="paper", yref="paper", x=0, y=1, xshift=-34, yshift=12,
+                       text="°C", showarrow=False,
+                       font=dict(family="JetBrains Mono, monospace", size=10, color=c.TEXT_SECONDARY))
+    # Annotazione sul limite finestra.
     fig.add_annotation(x=dd.lap_axis()[0], y=dd.TEMP_LIMIT, text="95°C",
                        showarrow=False, yshift=10, xshift=4,
                        font=dict(family="JetBrains Mono, monospace", size=9, color=c.TEXT_SECONDARY))
@@ -89,8 +95,8 @@ def _pressure_gauge_fig(value: float, in_window: bool) -> go.Figure:
             "threshold": {"line": {"color": "#FFFFFF", "width": 2}, "thickness": 0.8, "value": value},
         },
     ))
-    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", height=170,
-                      margin=dict(l=18, r=18, t=8, b=4),
+    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", height=180,
+                      margin=dict(l=18, r=18, t=18, b=6),
                       font=dict(color=c.TEXT_SECONDARY))
     return fig
 
@@ -120,22 +126,28 @@ def _heatmap_html() -> str:
     fonts = c.iframe_fonts("JetBrains Mono", "Inter", "Orbitron")
     lo, hi = dd.TEMP_SCALE
     # Posizioni angoli: FL/FR in alto (musata), RL/RR in basso.
+    # Posizioni gomme simmetriche rispetto al centro-scocca (y≈146): anteriori e
+    # posteriori equidistanti, così i 4 riquadri risultano allineati alle 4 ruote.
     corners = (
-        _heat_corner_svg(40, 70, "fl")
-        + _heat_corner_svg(166, 70, "fr")
-        + _heat_corner_svg(40, 196, "rl")
-        + _heat_corner_svg(166, 196, "rr")
+        _heat_corner_svg(40, 52, "fl")
+        + _heat_corner_svg(166, 52, "fr")
+        + _heat_corner_svg(40, 166, "rl")
+        + _heat_corner_svg(166, 166, "rr")
     )
     grad_lo = c.temp_to_color(lo, dd.TEMP_SCALE)
     grad_hi = c.temp_to_color(hi, dd.TEMP_SCALE)
     return f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
 {fonts}
 *{{margin:0;padding:0;box-sizing:border-box;}}
+html,body{{height:100%;}}
 body{{background:transparent;font-family:'Inter',sans-serif;}}
+/* Il contenitore RIEMPIE l'iframe (height:100%) invece di un'altezza fissa che
+   poteva eccederlo → niente clipping/scroll al primo render. */
 .wrap{{background:{c.BG_INSET};border:1px solid {c.BORDER};border-radius:10px;
-       padding:14px 16px;height:392px;display:flex;flex-direction:column;}}
+       padding:14px 16px;height:100%;display:flex;flex-direction:column;}}
 .t{{font-family:'JetBrains Mono',monospace;font-size:0.72rem;letter-spacing:0.14em;
     text-transform:uppercase;color:{c.TEXT_SECONDARY};margin-bottom:6px;}}
+.svgbox{{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;}}
 .legend{{display:flex;align-items:center;gap:8px;margin-top:10px;}}
 .legend .bar{{flex:1;height:8px;border-radius:4px;
    background:linear-gradient(90deg,{grad_lo} 0%,{grad_hi} 100%);}}
@@ -144,7 +156,8 @@ svg{{display:block;margin:0 auto;}}
 </style></head><body>
 <div class="wrap">
   <div class="t">Heatmap gomme · max stint</div>
-  <svg viewBox="0 0 240 290" width="100%" height="250" preserveAspectRatio="xMidYMid meet">
+  <div class="svgbox">
+  <svg viewBox="0 0 240 290" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
     <!-- scocca auto -->
     <path d="M120 24 C150 24 162 50 162 96 L162 230 C162 256 146 268 120 268
              C94 268 78 256 78 230 L78 96 C78 50 90 24 120 24 Z"
@@ -154,6 +167,7 @@ svg{{display:block;margin:0 auto;}}
     <rect x="104" y="158" width="32" height="46" rx="6" fill="#0e0e0e" stroke="{c.BORDER}" stroke-width="1"/>
     {corners}
   </svg>
+  </div>
   <div class="legend">
     <span class="end">{lo}°</span>
     <span class="bar"></span>

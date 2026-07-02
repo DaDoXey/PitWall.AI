@@ -225,7 +225,76 @@ contiguo all'output, non delegato a un input ancorato fuori vista.
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 30/06/2026 (INC-003, INC-004)*
+## INC-005 — Bug visivi grafico Telemetria (asse °C, legenda, clipping, allineamento)
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-005 |
+| Data rilevamento | 02/07/2026 |
+| Severità | Bassa (cosmetico) |
+| Stato | RISOLTO |
+| File coinvolto | `ui/telemetry.py` |
+
+### Sintomo
+Nella pagina Telemetria: (1) l'etichetta "°C" dell'asse Y appariva ruotata/storta;
+(2) la legenda si sovrapponeva al titolo del grafico; (3) gauge pressioni e heatmap
+risultavano tagliati al primo render (visibili solo scrollando); (4) i numeri sulla
+silhouette gomma non erano allineati alle 4 ruote.
+
+### Causa
+1. Plotly ruota di 90° il titolo dell'asse Y (`title_text="°C"`).
+2. Legenda ancorata in alto (`y=1.02`) nella stessa fascia del titolo.
+3. Heatmap con altezza contenitore fissa (`.wrap height:392px`) dentro un iframe che
+   poteva eccederla → clipping; gauge con margine superiore troppo stretto.
+4. Riquadri gomma posizionati in modo non simmetrico rispetto al centro-scocca.
+
+### Fix Applicato (solo presentazione — valori/soglie/finestra invariati)
+1. Titolo asse Y rimosso; "°C" reso come annotazione orizzontale in alto a sx.
+2. Legenda spostata sotto il grafico (`orientation=h, y=-0.15`) + margine inferiore.
+3. Heatmap che riempie l'iframe (`.wrap`/`html,body` `height:100%`, svg in `.svgbox`
+   flessibile); gauge `height 170→180`, `margin-top 8→18`.
+4. Riquadri gomma riposizionati simmetrici (anteriori `y=52`, posteriori `y=166`).
+
+**Nota:** i dati/finestra a caldo (28.5–30.0, gauge axis 27.0–30.5) sono quelli di
+`main` e NON sono stati toccati: la fix è stata riconciliata nel merge `restyle-ui`→`main`.
+
+---
+
+## INC-006 — Bottone upload Setup troncato ("Uplo…") con icona sovrapposta
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-006 |
+| Data rilevamento | 02/07/2026 |
+| Severità | Bassa (cosmetico) |
+| Stato | RISOLTO |
+| File coinvolto | `assets/app.css` |
+
+### Sintomo
+Negli uploader CSV/screenshot del Setup, il bottone Browse/Upload appariva troncato
+("Uplo…") con l'icona nativa di Streamlit sovrapposta al testo.
+
+### Causa
+La regola `[data-testid="stFileUploaderDropzone"] button { width:40px; overflow:hidden }`
+— pensata per le icone-bottone della sidebar — era scritta **senza scope**, quindi
+colpiva anche gli uploader dell'area principale (Setup), forzandone il bottone a 40px
+e tagliandone il testo.
+
+### Fix Applicato
+Regola (e le due correlate su icona/hover) scopate a
+`section[data-testid="stSidebar"] …`, così l'area principale usa il dropzone nativo
+completo senza overlap. Nessun selettore vietato introdotto (data-testid già in uso).
+
+### Verifiche correlate (non-incident)
+- **Toggle "Input sessione":** default già OFF (`flags.py PITWALL_SHOW_INPUTS=0`,
+  `setup_view.py setdefault`). Comportamento confermato, nessuna modifica.
+- **Rosso RL/RR nel Setup:** intenzionale — evidenziazione dei parametri suggeriti da
+  Gigi (`SUGGESTED_PARAMS = {tire_press_rl, tire_press_rr, preload}` → rosso, resto
+  bianco). NON è una soglia fuori-range. Già presente su `main`.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 02/07/2026 (INC-003…INC-006)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |
