@@ -70,6 +70,11 @@ COLD_PRESSURES = {"fl": 26.5, "fr": 26.5, "rl": 26.2, "rr": 26.0}
 # Coerente con i 4 gauge: media aritmetica dei 4 valori HOT.
 PRESS_AVG_HOT = round(sum(HOT_PRESSURES.values()) / 4, 1)   # → 26.8
 
+# Parametri evidenziati (rosso) negli slider Setup: sono quelli che Gigi consiglia
+# di correggere nella sessione demo (retrotreno scarico → pressioni posteriori +
+# precarico). Puramente presentazionale, coerente con la DEMO_RESPONSE della console.
+SUGGESTED_PARAMS = {"tire_press_rl", "tire_press_rr", "preload"}
+
 # ─────────────────────────────────────────────
 # CARBURANTE — consumo per giro (L), "stabile" attorno a 3.2
 # ─────────────────────────────────────────────

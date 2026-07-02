@@ -54,14 +54,18 @@ def _slider(params: dict, key: str, target=None):
     unit = f" {p['unit']}" if p["unit"] else ""
     disp = f"{current:.2f}" if is_float else str(int(current))
 
-    # Riga nome (mono, muted) + valore (accent) — stili inline, nessun selettore interno.
+    # Valore rosso SOLO per i parametri suggeriti da Gigi nella demo (RL/RR + precarico);
+    # gli altri in bianco. Puramente presentazionale (vedi dd.SUGGESTED_PARAMS).
+    val_color = "#E8002D" if key in dd.SUGGESTED_PARAMS else "#FFFFFF"
+
+    # Riga nome (mono, muted) + valore — stili inline, nessun selettore interno.
     target.markdown(
         '<div style="display:flex;justify-content:space-between;align-items:baseline;'
         'margin:0.7rem 0 0.15rem 0;">'
         f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.66rem;'
         f'letter-spacing:0.08em;color:#999;text-transform:uppercase;">{p["label"]}</span>'
         f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.82rem;'
-        f'font-weight:600;color:#E8002D;">{disp}{unit}</span>'
+        f'font-weight:600;color:{val_color};">{disp}{unit}</span>'
         '</div>',
         unsafe_allow_html=True,
     )

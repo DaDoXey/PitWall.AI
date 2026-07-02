@@ -208,9 +208,16 @@ completo senza overlap. Nessun selettore vietato introdotto (data-testid già in
 ### Verifica correlata (non-incident)
 - **Toggle "Input sessione":** default già OFF (`flags.py PITWALL_SHOW_INPUTS=0`,
   `setup_view.py setdefault`). Comportamento confermato, nessuna modifica.
-- **Rosso RL/RR (FASE 3):** nessuna logica colore per-ruota nel Setup; il rosso
-  osservato è dei gauge Telemetria (indicatore "BASSA = sotto finestra",
-  intenzionale). Non-incident, comportamento confermato.
+- **Rosso RL/RR nel Setup (FASE 3):** comportamento **intenzionale** — evidenziazione
+  dei parametri che Gigi consiglia di correggere nella sessione demo
+  (`SUGGESTED_PARAMS = {tire_press_rl, tire_press_rr, preload}` → rosso, resto bianco).
+  NON è una soglia fuori-range. Verificato che su `main` la logica è
+  `val_color = "#E8002D" if key in dd.SUGGESTED_PARAMS else "#FFFFFF"`.
+  **Regressione trovata su `restyle-ui`:** l'evidenziazione era andata persa
+  (`SUGGESTED_PARAMS` assente, valore rosso hardcoded per tutti). **Port ripristinato**
+  su `restyle-ui` (02/07/2026): aggiunto `SUGGESTED_PARAMS` in `ui/demo_data.py` e
+  la logica `val_color` in `ui/setup_view.py:_slider`. Solo presentazione, nessuna
+  logica soglia/gauge toccata.
 
 ---
 
