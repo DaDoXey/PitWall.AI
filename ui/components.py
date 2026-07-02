@@ -143,14 +143,15 @@ def gigi_avatar_svg(size: int = 44) -> str:
     return (
         f'<svg width="{size}" height="{size}" viewBox="0 0 64 64" '
         f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gigi" '
-        f'fill="none" stroke-linecap="round" stroke-linejoin="round">'
-        # archetto (headband)
-        f'<path d="M13 31 C13 12 51 12 51 31" stroke="#FFFFFF" stroke-width="3"/>'
-        # padiglione sinistro / destro (capsule a contorno)
-        f'<rect x="7.5" y="29" width="11" height="20" rx="5.5" stroke="#FFFFFF" stroke-width="3"/>'
-        f'<rect x="45.5" y="29" width="11" height="20" rx="5.5" stroke="#FFFFFF" stroke-width="3"/>'
-        # braccetto microfono + capsula (accento)
-        f'<path d="M51 47 C51 57 43 60 35 60" stroke="#E8002D" stroke-width="3"/>'
-        f'<circle cx="33.5" cy="60" r="2.6" fill="#E8002D"/>'
+        f'fill="none" stroke="#FFFFFF" stroke-width="3" '
+        f'stroke-linecap="round" stroke-linejoin="round">'
+        # archetto (headband) agganciato al top dei padiglioni
+        f'<path d="M13 29 C13 11 51 11 51 29"/>'
+        # padiglioni (capsule a contorno)
+        f'<rect x="7.5" y="29" width="11" height="18" rx="5.5"/>'
+        f'<rect x="45.5" y="29" width="11" height="18" rx="5.5"/>'
+        # braccetto microfono + capsula (tutto bianco)
+        f'<path d="M51 47 C51 56 43 59 34 59"/>'
+        f'<circle cx="33.5" cy="59" r="2.8" fill="#FFFFFF" stroke="none"/>'
         f'</svg>'
     )

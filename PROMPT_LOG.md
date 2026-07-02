@@ -646,4 +646,17 @@ appare Gigi nelle schermate. (Scelte: emblema **headset**, stile **linea minimal
   `ui/console.py:275` e `ui/dashboard.py:120` (unici usi).
 
 **Verifica:** `py_compile` OK (components/login); icona senza tile (nessun `#0a0a0a`/`rx=16`).
-In attesa di conferma push + check visivo utente. Segue altro fix (indicato dall'utente più avanti).
+Committato/pushato come `2ab0583`.
+
+### Addendum 3 — Icona Gigi tutta bianca + pulizia geometria (02/07/2026)
+
+**Messaggio utente:** «già meglio ma non abbastanza pulita: fai le cuffie totalmente bianche
+e vedi se ci sono altri errori».
+
+**Interventi (`ui/components.py → gigi_avatar_svg`):**
+- Microfono (braccetto + capsula) da rosso `#E8002D` → **bianco**; colore/spessore unificati
+  a livello di `<svg>` (ereditati) per uniformità garantita.
+- Archetto riagganciato al top dei padiglioni (`y29`) → niente micro-gap.
+- Padiglioni più compatti (h `20→18`), capsula mic riempita `stroke="none"` (non più ingrossata).
+
+**Verifica:** `py_compile` OK; nessun `#E8002D` residuo nell'icona (headset 100% bianco).
