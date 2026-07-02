@@ -294,7 +294,35 @@ completo senza overlap. Nessun selettore vietato introdotto (data-testid già in
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 02/07/2026 (INC-003…INC-006)*
+## INC-007 — Logo sidebar ".AI" bianco invece che rosso brand
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-007 |
+| Data rilevamento | 02/07/2026 |
+| Severità | Bassa (cosmetico) |
+| Stato | RISOLTO |
+| File coinvolto | `ui/sidebar.py` |
+
+### Sintomo
+Nel logo "PITWALL.AI" in sidebar, la parte ".AI" appariva bianca/grigia invece del
+rosso brand `#E8002D`, pur avendo lo stile inline `color:#E8002D`.
+
+### Causa
+Le regole globali della sidebar in `assets/app.css` usano `!important`
+(`[data-testid="stSidebar"] * { color: var(--text) !important; }` e
+`section[data-testid="stSidebar"] span:not([data-testid="stIconMaterial"]) { color:#999 !important; }`):
+uno stile inline **senza** `!important` perde contro un `!important` del foglio esterno,
+quindi il rosso del ".AI" veniva sovrascritto.
+
+### Fix Applicato
+Aggiunto `!important` allo stile inline del ".AI" (`color:#E8002D !important`): un
+`!important` inline batte quello di un foglio esterno. Fix di 1 riga, nessun selettore
+Streamlit-interno introdotto, nessuna regola CSS globale modificata.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 02/07/2026 (INC-003…INC-007)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |

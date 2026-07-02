@@ -17,7 +17,7 @@ def _logo() -> None:
         <div style="padding:6px 2px 14px 2px;border-bottom:1px solid #222;margin-bottom:14px;">
           <div style="font-family:'Orbitron',sans-serif;font-size:1.15rem;font-weight:700;
                       letter-spacing:0.08em;color:#FFFFFF;line-height:1;">
-            PITWALL<span style="color:#E8002D;">.AI</span>
+            PITWALL<span style="color:#E8002D !important;">.AI</span>
           </div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;
                       letter-spacing:0.22em;color:#666;text-transform:uppercase;margin-top:6px;">
