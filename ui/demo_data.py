@@ -67,7 +67,11 @@ HOT_PRESSURES = {"fl": 29.0, "fr": 29.2, "rl": 28.2, "rr": 28.0}
 HOT_PRESS_WINDOW = (28.5, 30.0)   # psi (finestra operativa GT3 a caldo)
 
 # A FREDDO — riferimento CSV/garage (NON usato nei gauge "a caldo").
-COLD_PRESSURES = {"fl": 26.5, "fr": 26.5, "rl": 26.2, "rr": 26.0}
+# Delta cold→hot uniforme a +2.5 psi (fisicamente realistico, vedi ERR-01/FASE 2.1):
+#   ant. 26.5→29.0 (+2.5) / 26.5→29.2 (+2.7);  post. 25.7→28.2 (+2.5) / 25.5→28.0 (+2.5).
+# I posteriori a freddo (25.7/25.5) sono SOTTO la finestra a freddo (26.0–27.0):
+# rende esplicita la causa "pressioni retrotreno impostate troppo basse".
+COLD_PRESSURES = {"fl": 26.5, "fr": 26.5, "rl": 25.7, "rr": 25.5}
 
 # Pressione media (a caldo) per la card Dashboard.
 # Coerente con i 4 gauge: media aritmetica dei 4 valori HOT.

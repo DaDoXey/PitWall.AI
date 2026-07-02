@@ -693,3 +693,24 @@ codice; `prompts/system_prompt_v4.txt` era già a 20–200 (file protetto non to
 `SPEC_ERRATA.md` ERR-05 → **RISOLTO**.
 
 **Verifica:** `py_compile modules/setup_params.py` OK. Committato/pushato.
+
+### Entry #010 — Chiusura FASE 2.1: delta pressioni retro a +2.5 (02/07/2026)
+
+**Messaggio utente:** «chiudiamo anche la FASE 2.1 mettendo le pressioni a +2.5» →
+«dimmi tu quale sarebbe la migliore e poi fai tu».
+
+**Analisi:** il delta cold→hot davanti era già +2.5; solo il retrotreno era a +2.0. Due modi
+opposti di portarlo a +2.5: (A) alzare il CALDO (28.7/28.5) → il retrotreno entra in finestra e
+si rompe tutta la narrativa demo (SUGGESTED_PARAMS, console Gigi, nota Dashboard, ERR-02/04);
+(B) abbassare il FREDDO (25.7/25.5) tenendo il caldo invariato → nessun visual cambia, storia
+preservata, più realistico. **Scelta: B** (raccomandata).
+
+**Interventi:**
+- `ui/demo_data.py`: `COLD_PRESSURES` rl 26.2→25.7, rr 26.0→25.5 (delta +2.5; caldo invariato
+  28.2/28.0). Commento aggiornato. `COLD_PRESSURES` non è renderizzato da nessun modulo.
+- `ui/console.py`: advice cache di Gigi (2 punti) da "+0.5 · 26.0→26.5" a **"+1.0 · 25.5→26.5"**,
+  coerente col nuovo freddo (a caldo → ~29.0, in finestra).
+- `SPEC_ERRATA.md`: ERR-01 valori freddo aggiornati + nota "Rev. FASE 2.1" → **FASE 2.1 CHIUSA**.
+
+**Verifica:** `py_compile ui/demo_data.py ui/console.py` OK; caldo/heatmap/media 28.6 invariati.
+Committato/pushato.

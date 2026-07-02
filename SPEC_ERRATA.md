@@ -17,7 +17,7 @@ pre-demo (Dashboard ↔ Telemetria ↔ Heatmap).
 pressioni "a freddo". Sono grandezze fisicamente distinte e non vanno mescolate.
 
 **Decisione:** in `ui/demo_data.py` due dizionari separati ed espliciti:
-- `COLD_PRESSURES` = `{fl 26.5, fr 26.5, rl 26.2, rr 26.0}` (riferimento garage/CSV);
+- `COLD_PRESSURES` = `{fl 26.5, fr 26.5, rl 25.7, rr 25.5}` (riferimento garage/CSV);
 - `HOT_PRESSURES` = `{fl 29.0, fr 29.2, rl 28.2, rr 28.0}` (display telemetria).
 
 **Vincolo fisico (rev. 2026-06-30):** a caldo SEMPRE > a freddo (la gomma in
@@ -26,6 +26,15 @@ retrotreno (28.2 / 28.0) restano comunque **sotto la finestra** (28.5–30.0):
 il caso didattico "posteriore scarico → sovrasterzo in trazione" è preservato,
 ma ora è anche fisicamente corretto (in precedenza il retrotreno a caldo
 mostrava 26.2 / 26.0, cioè SOTTO il valore a freddo: impossibile).
+
+**Rev. FASE 2.1 (02/07/2026):** il delta cold→hot al retrotreno è stato portato da
++2.0 a **+2.5** (allineato al tipico +2.5–3.5) abbassando SOLO il freddo
+(rl 26.2→25.7, rr 26.0→25.5) e lasciando **invariato il caldo** (28.2/28.0). Così
+nessun valore visibile della telemetria cambia (gauge, heatmap, media 28.6,
+finestra), la narrativa "retrotreno scarico" è preservata e la causa diventa più
+esplicita (freddo retro sotto la finestra a freddo 26.0–27.0). L'advice cache di
+Gigi (`ui/console.py`) è stato risincronizzato: posteriori a freddo **+1.0 · 25.5→26.5**.
+→ **FASE 2.1 CHIUSA.**
 
 **Nessuna trasformazione automatica** freddo→caldo viene applicata: i valori a
 caldo sono dati demo dedicati. Il line/gauge della Telemetria usa SOLO `HOT_*`.
