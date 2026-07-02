@@ -134,22 +134,23 @@ def window_bar_svg(value: float, vmin: float, vmax: float, win_lo: float, win_hi
 
 
 def gigi_avatar_svg(size: int = 44) -> str:
-    """SVG dell'avatar di Gigi (casco con cuffie). Stringa inseribile inline."""
+    """Icona di Gigi: headset minimale a contorno (archetto + padiglioni + mic).
+
+    Line-art, sfondo trasparente (nessuna tile/anello): struttura bianca, microfono
+    in accento rosso. Pensata per rendere bene a 44–50px su superfici scure.
+    Stringa SVG inseribile inline.
+    """
     return (
         f'<svg width="{size}" height="{size}" viewBox="0 0 64 64" '
-        f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gigi">'
-        f'<rect x="1.5" y="1.5" width="61" height="61" rx="16" fill="#0a0a0a" '
-        f'stroke="#222222" stroke-width="1.5"/>'
-        f'<circle cx="32" cy="32" r="25" fill="none" stroke="#E8002D" '
-        f'stroke-width="1.5" opacity="0.45"/>'
-        f'<path d="M16 51c0-9 7.2-14.5 16-14.5S48 42 48 51z" fill="#FFFFFF"/>'
-        f'<circle cx="32" cy="26" r="9.5" fill="#FFFFFF"/>'
-        f'<path d="M20.5 26a11.5 11.5 0 0 1 23 0" fill="none" stroke="#FFFFFF" '
-        f'stroke-width="2.6" stroke-linecap="round"/>'
-        f'<rect x="18" y="24" width="4.6" height="7.5" rx="2.3" fill="#E8002D"/>'
-        f'<rect x="41.4" y="24" width="4.6" height="7.5" rx="2.3" fill="#E8002D"/>'
-        f'<path d="M20.3 30c-2.4 3.4-2.4 6.6-.4 9.4" fill="none" stroke="#E8002D" '
-        f'stroke-width="2.2" stroke-linecap="round"/>'
-        f'<circle cx="20" cy="40" r="2.3" fill="#E8002D"/>'
+        f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gigi" '
+        f'fill="none" stroke-linecap="round" stroke-linejoin="round">'
+        # archetto (headband)
+        f'<path d="M13 31 C13 12 51 12 51 31" stroke="#FFFFFF" stroke-width="3"/>'
+        # padiglione sinistro / destro (capsule a contorno)
+        f'<rect x="7.5" y="29" width="11" height="20" rx="5.5" stroke="#FFFFFF" stroke-width="3"/>'
+        f'<rect x="45.5" y="29" width="11" height="20" rx="5.5" stroke="#FFFFFF" stroke-width="3"/>'
+        # braccetto microfono + capsula (accento)
+        f'<path d="M51 47 C51 57 43 60 35 60" stroke="#E8002D" stroke-width="3"/>'
+        f'<circle cx="33.5" cy="60" r="2.6" fill="#E8002D"/>'
         f'</svg>'
     )

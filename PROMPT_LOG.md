@@ -629,4 +629,21 @@ ma posteriori a +2.0 (non +2.5) **per scelta didattica** (retrotreno sotto fines
 - Login minimal di oggi **mantenuto** (niente auto animata, niente badge). Logica auth invariata.
 
 **Verifica:** `py_compile pages/login.py` OK; import `ui.components` risolto da `pages/`.
-Da fare prima del commit: `streamlit run app.py` e check visivo su Cloud.
+Committato e pushato come `bf91a91`.
+
+### Addendum 2 — Icona Gigi rifatta + avatar rimosso dalla login (02/07/2026)
+
+**Messaggio utente:** verifica a schermo → l'avatar in mezzo alla login **non** era voluto;
+voleva invece che rifacessi **l'icona dell'ingegnere** usata nell'Engineer Console e dove
+appare Gigi nelle schermate. (Scelte: emblema **headset**, stile **linea minimale senza tile**.)
+
+**Interventi:**
+- `pages/login.py`: **rimosso** l'avatar `components.html` in mezzo alla pagina e i relativi
+  import (`components`, `from ui import components as c`). La **traccia telemetria** resta.
+- `ui/components.py` → `gigi_avatar_svg`: **ridisegnata** da "casco con cuffie in tile" a
+  **headset line-art** (archetto + 2 padiglioni a contorno bianchi + braccetto/capsula mic in
+  accento rosso), sfondo trasparente, niente tile/anello. Si aggiorna automaticamente in
+  `ui/console.py:275` e `ui/dashboard.py:120` (unici usi).
+
+**Verifica:** `py_compile` OK (components/login); icona senza tile (nessun `#0a0a0a`/`rx=16`).
+In attesa di conferma push + check visivo utente. Segue altro fix (indicato dall'utente più avanti).

@@ -1,9 +1,7 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import uuid
 from auth_config import is_oauth_configured
 from db_auth import init_db, create_or_update_user
-from ui import components as c
 
 init_db()
 
@@ -37,15 +35,6 @@ st.markdown("""
     <div class="pw-hero-tagline" style="font-family:'Inter',sans-serif;font-size:0.82rem;color:#999999;font-style:italic;margin-top:6px;">Il tuo ingegnere di pista, sempre al muretto</div>
 </div>
 """, unsafe_allow_html=True)
-
-# ── SVG ingegnere minimale (FASE 4) — emblema tenue sotto la tagline ──
-# Riusa l'avatar di Gigi (ui/components.gigi_avatar_svg), reso via components.html
-# per affidabilità su Cloud (SVG in st.markdown non è garantito).
-components.html(
-    f'<div style="display:flex;justify-content:center;padding-top:6px;opacity:0.9;">'
-    f'{c.gigi_avatar_svg(48)}</div>',
-    height=64, scrolling=False,
-)
 
 st.markdown("")
 
