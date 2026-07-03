@@ -1037,7 +1037,11 @@ section[data-testid="stSidebar"] a:hover {
 /* Flusso naturale dall'alto: niente flex-fill né 100vh forzato (erano la causa
    degli stiramenti irregolari e del rischio overlap). Gap uniforme e compatto. */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-    gap: 0.5rem !important;   /* compatto ma respirabile (niente overlap in flusso normale) */
+    flex: 1 1 auto !important;
+    justify-content: space-between !important;  /* distribuisce le voci su TUTTA l'altezza
+        del pannello: logo in alto, footer in basso, resto equidistante → nessuna fascia
+        vuota. space-between non può sovrapporre (aggiunge solo spazio, mai negativo). */
+    gap: 0.5rem !important;   /* spazio MINIMO garantito fra le voci */
 }
 /* Riduce l'ingombro verticale complessivo così l'intera sidebar sta in un solo
    viewport e Streamlit non aggiunge lo scroll interno. */
@@ -1057,6 +1061,30 @@ section[data-testid="stSidebar"] > div:first-child,
 section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
 section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
     overflow: hidden !important;
+}
+/* Catena flex a piena altezza: il contenitore occupa tutto il pannello così lo
+   space-between del blocco voci può distribuire su tutta l'altezza (no scroll,
+   perché overflow:hidden + contenuto che ci sta). */
+section[data-testid="stSidebar"] > div:first-child {
+    height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+}
+/* Elimina la fascia vuota in alto: l'header nativo (bottone collapse) non riserva
+   più una banda di altezza. Il bottone « resta visibile (z-index/min-height propri). */
+section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
+    min-height: 0 !important;
+    height: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 /* Divider fra navigazione e "Sessione Attiva". */

@@ -922,4 +922,17 @@ sui contenitori-scroller della sidebar (`> div:first-child`, `stSidebarContent`,
 compattazione resta come garanzia che il contenuto stia nel viewport (hidden non taglia nulla su
 schermi normali). Solo CSS, nessun file protetto. Non è un incident (polish) → nessun INC.
 
+**Follow-up 3 (stesso giorno) — riempire il pannello (no spazi vuoti):**
+Utente: «ora che è fissa, imposta meglio tutte le voci così da non lasciare spazi liberi» +
+condiviso screenshot (`Catture di schermata/Screenshot 2026-07-03 194944.png`, letto). Dallo
+screenshot: **grande fascia vuota in alto** (header nativo sidebar col bottone collapse che riserva
+una banda) + voci raccolte al centro con spazio residuo sotto il footer. **Fix (solo `assets/app.css`):**
+(1) catena flex a piena altezza (`> div:first-child` height:100vh + flex column; `stSidebarContent`/
+`stSidebarUserContent` e wrapper flex:1) così il blocco voci occupa tutto il pannello; (2)
+`justify-content: space-between` sul blocco voci → logo in alto, footer in basso, resto equidistante
+(space-between aggiunge solo spazio, mai negativo → **impossibile l'overlap** del vecchio approccio);
+(3) header sidebar `min-height:0` → eliminata la fascia vuota in alto (bottone « resta, ha z-index/min
+propri). Overflow:hidden dei follow-up precedenti invariato (resta pannello fisso, no scroll). Non è
+un incident (polish) → nessun INC.
+
 **Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.
