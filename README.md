@@ -87,3 +87,13 @@ Per la modalità demo non è necessaria una chiave API: la console serve la risp
 sono la fonte di verità per i range ACC e i calcoli. Le viste UI li **chiamano**, non li
 modificano. Le correzioni ai soli dati demo di presentazione sono tracciate in
 `SPEC_ERRATA.md`; gli incidenti in `INCIDENTS.md`; lo storico di lavoro in `PROMPT_LOG.md`.
+
+## Documentazione — quale file è valido
+
+| Documento | Stato |
+|---|---|
+| `README.md` (questo file) | **Attuale** — stato del progetto post-restyle. |
+| `PitWall_AI_Technical_Spec_v4.md` | **Attuale** — specifica tecnica post-building di riferimento. |
+| `AVVIO_RAPIDO.md` | **Attuale** — guida operativa (lavorare da un secondo PC). |
+| `PitWall_AI_Technical_Spec_v3.md` | Storico — superato da v4. |
+| `README_EXTENSION.md` | Storico — pianificazione migrazione v2 (riconciliata, ma superata dal restyle). |

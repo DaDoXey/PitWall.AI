@@ -1,3 +1,11 @@
+> ⚠️ **DOCUMENTO SUPERATO.** Questa v3 (Release Candidate MVP, 10/05/2026) è stata
+> sostituita dalla **Specifica Tecnica v4** (`PitWall_AI_Technical_Spec_v4.md`), il
+> documento post-building che recepisce lo stato effettivo del progetto. La v4 dichiara
+> obsolete v1/v2/v3. Conservato solo come traccia storica: per lo stato attuale fare
+> riferimento a **v4** e a **`README.md`**.
+
+---
+
 # PitWall.AI — Specifica Tecnica v3 (Consolidata e Unificata)
 
 **Repository:** https://github.com/DaDoXey/PitWall.AI.git

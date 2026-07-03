@@ -1,3 +1,12 @@
+> ⚠️ **DOCUMENTO STORICO (v2, superato dal restyle).** Questo file descrive la
+> migrazione MVP → v2 (Setup completo + Vision) *com'era pianificata all'epoca*. La
+> struttura del repo è poi cambiata con il restyle UI/UX: `app.py` è oggi una
+> **shell + router** (non un monolite con 5 tab), il parsing CSV vive in
+> `backend/parser/csv_parser.py` (non `parser.py`), e il modello di default è
+> `claude-haiku-4-5`. Per lo **stato attuale** fare sempre riferimento a **`README.md`**.
+> Conservato come traccia storica delle decisioni; le sezioni fattuali qui sotto sono
+> state riconciliate con il repo reale.
+
 # PitWall.AI — Estensione v2: Setup Completo + Vision
 
 ## Cosa aggiunge questa versione
@@ -5,7 +14,7 @@
 ### Nuovi moduli
 | File | Descrizione |
 |---|---|
-| `modules/setup_params.py` | Definizione completa di tutti i parametri ACC (5 sezioni, 47 parametri totali) |
+| `modules/setup_params.py` | Definizione completa di tutti i parametri ACC (5 sezioni, 49 parametri totali — vedi tabella sotto) |
 | `modules/vision_parser.py` | Parsing screenshot setup via Claude Vision API |
 | `prompts/system_prompt_v4.txt` | System prompt aggiornato con tutti i nuovi range |
 | `app.py` | Riscrittura completa con 5 tab setup + input da screenshot |
@@ -26,19 +35,22 @@
 
 ## Integrazione nel repository esistente
 
-### Struttura target
+### Struttura target (com'era pianificata all'epoca)
+> ⚠️ **Storico.** La struttura reale attuale è diversa (vedi `README.md`): `app.py` è una
+> shell+router, il parser CSV è `backend/parser/csv_parser.py`, il prompt attivo è
+> `prompts/system_prompt_v4.txt`. Lo schema sotto è la pianificazione originale v2.
 ```
 PitWall.AI/
-├── app.py                          ← SOSTITUISCI con questo
-├── agent.py                        ← SOSTITUISCI con questo
-├── parser.py                       ← invariato (MVP)
+├── app.py                          ← (allora) SOSTITUISCI — oggi è shell + router
+├── agent.py                        ← (allora) SOSTITUISCI — punta al prompt v4
+├── parser.py                       ← (allora) MVP — oggi backend/parser/csv_parser.py
 ├── modules/
 │   ├── __init__.py                 ← CREA (file vuoto)
 │   ├── setup_params.py             ← AGGIUNGI
 │   └── vision_parser.py            ← AGGIUNGI
 ├── prompts/
-│   ├── system_prompt.txt           ← invariato (v3, mantieni come backup)
-│   └── system_prompt_v4.txt        ← AGGIUNGI
+│   ├── system_prompt.txt           ← (allora) v3 di backup
+│   └── system_prompt_v4.txt        ← AGGIUNGI (prompt attivo)
 ├── data/
 │   └── test_session.csv            ← invariato
 ├── .env
@@ -51,15 +63,17 @@ PitWall.AI/
 touch modules/__init__.py
 ```
 
-### Aggiorna `requirements.txt`
+### `requirements.txt` (stato attuale del repo)
 ```
-streamlit
-anthropic
-openai
-python-dotenv
-pandas
+streamlit>=1.0
+anthropic>=0.26.0
+python-dotenv>=1.0
+pandas>=2.0
+plotly>=5.0
+requests>=2.30
 ```
-Nessuna dipendenza aggiuntiva: `vision_parser.py` usa già `anthropic` che era nel requirements.
+Il `vision_parser.py` usa `anthropic`, già presente. (Nota storica: la bozza v2 elencava
+anche `openai`, mai usato nel repo attuale — rimosso.)
 
 ---
 
@@ -80,8 +94,10 @@ Nessuna dipendenza aggiuntiva: `vision_parser.py` usa già `anthropic` che era n
 - Non sostituisce la validazione manuale: il pilota deve sempre verificare i valori riconosciuti
 
 ### Costo per chiamata Vision
-- ~$0.004–0.008 per immagine (Claude Sonnet, immagine 1080p)
+- ~$0.004–0.008 per immagine (immagine 1080p; ordine di grandezza stimato all'epoca su
+  Claude Sonnet — il default attuale del progetto è `claude-haiku-4-5`, più economico)
 - Separato dal costo dell'analisi principale
+- N.B.: la feature screenshot è dietro feature-flag `FEATURE_SCREENSHOT` (default OFF)
 
 ---
 

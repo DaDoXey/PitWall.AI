@@ -1035,3 +1035,25 @@ valore 28.6, range 28.5–30.0, min/max consumo 3.0/3.3), id gradienti **unici**
 tag div/svg/span bilanciati. Non un incident → nessun INC.
 
 **Backlog residuo:** video demo di backup (task utente, non-code).
+
+---
+
+## 04/07 — Documentazione: riconciliazione doc storici
+
+Utente: «ok molto meglio i grafici era quello che volevo» → conferma Dashboard OK. Poi «quale potrebbe
+essere la prossima task da fare» → AskUserQuestion → scelta **«Documentazione / README»**. Analisi (lettura
+integrale README, README_EXTENSION, SPEC_ERRATA, le due spec v3/v4, verifica incrociata con `agent.py` e
+`requirements.txt`). Discrepanze trovate: (1) `README_EXTENSION.md` obsoleto — descriveva `app.py` come
+monolite «da sostituire», citava `parser.py`, `requirements` con `openai` e senza `plotly/requests`, costo
+Vision su Sonnet, e incongruenza interna «47» vs tabella «49» parametri; (2) `PitWall_AI_Technical_Spec_v3.md`
+già dichiarata obsoleta dalla v4 ma priva di avviso nel file. README.md invece **già accurato** (verificato:
+`LLM_MODEL` default `claude-haiku-4-5` = `agent.py:40`; requirements combaciano). Scelta utente: **marcare
+come superati** (non eliminare). **Fix (solo file `.md`, nessun codice/dato/file protetto):**
+- `PitWall_AI_Technical_Spec_v3.md`: banner «DOCUMENTO SUPERATO → vedi v4/README» in testa.
+- `README_EXTENSION.md`: banner «DOCUMENTO STORICO (v2, superato dal restyle)»; corretti i 4 punti fattuali
+  (struttura reale con note storiche, requirements allineati al repo, `47→49` parametri, nota costo Vision +
+  feature-flag `FEATURE_SCREENSHOT`).
+- `README.md`: aggiunta tabella «Documentazione — quale file è valido» (Attuale vs Storico).
+Non un incident → nessun INC.
+
+**Backlog residuo:** video demo di backup (task utente, non-code).
