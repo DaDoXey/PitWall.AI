@@ -1029,34 +1029,16 @@ section[data-testid="stSidebar"] a:hover {
 }
 
 /* ==============================================
-   SIDEBAR — compattazione + ancoraggio in fondo (Esci/footer)
+   SIDEBAR — compattazione (flusso naturale, spaziatura uniforme)
    Solo selettori scoped alla sidebar; nessun wildcard.
    Collapse/expand e contenuto del box sessione NON toccati.
    ============================================== */
 
-/* Colonna a piena altezza: permette allo spacer di spingere Esci+footer in fondo. */
-section[data-testid="stSidebar"] > div:first-child {
-    min-height: 100vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-section[data-testid="stSidebar"] > div:first-child > div,
-section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
-    flex: 1 1 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-/* Il blocco verticale interno riempie l'altezza disponibile… */
+/* Flusso naturale dall'alto: niente flex-fill né 100vh forzato (erano la causa
+   degli stiramenti irregolari e del rischio overlap). Resta un solo gap uniforme
+   e compatto fra gli elementi impilati → nessuno scroll, nessuna sovrapposizione. */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-    flex: 1 1 auto;
-    gap: 0.45rem !important;   /* meno spazio morto fra gli elementi (era ampio) */
-}
-/* …e lo spacer si espande, spingendo tutto ciò che segue verso il basso.
-   :has() è supportato dal Chrome di Streamlit Cloud; se non applicasse, resta il
-   min-height come gap minimo → degrada con grazia. */
-section[data-testid="stSidebar"] [data-testid="stElementContainer"]:has(.pw-sb-spacer) {
-    flex: 1 1 auto !important;
-    min-height: 14px;
+    gap: 0.65rem !important;   /* compatto ma respirabile */
 }
 
 /* Divider fra navigazione e "Sessione Attiva". */

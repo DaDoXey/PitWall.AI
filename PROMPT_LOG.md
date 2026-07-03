@@ -860,3 +860,43 @@ Non è un incident (polish, non bug) → nessun INC. Da confermare a schermo il 
 sul deploy; fallback graceful se non applicasse.
 
 **Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.
+
+### Addendum — Sidebar: spaziatura uniforme (rework, flusso naturale) (03/07/2026)
+
+**Data:** 03/07/2026 · branch `restyle-ui` · modello claude-opus-4-8 (Claude Code)
+
+**Contesto (ripresa dopo `/clear`):** memoria persistente vuota → ricostruito lo status
+leggendo per intero PROMPT_LOG/INCIDENTS/AVVIO_RAPIDO/README + Git (tutto allineato a
+`b08f206`, `main`==`restyle-ui`==`origin/*`, 0/0). Prossima task scelta dall'utente = sidebar.
+
+**Catalogo messaggi di questa iterazione:**
+1. Utente: «a che punto siamo con la task di prima?» → chiarito che `/clear` ha azzerato il contesto.
+2. Utente: «controlla la memoria persistente» → cartella memory vuota (nessun file).
+3. Utente: incollato il **Setup/metodo** (scopo prompt_log + incidents; obiettivo: proseguire il
+   breakdown/status; leggere tutto, verificare discordanze, allineamento Git, esporre piano e
+   attendere approvazione; non inventare/costruire; repo link). Subtask iniziale: nessuna.
+4. Scelta guidata prossima task → Utente (Other): «inizia col sistemare la sidebar, avevo fatto
+   richieste prima ma non sono riuscite bene».
+5. Scelta guidata sintomo → Utente: «spaziature irregolari; voglio la sidebar compatta senza scroll,
+   ma l'ultima volta è venuta troppo compatta e alcune cose rischiano di sovrapporsi».
+6. Scelta guidata Esci/footer → Utente: **«Flusso naturale (Consigliato)»** (no push-to-bottom).
+7. Utente: «ok procedi».
+
+**Diagnosi:** le spaziature irregolari + rischio overlap nascevano dal conflitto tra due meccanismi
+del blocco "compattazione" precedente: `[data-testid="stVerticalBlock"] { flex:1 }` (stirava TUTTI i
+blocchi verticali annidati) e `gap:0.45rem` (troppo stretto), sommati al push-to-bottom
+(`min-height:100vh` + spacer `:has()` flex). Compattare e riempire in contemporanea = layout ballerino.
+
+**Interventi (solo presentazione, nessun file protetto; auth/nav/logout e box sessione invariati):**
+- `assets/app.css` (blocco sidebar): **rimossi** `min-height:100vh`/flex-column su `> div:first-child`,
+  le regole flex annidate (`> div`/`stSidebarUserContent`), il `flex:1` su `stVerticalBlock` e la regola
+  spacer `stElementContainer:has(.pw-sb-spacer)`. Resta un **unico gap uniforme `0.65rem`** (compatto ma
+  respirabile). Commento di sezione aggiornato ("flusso naturale, spaziatura uniforme").
+- `ui/sidebar.py`: rimosso il `<div class="pw-sb-spacer">`; al suo posto un **divider** `.pw-sb-div`
+  tra "Sessione Attiva" ed "Esci" → flusso dall'alto, Esci/footer seguono naturalmente.
+
+**Verifica:** `py_compile ui/sidebar.py` OK; `import ui.sidebar` OK (`render_sidebar` callable);
+nessun riferimento orfano a `pw-sb-spacer` (grep py/css). Non è un incident (polish, non bug) → nessun INC.
+
+**Decisione:** ☑ Mantenuto. Commit/push su `restyle-ui`+`main` solo dopo «ok push» esplicito (regola git).
+**Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.

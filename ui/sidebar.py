@@ -119,10 +119,9 @@ def render_sidebar() -> None:
         st.markdown('<div class="pw-sb-div"></div>', unsafe_allow_html=True)
         _session_box()
 
-        # Spacer flessibile: spinge Esci + footer in fondo alla sidebar (riempie il
-        # vuoto). Se il flex non regge su una versione di Streamlit, degrada a un
-        # piccolo gap fisso (min-height nel CSS) senza rompere nulla.
-        st.markdown('<div class="pw-sb-spacer"></div>', unsafe_allow_html=True)
+        # Divider tra "Sessione Attiva" e il logout: separazione pulita in un
+        # flusso naturale dall'alto (niente push-to-bottom → niente stiramenti/overlap).
+        st.markdown('<div class="pw-sb-div"></div>', unsafe_allow_html=True)
 
         if st.button("⏻  Esci", key="btn_logout", use_container_width=True):
             _logout()
