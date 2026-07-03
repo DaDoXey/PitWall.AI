@@ -32,9 +32,13 @@ _FONTS = [
 ]
 
 
-@functools.lru_cache(maxsize=1)
-def _base_style() -> str:
-    """Font self-hosted (base64) + token del design system. Cache: 1 lettura."""
+@functools.lru_cache(maxsize=4)
+def _base_style_cached(_mtime: float) -> str:
+    """Font self-hosted (base64) + token del design system.
+
+    Cache keyed sull'mtime di design_system.css: se il file cambia, l'mtime cambia
+    e viene riletto (niente più CSS stantio servito da cache-a-vita-processo).
+    """
     faces = []
     for family, weight, filename in _FONTS:
         data = (_FONTS_DIR / filename).read_bytes()
@@ -53,6 +57,10 @@ def _base_style() -> str:
         css = css[css.index(marker):]
 
     return "".join(faces) + css
+
+
+def _base_style() -> str:
+    return _base_style_cached(_DESIGN_SYSTEM.stat().st_mtime)
 
 
 @functools.lru_cache(maxsize=8)
@@ -79,10 +87,18 @@ def font_faces_css(*families: str) -> str:
     return "".join(faces)
 
 
-@functools.lru_cache(maxsize=1)
+@functools.lru_cache(maxsize=4)
+def _app_style_cached(_mtime: float) -> str:
+    """Stile principale dell'app (estratto da app.py in Lotto 2).
+
+    Cache keyed sull'mtime di app.css: modificando il CSS basta un rerun/refresh
+    per vederlo aggiornato, senza riavviare il server (Streamlit non sorveglia i .css).
+    """
+    return _APP_CSS.read_text(encoding="utf-8")
+
+
 def _app_style() -> str:
-    """Stile principale dell'app (estratto da app.py in Lotto 2)."""
-    return _APP_CSS.read_text(encoding="utf-8") if _APP_CSS.exists() else ""
+    return _app_style_cached(_APP_CSS.stat().st_mtime) if _APP_CSS.exists() else ""
 
 
 def inject_design_system(include_app_css: bool = True) -> None:

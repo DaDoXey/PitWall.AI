@@ -935,4 +935,16 @@ una banda) + voci raccolte al centro con spazio residuo sotto il footer. **Fix (
 propri). Overflow:hidden dei follow-up precedenti invariato (resta pannello fisso, no scroll). Non è
 un incident (polish) → nessun INC.
 
+**Follow-up 4 (stesso giorno) — «è uguale a prima»: causa reale = CSS in cache:**
+Utente: «è ancora uguale a prima, fixala». Indagine: testid Streamlit 1.58 verificati nel frontend
+(`stSidebarContent`/`stSidebarUserContent`/`stSidebarHeader`/`stVerticalBlock` esistono → selettori
+corretti). **Causa vera:** `assets/css_loader.py` cacheva `app.css` in `@lru_cache(maxsize=1)` a
+vita-processo e Streamlit **non sorveglia i file `.css`** → un semplice refresh serviva il CSS
+vecchio; il fill/header del follow-up 3 non veniva mai caricato senza un restart completo del server.
+**Fix:** cache legata all'`mtime` del file (`_app_style_cached(mtime)` + `_base_style_cached(mtime)`)
+→ ogni modifica CSS si ricarica a un rerun/refresh, niente più restart. In più, robustezza sul fill:
+`min-height: calc(100vh - 3rem)` sul blocco voci (forza l'altezza anche se la catena flex dei genitori
+non regge). File toccati: `assets/css_loader.py`, `assets/app.css` — nessun file protetto. Verificato:
+`py_compile` OK, `_app_style()` rilegge il file (contiene `space-between`). Non un incident → nessun INC.
+
 **Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.

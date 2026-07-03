@@ -1038,6 +1038,9 @@ section[data-testid="stSidebar"] a:hover {
    degli stiramenti irregolari e del rischio overlap). Gap uniforme e compatto. */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
     flex: 1 1 auto !important;
+    /* min-height forza l'altezza del blocco ANCHE se la catena flex dei genitori
+       non regge (min-height non dipende dal parent) → il riempimento è robusto. */
+    min-height: calc(100vh - 3rem) !important;
     justify-content: space-between !important;  /* distribuisce le voci su TUTTA l'altezza
         del pannello: logo in alto, footer in basso, resto equidistante → nessuna fascia
         vuota. space-between non può sovrapporre (aggiunge solo spazio, mai negativo). */
