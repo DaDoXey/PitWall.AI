@@ -7,13 +7,24 @@
 
 ## 0. Dati della demo
 
-- **CSV di sessione:** `backend/data/test_session.csv` (5 giri).
-  - Posteriori caldi (RL ~94–98 °C, **RR ~101–105 °C**) vs anteriori in range (~87–92 °C).
-  - Pressioni ~26.4–27.0 PSI (finestra a freddo OK), consumo ~3.0–3.3 L/giro.
-  - **Caso didattico:** asse posteriore termicamente sovraccarico → spunto perfetto per
-    raccontare sovrasterzo in trazione / pressioni-temperature.
+> ⚠️ **Distinzione importante (verificata in prova-generale 04/07):** le schermate sono in
+> **demo-mode blindata** e leggono da `ui/demo_data.py` (**8 giri**, Monza · BMW M4 GT3) —
+> NON dal CSV. Il CSV serve solo a *mostrare* la funzione di upload; caricarlo non cambia i
+> numeri a video. Quindi **a voce parla sempre di "8 giri"**, che è ciò che si vede.
+
+- **Dati a schermo (demo-mode, `ui/demo_data.py`):** **8 giri**, best 1:47.812, consumo medio
+  **3.2 L/giro** (25.6 L totali).
+  - Temperature a caldo: anteriori in range (88/90 °C), **Post.DX 105 °C** (oltre il limite 95 °C).
+  - Pressioni **a caldo** (gauge/heatmap): ant. 29.0/29.2 in finestra, **post. 28.2/28.0 SOTTO
+    finestra** (28.5–30.0) → è QUI che si legge il "retrotreno scarico".
+  - **Caso didattico:** asse posteriore termicamente sovraccarico + pressioni posteriori sotto
+    finestra → sovrasterzo in trazione. **Raccontalo sui dati a CALDO** (Telemetria/heatmap),
+    non sulle pressioni a freddo.
+- **CSV di sessione (illustrativo):** `backend/data/test_session.csv` (5 giri, pressioni a
+  **freddo** 26.4–27.0 PSI, consumo 3.0–3.3). Usalo solo per far vedere l'upload nel Setup;
+  le sue pressioni a freddo sono in finestra, quindi NON commentarci sopra il retrotreno.
 - **Deploy:** https://pitwall-ai-dado.streamlit.app
-- **Auto/pista da impostare a mano:** BMW M4 GT3 · Monza · Asciutto (il CSV ACC non contiene questi metadati).
+- **Auto/pista già impostate in demo:** BMW M4 GT3 · Monza · Asciutto (il CSV ACC non contiene questi metadati).
 
 ---
 
@@ -27,30 +38,39 @@
 - Mostra la **welcome card di Gigi** (icona nuova, font self-hosted, niente flash).
 - *Frase:* «Gigi è l'ingegnere virtuale: presento i dati, lui dà l'analisi tecnica».
 
-### [1:00] Caricamento dati (45s)
-- Sidebar → carica `test_session.csv`.
-- Mostra le **card metriche** (dato + sparkline) e l'**alert automatico** sulle temperature.
-- *Frase:* «5 giri, consumo medio, temperatura massima — già evidenziata in giallo/rosso».
+### [1:00] Dashboard — metriche già popolate (45s)
+- La **Dashboard** è già piena (demo-mode): **card metriche** con dato + grafico (sparkline
+  temperature/consumo, window-bar pressione) e la nota d'**alert** su Post.DX e retrotreno.
+- *Frase:* «8 giri, consumo medio 3.2 L, temperatura massima Post.DX 105°C — già evidenziata».
+- *(Opzionale)* per mostrare la funzione upload: Setup → toggle **«Input sessione»** →
+  expander **«Dati sessione»** → carica `test_session.csv`. **Nota:** è dimostrativo, le metriche
+  restano quelle demo (non si ricalcolano dal CSV).
 
 ### [1:45] Telemetria (45s)
-- Scorri alla **sezione Telemetria**: line chart temperature per giro, bar chart consumo,
-  **heatmap 2×2** con il posteriore destro rosso.
-- *Frase:* «Si vede a colpo d'occhio: asse posteriore in sofferenza termica».
+- Vai su **Telemetria**: line chart temperature per giro (toggle °C/°F, raw/smoothed),
+  4 gauge pressioni, **heatmap 2×2** con il posteriore destro rosso; sotto, tabella giro-per-giro.
+- *Frase:* «Si vede a colpo d'occhio: asse posteriore in sofferenza termica, pressioni post. sotto finestra».
 
-### [2:30] Setup + Feedback (60s)
-- Imposta **BMW M4 GT3 / Monza / Asciutto**.
-- Nei tab setup, mostra un paio di slider (pressioni, ARB).
-- Scrivi un feedback: *«Sovrasterzo in uscita dalle curve lente, posteriore instabile»*.
-- Seleziona **pressioni a freddo**. Premi **ANALIZZA SESSIONE**.
+### [2:30] Setup (45s)
+- Apri **Setup** (BMW M4 GT3 · Monza già impostate): scorri i 5 tab, mostra un paio di slider
+  (pressioni, ARB).
+- *Frase:* «I 4 valori di pressione si colorano da soli vs la finestra ottimale a freddo
+  (verde/ambra/rosso); i parametri suggeriti da Gigi sono in rosso».
+- *(Nessun bottone Analizza qui: l'analisi si fa nella Engineer Console — passo successivo.)*
 
-### [3:30] Report AI (60s)
-- Mostra il **report a 4 sezioni** (Diagnosi → Causa → Correzione → Note) numerato.
-- Evidenzia una **correzione numerica concreta** (es. pressioni/ARB/preload).
-- *Frase:* «Output strutturato, terminologia ACC, valori azionabili».
+### [3:15] Engineer Console — feedback + analisi (75s)
+- Apri **Engineer Console** (Gigi · online). Scrivi nel campo un feedback:
+  *«L'auto scivola dietro in accelerazione»* (o usa un chip: Sottosterzo/Gomme/…).
+- Premi **«⚙ ANALIZZA»**.
+- Mostra il **report a 4 sezioni** numerato (01 Diagnosi → 02 Causa → 03 Correzione → 04 Note),
+  con la card **Correzione** evidenziata come «Scheda Setup».
+- *Frase:* «Output strutturato, terminologia ACC, correzione numerica azionabile —
+  pressioni post. +1.0 psi, precarico 60→75 Nm».
 
-### [4:30] Chat con Gigi (30s)
-- Apri **Parla con Gigi**, domanda di follow-up (es. «e se la pista sale a 40°C?»).
-- Mostra l'avatar animato e la risposta contestuale.
+### [4:30] Follow-up con Gigi (30s)
+- **Nella stessa Engineer Console**, prova un altro scenario: clicca un chip diverso
+  (es. **Analizza gomme**) o scrivi una nuova domanda → il report cambia in tempo reale.
+- *Frase:* «Risposte diverse per scenario, tutte offline in demo-mode: la demo non dipende dalla rete».
 
 ### Chiusura
 - *Frase:* «Design system unico, font self-hosted, deploy su Streamlit Cloud».
@@ -63,9 +83,10 @@
 - [ ] Deploy raggiungibile e **sveglio** (apri il link 10 min prima — Streamlit Cloud va in sleep).
 - [ ] **`ANTHROPIC_API_KEY`** valida e con credito (testa una analisi reale end-to-end).
 - [ ] Login quick-DEV funziona.
-- [ ] Upload `test_session.csv` → metriche, telemetria, heatmap renderizzano.
-- [ ] **ANALIZZA SESSIONE** restituisce le 4 sezioni senza errori.
-- [ ] Chat con Gigi risponde.
+- [ ] Dashboard/Telemetria/heatmap renderizzano (dati demo-mode) senza errori.
+- [ ] *(Opzionale)* Upload `test_session.csv` nel Setup mostra il messaggio «CSV letto: 5 giri…».
+- [ ] Engineer Console → **«⚙ ANALIZZA»** (o un chip) restituisce le **4 sezioni** senza errori.
+- [ ] Cambiando chip/testo nella Console il report cambia (interattività demo).
 
 ### Visivo (la verifica rimandata di tutte le fasi 1–6!)
 - [ ] Font corretti (Orbitron/Inter/JetBrains) — **niente flash** di font di sistema.

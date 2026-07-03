@@ -122,6 +122,10 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
   corrette le incongruenze fattuali della v2 (struttura reale, requirements, modello,
   47→49 parametri). Aggiunta a `README.md` la tabella «quale doc è valido» (v4 + README
   attuali). Nessun codice/dato toccato.
+- ~~Prova-generale demo~~ → **fatta il 04/07**: verifica a codice dei 7 passi di
+  `docs/demo_checklist.md` (smoke test OK). Allineato lo **script** all'app reale (8 giri non 5;
+  analisi in Engineer Console con «⚙ ANALIZZA», non nel Setup; niente chat separata; retrotreno
+  raccontato sui dati a caldo). Solo `.md`, nessun codice toccato.
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
 > ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /

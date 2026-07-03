@@ -1057,3 +1057,26 @@ come superati** (non eliminare). **Fix (solo file `.md`, nessun codice/dato/file
 Non un incident → nessun INC.
 
 **Backlog residuo:** video demo di backup (task utente, non-code).
+
+---
+
+## 04/07 — Prova-generale demo + allineamento script
+
+Utente: «passiamo alla prova-generale demo» → «procedi». Prova a codice dei 7 passi di
+`docs/demo_checklist.md` confrontati con l'app reale (lettura integrale `setup_view.py`,
+`console.py`, `demo_data.py`, `test_session.csv`; smoke test import di 11 moduli). Esito
+**funzionale ✅** (import OK, console demo 4/4 sezioni offline, i 5 scenari-chip rispondono
+diversi, dati demo coerenti). Emersi **6 attriti script↔app** (nessun bug, sceneggiatura rimasta
+indietro): (A) script «5 giri» ma schermate demo mostrano **8 giri** (hardcoded `demo_data`); (B)
+[1:00] «sidebar→CSV→metriche» ma l'upload è nel Setup dietro toggle OFF e le card leggono da
+`demo_data`, non dal CSV; (C) [2:30] «pressioni a freddo + ANALIZZA SESSIONE nel Setup» ma il
+Setup non ha né radio freddo/caldo né bottone: l'analisi è in Engineer Console («⚙ ANALIZZA»);
+(D) [4:30] «Parla con Gigi» chat separata inesistente (è la stessa Console); (E) retrotreno
+scarico va raccontato sui dati a CALDO, non sul CSV a freddo (in finestra); (F) naming
+«ANALIZZA SESSIONE»→«⚙ ANALIZZA». Scelta utente: **aggiornare lo script** (nessun codice/dato).
+**Fix (solo `docs/demo_checklist.md`):** riscritta sez. 0 (dati a schermo = 8 giri demo, CSV
+illustrativo 5 giri), passi [1:00]/[1:45]/[2:30]/[3:15]/[4:30] col flusso reale (Dashboard già
+popolata → Telemetria → Setup senza analisi → Engineer Console con ⚙ ANALIZZA → follow-up
+stessa console), checklist funzionale allineata. Non un incident → nessun INC.
+
+**Backlog residuo:** video demo di backup (task utente, non-code).
