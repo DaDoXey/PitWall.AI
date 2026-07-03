@@ -111,9 +111,12 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
 - ~~Setup (colore pressioni)~~ → **fatto il 03/07**: i 4 valori pressione si colorano vs
   finestra ottimale a freddo (verde `26.0–27.0`, ambra ±0.6, rosso oltre) con pallino ● +
   legenda. Soglie tunable in `ui/demo_data.py` (`COLD_PRESS_WINDOW`). `setup_params.py` intatto.
-- ~~Dashboard (routing bottoni)~~ → **fatto il 03/07**: il routing era già ok; ricostruite le 3
-  card metriche **native** (via `st.container(border,key=)`) col bottone "Apri" **dentro** la card
-  (prima erano in un iframe → bottoni staccati sotto). Mapping invariato. Card Gigi invariata.
+- ~~Dashboard (grafici)~~ → **fatto il 03/07**: il routing era già ok; il vero obiettivo erano i
+  **grafici**. Layout iframe mantenuto (un tentativo di card native col bottone dentro è stato
+  **annullato** perché l'utente preferiva l'impaginazione di prima). Sparkline arricchite (area
+  sfumata, curva morbida, min/max, linea-limite tratteggiata 95°C) e window-bar con valore+range
+  — in `ui/components.py` (`sparkline_svg`/`window_bar_svg`, etichette in overlay HTML per non
+  distorcersi). Nessun dato toccato.
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
 > ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /

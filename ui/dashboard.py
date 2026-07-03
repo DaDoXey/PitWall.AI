@@ -56,56 +56,52 @@ body{{background:transparent;font-family:'Inter',sans-serif;}}
 
 # ─────────────────────────────────────────────
 # CARD MODULARI — temp / pressione / consumo
-# Native (niente iframe): così il bottone "Apri" può vivere DENTRO la card e
-# navigare (un bottone in un iframe di components.html non può → erano staccati).
-# Gli SVG sono inline puri e i font sono già iniettati nel documento principale.
 # ─────────────────────────────────────────────
-def _metric_card_inner(label, value, unit, note, note_color, chart_svg) -> str:
-    """Contenuto della card (label · valore · grafico · nota) SENZA il box esterno:
-    il box è fornito dal st.container(border=True) che ospita anche il bottone."""
+def _metric_card(label, value, unit, note, note_color, chart_svg) -> str:
     unit_html = f'<span style="font-size:0.8rem;color:#999;margin-left:3px;">{unit}</span>' if unit else ""
     return (
-        f'<div class="pw-dash-card-body">'
+        f'<div style="flex:1;background:{c.BG_SURFACE};border:1px solid {c.BORDER};'
+        f'border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;">'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.6rem;letter-spacing:0.14em;'
         f'color:#666;text-transform:uppercase;">{label}</div>'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.8rem;font-weight:500;'
-        f'color:#FFFFFF;line-height:1;margin-top:8px;">{value}{unit_html}</div>'
-        f'<div style="height:46px;margin-top:8px;color:{note_color};">{chart_svg}</div>'
-        f'<div class="pw-dash-card-note" style="font-family:\'Inter\',sans-serif;'
-        f'font-size:0.68rem;color:{note_color};margin-top:6px;">{note}</div>'
+        f'color:#FFFFFF;line-height:1;">{value}{unit_html}</div>'
+        f'<div style="min-height:52px;">{chart_svg}</div>'
+        f'<div style="font-family:\'Inter\',sans-serif;font-size:0.68rem;color:{note_color};">{note}</div>'
         f'</div>'
     )
 
 
-def _metric_cards() -> list[dict]:
-    """Le 3 card metriche: contenuto + bottone + destinazione (mapping invariato)."""
-    return [
-        {
-            "inner": _metric_card_inner(
-                "Temperatura gomme", dd.TYRE_TEMP_MAX["rr"], "°C",
-                "Post.DX sopra finestra (limite 95°C)", c.ACCENT,
-                c.sparkline_svg(dd.TYRE_TEMP_SERIES["rr"], c.ACCENT),
-            ),
-            "btn": "Apri Telemetria", "key": "open_temp", "target": "Telemetria",
-        },
-        {
-            "inner": _metric_card_inner(
-                "Pressione media", dd.PRESS_AVG_HOT, "psi",
-                "Retrotreno sotto finestra (28.5–30.0)", c.ACCENT,
-                c.window_bar_svg(dd.PRESS_AVG_HOT, 27.0, 30.5,
-                                 dd.HOT_PRESS_WINDOW[0], dd.HOT_PRESS_WINDOW[1], c.ACCENT),
-            ),
-            "btn": "Regola Setup", "key": "open_press", "target": "Setup",
-        },
-        {
-            "inner": _metric_card_inner(
-                "Consumo medio", f"{dd.SESSION['fuel_avg_per_lap']:.1f}", "L/giro",
-                f"Stabile · {dd.SESSION['fuel_total']:.1f} L totali", c.STATUS_OK,
-                c.sparkline_svg(dd.FUEL_PER_LAP, c.STATUS_OK),
-            ),
-            "btn": "Strategia carburante", "key": "open_fuel", "target": "Engineer Console",
-        },
-    ]
+def _cards_html() -> str:
+    fonts = c.iframe_fonts("JetBrains Mono", "Inter")
+
+    temp_card = _metric_card(
+        "Temperatura gomme", dd.TYRE_TEMP_MAX["rr"], "°C",
+        "Post.DX sopra finestra (limite 95°C)", c.ACCENT,
+        c.sparkline_svg(dd.TYRE_TEMP_SERIES["rr"], c.ACCENT,
+                        limit=dd.TEMP_LIMIT, value_fmt="{:.0f}"),
+    )
+    press_card = _metric_card(
+        "Pressione media", dd.PRESS_AVG_HOT, "psi",
+        "Retrotreno sotto finestra (28.5–30.0)", c.ACCENT,
+        c.window_bar_svg(dd.PRESS_AVG_HOT, 27.0, 30.5,
+                         dd.HOT_PRESS_WINDOW[0], dd.HOT_PRESS_WINDOW[1], c.ACCENT,
+                         value_fmt="{:.1f}"),
+    )
+    fuel_card = _metric_card(
+        "Consumo medio", f"{dd.SESSION['fuel_avg_per_lap']:.1f}", "L/giro",
+        f"Stabile · {dd.SESSION['fuel_total']:.1f} L totali", c.STATUS_OK,
+        c.sparkline_svg(dd.FUEL_PER_LAP, c.STATUS_OK, value_fmt="{:.1f}"),
+    )
+    return f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+{fonts}
+*{{margin:0;padding:0;box-sizing:border-box;}}
+body{{background:transparent;font-family:'Inter',sans-serif;}}
+.grid{{display:flex;gap:14px;}}
+@media(max-width:760px){{.grid{{flex-direction:column;}}}}
+</style></head><body>
+<div class="grid">{temp_card}{press_card}{fuel_card}</div>
+</body></html>"""
 
 
 # ─────────────────────────────────────────────
@@ -149,16 +145,17 @@ def render() -> None:
         'Metriche sessione</div>',
         unsafe_allow_html=True,
     )
-    # Card native: ogni metrica è un blocco unico "card + bottone". Il bottone
-    # (st.button nativo, dentro il container) naviga via nav.go_to → destinazione
-    # coerente con la card. Temp → Telemetria · Pressione → Setup · Consumo → Console.
-    cols = st.columns(3)
-    for col, card in zip(cols, _metric_cards()):
-        with col:
-            with st.container(border=True, key=f"pw-dash-card-{card['key']}"):
-                st.markdown(card["inner"], unsafe_allow_html=True)
-                if st.button(card["btn"], key=card["key"], use_container_width=True):
-                    nav.go_to(card["target"])
+    components.html(_cards_html(), height=230, scrolling=False)
+
+    # Bottoni "Apri" sotto le 3 card → ognuno alla destinazione coerente con la card.
+    # Temp → Telemetria · Pressione → Setup (regolazione) · Consumo → Gigi (strategia).
+    b1, b2, b3 = st.columns(3)
+    if b1.button("Apri Telemetria", key="open_temp", use_container_width=True):
+        nav.go_to("Telemetria")
+    if b2.button("Regola Setup", key="open_press", use_container_width=True):
+        nav.go_to("Setup")
+    if b3.button("Strategia carburante", key="open_fuel", use_container_width=True):
+        nav.go_to("Engineer Console")
 
     st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
     components.html(_gigi_card_html(), height=120, scrolling=False)

@@ -88,49 +88,133 @@ def placeholder_panel(message: str) -> str:
     )
 
 
-def sparkline_svg(series, color: str, w: int = 200, h: int = 46) -> str:
-    """Mini-grafico a linea (SVG inline) da una serie numerica. Solo presentazione."""
+def _smooth_path(coords) -> str:
+    """Path 'd' morbido (Catmull-Rom → cubiche di Bézier) per una lista di punti.
+
+    Con <3 punti degrada a segmenti retti. Rende le sparkline meno spigolose senza
+    dipendenze esterne. Solo presentazione.
+    """
+    if len(coords) < 3:
+        return "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in coords)
+    d = [f"M{coords[0][0]:.1f} {coords[0][1]:.1f}"]
+    for i in range(len(coords) - 1):
+        p0 = coords[i - 1] if i > 0 else coords[i]
+        p1, p2 = coords[i], coords[i + 1]
+        p3 = coords[i + 2] if i + 2 < len(coords) else p2
+        c1x = p1[0] + (p2[0] - p0[0]) / 6.0
+        c1y = p1[1] + (p2[1] - p0[1]) / 6.0
+        c2x = p2[0] - (p3[0] - p1[0]) / 6.0
+        c2y = p2[1] - (p3[1] - p1[1]) / 6.0
+        d.append(f"C{c1x:.1f} {c1y:.1f} {c2x:.1f} {c2y:.1f} {p2[0]:.1f} {p2[1]:.1f}")
+    return " ".join(d)
+
+
+def sparkline_svg(series, color: str, w: int = 200, h: int = 52, *,
+                  limit=None, fill: bool = True, show_minmax: bool = True,
+                  value_fmt: str = "{:.0f}") -> str:
+    """Mini-grafico a linea arricchito (area sfumata, curva morbida, min/max, limite).
+
+    Ritorna un frammento HTML (div posizionato con SVG + etichette in overlay): le
+    etichette sono HTML, non <text> SVG, così NON si distorcono con
+    preserveAspectRatio="none" (lo stretch orizzontale rovinerebbe il testo).
+    `limit` disegna una linea tratteggiata ambra (solo se cade dentro il range dati).
+    Solo presentazione.
+    """
     pts = [float(v) for v in series if v is not None]
     if len(pts) < 2:
         return ""
     lo, hi = min(pts), max(pts)
     span = (hi - lo) or 1.0
-    pad = 4.0
+    pad = 5.0
     n = len(pts)
-    coords = []
-    for i, v in enumerate(pts):
-        x = pad + (w - 2 * pad) * (i / (n - 1))
-        y = pad + (h - 2 * pad) * (1 - (v - lo) / span)
-        coords.append((x, y))
-    poly = " ".join(f"{x:.1f},{y:.1f}" for x, y in coords)
-    lx, ly = coords[-1]
-    return (
-        f'<svg viewBox="0 0 {w} {h}" width="100%" height="{h}" '
-        f'preserveAspectRatio="none" aria-hidden="true">'
-        f'<polyline points="{poly}" fill="none" stroke="{color}" stroke-width="1.8" '
-        f'stroke-linejoin="round" stroke-linecap="round"/>'
-        f'<circle cx="{lx:.1f}" cy="{ly:.1f}" r="2.6" fill="{color}"/></svg>'
-    )
+
+    def X(i):
+        return pad + (w - 2 * pad) * (i / (n - 1))
+
+    def Y(v):
+        return pad + (h - 2 * pad) * (1 - (v - lo) / span)
+
+    coords = [(X(i), Y(v)) for i, v in enumerate(pts)]
+    line_d = _smooth_path(coords)
+    gid = f"pwg{abs(hash((tuple(pts), color))) % 999983}"
+
+    svg = [f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="none" aria-hidden="true" '
+           f'style="position:absolute;inset:0;width:100%;height:100%;">']
+    if fill:
+        area_d = (f'{line_d} L{coords[-1][0]:.1f} {h - pad:.1f} '
+                  f'L{coords[0][0]:.1f} {h - pad:.1f} Z')
+        svg.append(
+            f'<defs><linearGradient id="{gid}" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0%" stop-color="{color}" stop-opacity="0.28"/>'
+            f'<stop offset="100%" stop-color="{color}" stop-opacity="0"/>'
+            f'</linearGradient></defs><path d="{area_d}" fill="url(#{gid})"/>'
+        )
+    show_limit = limit is not None and lo < float(limit) < hi
+    if show_limit:
+        ly = Y(float(limit))
+        svg.append(f'<line x1="{pad:.1f}" y1="{ly:.1f}" x2="{w - pad:.1f}" y2="{ly:.1f}" '
+                   f'stroke="{STATUS_WARN}" stroke-width="1" stroke-dasharray="4 3" opacity="0.75"/>')
+    svg.append(f'<path d="{line_d}" fill="none" stroke="{color}" stroke-width="2" '
+               f'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>')
+    svg.append('</svg>')
+
+    mono = "font-family:'JetBrains Mono',monospace;"
+    # chip: sfondo scuro semitrasparente → le etichette restano leggibili sopra la linea.
+    chip = "background:rgba(10,10,10,0.55);padding:0 2px;border-radius:2px;"
+    lx_pct = (coords[-1][0] / w) * 100
+    ly_pct = (coords[-1][1] / h) * 100
+    ov = [f'<span style="position:absolute;left:{lx_pct:.1f}%;top:{ly_pct:.1f}%;'
+          f'width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:{color};"></span>']
+    if show_minmax:
+        ov.append(f'<span style="position:absolute;left:2px;top:0;{mono}{chip}font-size:0.55rem;'
+                  f'color:#888;">{value_fmt.format(hi)}</span>')
+        ov.append(f'<span style="position:absolute;left:2px;bottom:0;{mono}{chip}font-size:0.55rem;'
+                  f'color:#888;">{value_fmt.format(lo)}</span>')
+    if show_limit:
+        lim_pct = (Y(float(limit)) / h) * 100
+        ov.append(f'<span style="position:absolute;right:2px;top:{lim_pct:.1f}%;{mono}{chip}'
+                  f'font-size:0.52rem;color:{STATUS_WARN};margin-top:-0.75rem;">'
+                  f'lim {value_fmt.format(float(limit))}</span>')
+    return (f'<div style="position:relative;width:100%;height:{h}px;">'
+            + "".join(svg) + "".join(ov) + '</div>')
 
 
 def window_bar_svg(value: float, vmin: float, vmax: float, win_lo: float, win_hi: float,
-                   color: str, w: int = 200, h: int = 30) -> str:
-    """Barra orizzontale con finestra ottimale (verde) e marker sul valore."""
-    pad = 4.0
+                   color: str, w: int = 200, h: int = 42, *,
+                   value_fmt: str = "{:.1f}", unit: str = "") -> str:
+    """Barra orizzontale con finestra ottimale (verde), marker sul valore, e
+    etichette in overlay HTML: valore sopra il marker + range finestra sotto la
+    banda verde. Solo presentazione."""
+    pad = 5.0
     span = (vmax - vmin) or 1.0
+    bar_y = h * 0.62
 
-    def x(v):
+    def X(v):
         return pad + (w - 2 * pad) * (_clamp((v - vmin) / span))
 
-    x_lo, x_hi, x_val = x(win_lo), x(win_hi), x(value)
-    return (
-        f'<svg viewBox="0 0 {w} {h}" width="100%" height="{h}" preserveAspectRatio="none">'
-        f'<rect x="{pad}" y="{h/2-3:.0f}" width="{w-2*pad:.0f}" height="6" rx="3" fill="{BG_RAISED}"/>'
-        f'<rect x="{x_lo:.1f}" y="{h/2-3:.0f}" width="{max(2,x_hi-x_lo):.1f}" height="6" rx="3" '
-        f'fill="{STATUS_OK}" opacity="0.45"/>'
-        f'<line x1="{x_val:.1f}" y1="3" x2="{x_val:.1f}" y2="{h-3}" stroke="{color}" stroke-width="2.4"/>'
-        f'<circle cx="{x_val:.1f}" cy="{h/2:.0f}" r="3.4" fill="{color}"/></svg>'
+    x_lo, x_hi, x_val = X(win_lo), X(win_hi), X(value)
+    svg = (
+        f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="none" aria-hidden="true" '
+        f'style="position:absolute;inset:0;width:100%;height:100%;">'
+        f'<rect x="{pad:.1f}" y="{bar_y - 3:.1f}" width="{w - 2 * pad:.1f}" height="6" rx="3" fill="{BG_RAISED}"/>'
+        f'<rect x="{x_lo:.1f}" y="{bar_y - 3:.1f}" width="{max(2, x_hi - x_lo):.1f}" height="6" rx="3" '
+        f'fill="{STATUS_OK}" opacity="0.5"/>'
+        f'<line x1="{x_val:.1f}" y1="{bar_y - 9:.1f}" x2="{x_val:.1f}" y2="{bar_y + 9:.1f}" '
+        f'stroke="{color}" stroke-width="2.4" vector-effect="non-scaling-stroke"/>'
+        f'</svg>'
     )
+    mono = "font-family:'JetBrains Mono',monospace;"
+    val_pct = (x_val / w) * 100
+    win_pct = ((x_lo + x_hi) / 2 / w) * 100
+    ov = (
+        f'<span style="position:absolute;left:{val_pct:.1f}%;top:0;transform:translateX(-50%);'
+        f'{mono}font-size:0.62rem;font-weight:600;color:{color};white-space:nowrap;">'
+        f'{value_fmt.format(value)}{unit}</span>'
+        f'<span style="position:absolute;left:{win_pct:.1f}%;bottom:0;transform:translateX(-50%);'
+        f'{mono}font-size:0.5rem;color:{STATUS_OK};white-space:nowrap;">'
+        f'{value_fmt.format(win_lo)}–{value_fmt.format(win_hi)}</span>'
+    )
+    return f'<div style="position:relative;width:100%;height:{h}px;">{svg}{ov}</div>'
 
 
 def gigi_avatar_svg(size: int = 44) -> str:

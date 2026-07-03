@@ -983,7 +983,12 @@ sul valore corrente → si aggiorna muovendo lo slider. Non un incident (feature
 
 ---
 
-## 03/07 — Dashboard: card + bottone uniti
+## 03/07 — Dashboard: card + bottone uniti  ⟵ ANNULLATO (vedi sezione successiva)
+
+> **NB:** questo intervento (commit `a4d4279`) è stato **annullato** su feedback utente
+> («era meglio prima»): l'utente preferiva l'impaginazione a iframe e voleva in realtà
+> lavorare sui **grafici**. `ui/dashboard.py` e `assets/app.css` ripristinati allo stato
+> precedente (`c617e94`). Vedi la sezione "Dashboard: grafici SVG arricchiti".
 
 Utente: «procedi con l'analisi della Dashboard». Analisi: il **routing** dei bottoni era già
 implementato e funzionante (`ui/dashboard.py` → `nav.go_to`, confermato dal PROMPT_LOG punto 4.2),
@@ -1003,5 +1008,30 @@ modificato):**
   allineare i 3 bottoni. Selettore scoped alla sola classe key.
 Verifica: `py_compile` OK; test import → 3 card, mapping corretto, `_cards_html` rimosso, hook CSS
 presenti. Non un incident (UX polish) → nessun INC.
+
+---
+
+## 03/07 — Dashboard: grafici SVG arricchiti
+
+Utente: «ok era meglio prima, quello che volevo rifare erano i **grafici**, renderli migliori».
+→ Prima cosa: **ripristinata** la Dashboard allo stato `c617e94` (`git checkout c617e94 -- ui/dashboard.py
+assets/app.css`): tornano le card in iframe con i bottoni sotto (annullato l'intervento card+bottone).
+Poi analisi grafici: le card usavano `sparkline_svg` (linea nuda) e `window_bar_svg` (barra+finestra),
+i più "poveri" dell'app (Telemetria usa già Plotly). **Vincolo:** le 3 card stanno in UN iframe
+(`components.html`) → dentro solo SVG, non Plotly (richiederebbe card native = il layout appena scartato).
+Scelta utente (AskUserQuestion → «SVG arricchiti, mantiene il look»). **Implementazione (solo
+presentazione, nessun file protetto, nessun dato):**
+- `ui/components.py`: nuovo `_smooth_path` (Catmull-Rom→Bézier). `sparkline_svg` riscritta →
+  frammento HTML con SVG (area sfumata via `linearGradient` con id univoco per-serie, curva morbida,
+  linea-limite tratteggiata ambra opzionale) + etichette **in overlay HTML** (min/max, "lim N",
+  punto finale) — HTML e non `<text>` SVG per non distorcersi con `preserveAspectRatio="none"`;
+  chip di sfondo scuro per leggibilità sopra la linea. Firme estese con soli parametri opzionali
+  (`limit`, `value_fmt`, `show_minmax`, `fill`) → retro-compatibili. `window_bar_svg` arricchita:
+  valore sopra il marker + range finestra sotto la banda verde.
+- `ui/dashboard.py`: Temp passa `limit=dd.TEMP_LIMIT` (95) e `value_fmt="{:.0f}"`; Consumo
+  `value_fmt="{:.1f}"`; Pressione valore+range. Area grafico `46→52px min-height`, iframe `210→230`.
+Verifica: `py_compile` OK; smoke test HTML → etichette attese presenti (max 105, min 82, lim 95,
+valore 28.6, range 28.5–30.0, min/max consumo 3.0/3.3), id gradienti **unici** fra le 2 sparkline,
+tag div/svg/span bilanciati. Non un incident → nessun INC.
 
 **Backlog residuo:** video demo di backup (task utente, non-code).
