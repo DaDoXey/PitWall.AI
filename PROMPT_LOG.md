@@ -899,4 +899,16 @@ blocchi verticali annidati) e `gap:0.45rem` (troppo stretto), sommati al push-to
 nessun riferimento orfano a `pw-sb-spacer` (grep py/css). Non è un incident (polish, non bug) → nessun INC.
 
 **Decisione:** ☑ Mantenuto. Commit/push su `restyle-ui`+`main` solo dopo «ok push» esplicito (regola git).
+
+**Follow-up (stesso giorno) — sidebar ancora scrollabile → compattazione dell'ingombro:**
+Utente: «risulta sempre con le parti scorrevoli, la volevo fissa». Diagnosi: il flusso naturale
+non bastava — la somma padding sidebar + 5 bottoni + box sessione superava il viewport → scroll
+interno di Streamlit. Ridotto l'ingombro verticale (~95-100px) in `assets/app.css`, blocco sidebar:
+`gap 0.65→0.5rem`; `.block-container padding-top 1.5→0.75rem`; container `> div:first-child`
+`1rem/1.5rem → 0.75rem/0.9rem`; **override padding bottoni** (nav+Esci) `0.6→0.4rem`; `.pw-sb-div`
+`margin 12→8px`; `.pw-sb-footer` `margin/padding-top 12→8px`. Flusso normale → nessun overlap.
+Nota diagnostica lasciata all'utente: possibile **deploy stale** (INC-003) — Streamlit Cloud non
+si aggiorna da solo; verificare in locale (`streamlit run app.py`). Solo CSS, nessun file protetto.
+Non è un incident (polish) → nessun INC.
+
 **Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.

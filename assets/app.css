@@ -1029,23 +1029,31 @@ section[data-testid="stSidebar"] a:hover {
 }
 
 /* ==============================================
-   SIDEBAR — compattazione (flusso naturale, spaziatura uniforme)
+   SIDEBAR — compattazione (flusso naturale, entra in una schermata → no scroll)
    Solo selettori scoped alla sidebar; nessun wildcard.
    Collapse/expand e contenuto del box sessione NON toccati.
    ============================================== */
 
 /* Flusso naturale dall'alto: niente flex-fill né 100vh forzato (erano la causa
-   degli stiramenti irregolari e del rischio overlap). Resta un solo gap uniforme
-   e compatto fra gli elementi impilati → nessuno scroll, nessuna sovrapposizione. */
+   degli stiramenti irregolari e del rischio overlap). Gap uniforme e compatto. */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-    gap: 0.65rem !important;   /* compatto ma respirabile */
+    gap: 0.5rem !important;   /* compatto ma respirabile (niente overlap in flusso normale) */
+}
+/* Riduce l'ingombro verticale complessivo così l'intera sidebar sta in un solo
+   viewport e Streamlit non aggiunge lo scroll interno. */
+[data-testid="stSidebar"] .block-container { padding-top: 0.75rem !important; }
+section[data-testid="stSidebar"] > div:first-child { padding: 0.75rem 1rem 0.9rem 1rem !important; }
+/* Bottoni nav + Esci più bassi (override del padding generico 0.6rem 2rem). */
+section[data-testid="stSidebar"] div[data-testid="stButton"] button {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
 }
 
 /* Divider fra navigazione e "Sessione Attiva". */
 .pw-sb-div {
     height: 1px;
     background: #222222;
-    margin: 12px 0;
+    margin: 8px 0;
 }
 
 /* Footer sidebar: versione + link GitHub, ancorato in fondo. */
@@ -1053,8 +1061,8 @@ section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid #222222;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.6rem;
