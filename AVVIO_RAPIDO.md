@@ -104,9 +104,10 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
 
 - ~~Stile tasti del login~~ → **fatto il 03/07**: bottone Google riportato in stile
   cockpit dark (`styles/login.css`, `.pw-google-btn`).
-- ~~Sidebar~~ → **compattata il 03/07**, poi **rework spaziatura** (03/07): tolto il
-  flex-fill/push-to-bottom che stirava i blocchi; ora flusso naturale dall'alto con gap
-  uniforme `0.65rem` (compatta, niente scroll né overlap). Collapse/box sessione invariati.
+- ~~Sidebar~~ → **compattata + centrata il 03/07**: pannello fisso (no scroll), stack ad
+  altezza naturale **centrato verticalmente** (`justify-content:center`), gap uniforme `0.6rem`.
+  Tolto il fill forzato (`min-height:100vh`/`space-between`) che tagliava l'Esci in fondo.
+  CSS ora si ricarica su modifica (cache per mtime in `css_loader.py`). Collapse/box sessione invariati.
 - Backlog restyle: **Setup** (colore pressioni), **Dashboard** (routing bottoni)
   — rimandati a una fase successiva.
 - **Video demo di backup** ancora da registrare (rischio già costato punti).

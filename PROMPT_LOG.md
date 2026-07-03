@@ -947,4 +947,16 @@ vecchio; il fill/header del follow-up 3 non veniva mai caricato senza un restart
 non regge). File toccati: `assets/css_loader.py`, `assets/app.css` — nessun file protetto. Verificato:
 `py_compile` OK, `_app_style()` rilegge il file (contiene `space-between`). Non un incident → nessun INC.
 
+**Follow-up 5 (stesso giorno) — Esci tagliato: il fill era troppo aggressivo:**
+Utente: «il tasto Esci in fondo alla sidebar risulta tagliato, accentra meglio tutto in modo che
+non venga male nulla». **Causa:** il fill del follow-up 4 forzava il blocco voci a
+`min-height: calc(100vh - 3rem)` + `space-between`, ma quel blocco vive **dentro** il padding
+(0.75rem sopra + 0.9rem sotto) e sotto l'header nativo → `blocco + padding + header > 100vh`, e con
+`overflow:hidden` il fondo (Esci + footer) finiva sotto il taglio. **Fix (solo `assets/app.css`):**
+(1) tolto il fill forzato sul blocco voci — via `min-height:calc(100vh-3rem)`, via `space-between`,
+`flex:0 0 auto` → altezza **naturale**, non può più sforare (Esci mai tagliato); (2) `justify-content:
+center` sul contenitore flex della sidebar → stack **centrato verticalmente** con margini uguali
+sopra/sotto (niente fasce vuote sbilanciate); (3) gap voci a `0.6rem` (spaziatura uniforme). Overflow
+hidden / header banda-zero / compattazione padding invariati. Non un incident (polish) → nessun INC.
+
 **Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.
