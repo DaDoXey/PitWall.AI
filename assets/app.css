@@ -1048,6 +1048,16 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] button {
     padding-top: 0.4rem !important;
     padding-bottom: 0.4rem !important;
 }
+/* PANNELLO FISSO — disabilita lo scroll interno nativo di Streamlit.
+   Il contenitore della sidebar ha overflow-y:auto di default: basta 1px di
+   eccedenza e la rotella scrolla. Con la compattazione sopra il contenuto sta nel
+   viewport, quindi hidden NON taglia nulla su schermi normali. Copre i vari
+   testid di scroller usati dalle diverse versioni di Streamlit. */
+section[data-testid="stSidebar"] > div:first-child,
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    overflow: hidden !important;
+}
 
 /* Divider fra navigazione e "Sessione Attiva". */
 .pw-sb-div {

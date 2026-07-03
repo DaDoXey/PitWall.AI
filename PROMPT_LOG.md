@@ -911,4 +911,15 @@ Nota diagnostica lasciata all'utente: possibile **deploy stale** (INC-003) — S
 si aggiorna da solo; verificare in locale (`streamlit run app.py`). Solo CSS, nessun file protetto.
 Non è un incident (polish) → nessun INC.
 
+**Follow-up 2 (stesso giorno) — causa reale dello scroll: overflow nativo:**
+Utente: «posso ancora scrollare con la rotella nella sidebar, perché? trova l'errore e fixa».
+**Errore individuato:** compattare il contenuto non bastava — il contenitore-scroller della
+sidebar ha `overflow-y:auto` di default in Streamlit, quindi basta 1px di eccedenza (altezza
+finestra/zoom) perché la rotella scrolli, anche senza barra visibile. Le modifiche precedenti
+riducevano l'altezza ma **non disattivavano il meccanismo di scroll**. **Fix:** `overflow:hidden`
+sui contenitori-scroller della sidebar (`> div:first-child`, `stSidebarContent`,
+`stSidebarUserContent` — coperti i vari testid delle versioni Streamlit) → pannello fisso. La
+compattazione resta come garanzia che il contenuto stia nel viewport (hidden non taglia nulla su
+schermi normali). Solo CSS, nessun file protetto. Non è un incident (polish) → nessun INC.
+
 **Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.
