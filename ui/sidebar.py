@@ -14,7 +14,7 @@ from ui.demo_data import SESSION
 def _logo() -> None:
     st.markdown(
         """
-        <div style="padding:6px 2px 14px 2px;border-bottom:1px solid #222;margin-bottom:14px;">
+        <div style="padding:2px 2px 10px 2px;border-bottom:1px solid #222;margin-bottom:10px;">
           <div style="font-family:'Orbitron',sans-serif;font-size:1.15rem;font-weight:700;
                       letter-spacing:0.08em;color:#FFFFFF;line-height:1;">
             PITWALL<span style="color:#E8002D !important;">.AI</span>
@@ -32,7 +32,7 @@ def _logo() -> None:
 def _session_box() -> None:
     st.markdown(
         f"""
-        <div style="margin-top:18px;background:#111111;border:1px solid #222;
+        <div style="background:#111111;border:1px solid #222;
                     border-left:3px solid #E8002D;border-radius:8px;padding:12px 14px;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;
                       letter-spacing:0.2em;color:#00C853;text-transform:uppercase;
@@ -63,6 +63,18 @@ def _session_box() -> None:
                            color:#FFFFFF;">{SESSION['stint']}</span>
             </div>
           </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _footer() -> None:
+    st.markdown(
+        """
+        <div class="pw-sb-footer">
+          <span class="pw-sb-ver">v0.2.0</span>
+          <a href="https://github.com/DaDoXey/PitWall.AI" target="_blank" rel="noopener">GitHub ↗</a>
         </div>
         """,
         unsafe_allow_html=True,
@@ -103,8 +115,16 @@ def render_sidebar() -> None:
                 if not is_active:
                     nav.go_to(page)
 
+        # Divider tra navigazione e sessione attiva.
+        st.markdown('<div class="pw-sb-div"></div>', unsafe_allow_html=True)
         _session_box()
 
-        st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
+        # Spacer flessibile: spinge Esci + footer in fondo alla sidebar (riempie il
+        # vuoto). Se il flex non regge su una versione di Streamlit, degrada a un
+        # piccolo gap fisso (min-height nel CSS) senza rompere nulla.
+        st.markdown('<div class="pw-sb-spacer"></div>', unsafe_allow_html=True)
+
         if st.button("⏻  Esci", key="btn_logout", use_container_width=True):
             _logout()
+
+        _footer()

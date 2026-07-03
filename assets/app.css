@@ -1027,3 +1027,58 @@ section[data-testid="stSidebar"] a:hover {
         transition-duration: 0.001ms !important;
     }
 }
+
+/* ==============================================
+   SIDEBAR — compattazione + ancoraggio in fondo (Esci/footer)
+   Solo selettori scoped alla sidebar; nessun wildcard.
+   Collapse/expand e contenuto del box sessione NON toccati.
+   ============================================== */
+
+/* Colonna a piena altezza: permette allo spacer di spingere Esci+footer in fondo. */
+section[data-testid="stSidebar"] > div:first-child {
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+section[data-testid="stSidebar"] > div:first-child > div,
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+/* Il blocco verticale interno riempie l'altezza disponibile… */
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    flex: 1 1 auto;
+    gap: 0.45rem !important;   /* meno spazio morto fra gli elementi (era ampio) */
+}
+/* …e lo spacer si espande, spingendo tutto ciò che segue verso il basso.
+   :has() è supportato dal Chrome di Streamlit Cloud; se non applicasse, resta il
+   min-height come gap minimo → degrada con grazia. */
+section[data-testid="stSidebar"] [data-testid="stElementContainer"]:has(.pw-sb-spacer) {
+    flex: 1 1 auto !important;
+    min-height: 14px;
+}
+
+/* Divider fra navigazione e "Sessione Attiva". */
+.pw-sb-div {
+    height: 1px;
+    background: #222222;
+    margin: 12px 0;
+}
+
+/* Footer sidebar: versione + link GitHub, ancorato in fondo. */
+.pw-sb-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #222222;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.pw-sb-footer .pw-sb-ver { color: #555555 !important; }
+.pw-sb-footer a { color: #777777 !important; text-decoration: none !important; }
+.pw-sb-footer a:hover { color: #E8002D !important; }

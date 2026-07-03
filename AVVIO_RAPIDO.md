@@ -104,8 +104,10 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
 
 - ~~Stile tasti del login~~ → **fatto il 03/07**: bottone Google riportato in stile
   cockpit dark (`styles/login.css`, `.pw-google-btn`).
-- Backlog restyle: **Sidebar** (collapse), **Setup** (colore pressioni), **Dashboard**
-  (routing bottoni) — rimandati a una fase successiva.
+- ~~Sidebar~~ → **compattata il 03/07** (densità + Esci/footer ancorati in fondo;
+  collapse già ok, box sessione invariato).
+- Backlog restyle: **Setup** (colore pressioni), **Dashboard** (routing bottoni)
+  — rimandati a una fase successiva.
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
 > ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /

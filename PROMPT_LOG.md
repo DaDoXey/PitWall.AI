@@ -840,3 +840,23 @@ Motivazione: era l'unico elemento chiaro in una login tutta scura → stonava. N
 
 **Verifica:** `py_compile pages/login.py` OK; mockup prima/dopo generato. Item backlog "stile tasti login"
 → **CHIUSO** (spuntato in `AVVIO_RAPIDO.md`). Backlog residuo: Sidebar/Setup/Dashboard, video demo.
+
+### Addendum — Sidebar: compattazione + polish (03/07/2026)
+
+**Scoping (domande all'utente):** obiettivo = tutti e tre (funzionale+estetico+contenuto), MA collapse
+già ok (non toccare), box "Sessione Attiva" tenuto com'è (demo fisso), problema reale = **sidebar troppo
+vuota/spaziata** → compattare + riempire il vuoto in basso.
+
+**Intervento (`ui/sidebar.py` + `assets/app.css`, solo selettori scoped `section[data-testid="stSidebar"]`,
+nessun wildcard; collapse e dati box invariati; nessun file protetto):**
+- **Densità:** `stVerticalBlock gap 0.45rem`, margini logo/box più stretti.
+- **Fondo ancorato:** sidebar resa colonna a piena altezza + spacer flessibile (`.pw-sb-spacer` con
+  `:has()`→`flex:1`) che spinge **Esci + footer** in fondo; degrada a `min-height` se il flex non regge.
+- **Footer** `.pw-sb-footer`: `v0.2.0` + link GitHub (mono, hover rosso).
+- **Divider** `.pw-sb-div` tra Navigazione e Sessione Attiva.
+
+**Verifica:** `py_compile ui/sidebar.py` OK; import catena UI OK; mockup prima/dopo generato.
+Non è un incident (polish, non bug) → nessun INC. Da confermare a schermo il pin-in-fondo (`:has()`/flex)
+sul deploy; fallback graceful se non applicasse.
+
+**Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.
