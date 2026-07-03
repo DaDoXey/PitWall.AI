@@ -81,6 +81,19 @@ PRESS_AVG_HOT = round(sum(HOT_PRESSURES.values()) / 4, 1)   # → 28.6
 # Coerenti con la DEMO_RESPONSE della console: pressioni posteriori + precarico.
 SUGGESTED_PARAMS = {"tire_press_rl", "tire_press_rr", "preload"}
 
+# Pressioni a CALDO per GIRO (psi) — salgono col riscaldamento gomma nel corso
+# dello stint e terminano ESATTAMENTE sui valori HOT_PRESSURES (ultimo giro =
+# valore mostrato dai gauge → coerenza garantita per costruzione, come TYRE_TEMP_MAX).
+# Usate SOLO dalla tabella giro-per-giro della Telemetria; i gauge restano su HOT_PRESSURES.
+HOT_PRESS_SERIES = {
+    "fl": [28.2, 28.4, 28.6, 28.7, 28.8, 28.9, 29.0, 29.0],
+    "fr": [28.3, 28.5, 28.7, 28.9, 29.0, 29.1, 29.2, 29.2],
+    "rl": [27.4, 27.6, 27.8, 27.9, 28.0, 28.1, 28.2, 28.2],
+    "rr": [27.2, 27.4, 27.6, 27.7, 27.8, 27.9, 28.0, 28.0],
+}
+# Coerenza: l'ultimo valore di ogni serie coincide con HOT_PRESSURES.
+assert all(HOT_PRESS_SERIES[p][-1] == HOT_PRESSURES[p] for p in HOT_PRESSURES)
+
 # ─────────────────────────────────────────────
 # CARBURANTE — consumo per giro (L), "stabile" attorno a 3.2
 # ─────────────────────────────────────────────

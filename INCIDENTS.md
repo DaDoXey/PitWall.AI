@@ -322,7 +322,57 @@ Streamlit-interno introdotto, nessuna regola CSS globale modificata.
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 02/07/2026 (INC-003…INC-007)*
+## INC-008 — Telemetria: unità °C incoerente, tooltip su legenda, heatmap disallineata
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-008 |
+| Data rilevamento | 03/07/2026 |
+| Severità | Bassa (cosmetico) |
+| Stato | RISOLTO |
+| File coinvolto | `ui/telemetry.py` |
+
+### Sintomo
+Round di rifinitura successivo a INC-005 (stessa pagina). Tre residui: (1) i tick
+dell'asse Y del line chart mostravano solo `°` (`88°`, `95°`) mentre annotazione
+soglia e tooltip usavano `°C`; (2) col mouse su un punto (es. giro 6) il box tooltip
+`x unified` si sovrapponeva alla legenda posta in alto; (3) nella heatmap i valori
+non risultavano ancorati alla sagoma della gomma (posteriori "alti" rispetto
+all'assale reale).
+
+### Causa
+1. `update_yaxes(ticksuffix="°")` invece di `"°C"` → unità disallineata tra tick,
+   annotazione e tooltip.
+2. Legenda ancorata al bordo superiore del plot (`y=1.0`), nella stessa fascia dove
+   Plotly rende il box `hovermode="x unified"`.
+3. I 4 riquadri-gomma erano posizionati con coordinate assolute (`38/162`, `52/166`)
+   slegate dal `<path>` della scocca: nessun ancoraggio condiviso alle ruote.
+
+### Fix Applicato (solo presentazione — valori/soglie/finestra invariati)
+1. `ticksuffix="°C"` → unità uniforme su tick, annotazione e tooltip.
+2. Legenda spostata SOTTO il grafico (`orientation=h, y=-0.20`, centrata); `t` 30→16,
+   `b` 48→88, `title_standoff=6` su "Giro" → tooltip (in alto) e legenda (in basso)
+   non si sovrappongono mai.
+3. Riquadri/valori heatmap **ancorati alla geometria della scocca**: costanti
+   `_BODY_LEFT/RIGHT_X`, `_FRONT/REAR_AXLE_Y`, `_WHEEL_W/H`; builder `_heat_corner_svg`
+   riscritto in modalità centro-ruota. Posteriori riportate sulla linea-assale reale.
+
+### Espansione contestuale (FASE 3, non-incident — a rischio zero, colonne CSV esistenti)
+Aggiunte alla Telemetria, nessun file protetto toccato: **tabella giro-per-giro
+ordinabile**; **proiezione giri rimanenti** (`project_remaining_laps`, sola lettura,
+fuori dalla fuel-logic protetta); **feed cross-check** (incongruenze deterministiche +
+riuso della diagnosi di Gigi da `session_state`, zero chiamate LLM); **toggle °C/°F**
+e **raw/smoothed** sul line chart. Nuova serie coerente `HOT_PRESS_SERIES` in
+`ui/demo_data.py` (ultimo giro == valori dei gauge, garantito da `assert`).
+
+### Lezione Appresa
+Le rifiniture cosmetiche vanno ancorate alla geometria sorgente (la sagoma), non a
+coordinate letterali: così restano corrette anche se il layout cambia. E un box
+tooltip e una legenda non devono mai condividere la stessa fascia del grafico.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 03/07/2026 (INC-003…INC-008)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |

@@ -765,3 +765,64 @@ troppo vicino/sovrapposto in Telemetria. Correzioni strutturali su `ui/telemetry
 
 **FASE 4 (logo `.AI`):** `ui/sidebar.py` — aggiunto `!important` inline al `.AI` (batte
 l'`!important` delle regole sidebar). Doc INC-007.
+
+---
+
+## TELEMETRIA-UPGRADE-1 — 3 fix + espansione a rischio zero (branch `restyle-ui`)
+
+**Data:** 03/07/2026 · branch `restyle-ui` (poi merge `--ff-only` su `main`) · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Ripresa lavori (status/metodo):** leggere per intero prompt log + breakdown + progetto,
+   verificare discordanze, controllare allineamento Git con `origin`, esporre il piano e
+   attendere approvazione; non inventare/costruire. Subtask iniziale: nessuna.
+2. **Utente:** «fai in modo che abbia tutto allineato qui su questo pc» → eseguito il
+   fast-forward (locale era 13 commit dietro `origin/main`, vedi sotto).
+3. **Utente:** «questo [PROMPT_LOG] non scriverlo, avverranno altre modifiche; aspetta istruzioni.»
+4. **Utente:** incollato il prompt **TELEMETRIA-UPGRADE-1** (FASI 0–3, con STOP GATE).
+5. **Utente:** «procedi con la fase 1» → diagnosi dei 3 bug.
+6. **Utente:** «procedi con la fase 2» → i 3 fix, uno alla volta.
+7. **Utente:** «installa kaleido e generami le anteprime» → PNG di line chart/gauge + heatmap.
+8. **Utente:** «posso controllare ora o devi pushare?» → chiarito: modifiche solo locali, nessun push.
+9. **Utente:** «vai avanti fino ai prossimi stop gate; controllerò a ogni push.»
+10. **Utente (scelta guidata FASE 3):** incluse **tutte e 4** le voci del menu espansione.
+11. **Utente:** «sì aggiorna i doc e poi ok push.»
+
+### Passo preliminare — Allineamento Git
+Locale (`main` e `restyle-ui`) era **13 commit dietro** `origin` (lavoro dall'altro PC:
+punch-list v2, INC-004…007, ERR-05, merge UI-FIX-2, FASE 4). Fast-forward pulito a
+`376880b`, `0/0` col remoto, tree clean, `py_compile` OK. Nessun dato perso.
+
+### FASE 0–1 — Ricognizione + diagnosi (sola lettura)
+File Telemetria: `ui/telemetry.py` (line chart/gauge/heatmap), `ui/demo_data.py` (dati),
+`ui/components.py` (helper/token), `ui/router.py` (dispatch). Nessun file protetto coinvolto.
+I 3 bug (unità `°`/`°C`, tooltip su legenda, heatmap slegata dalla sagoma) sono figli di
+INC-005 → tracciati come **INC-008**. Note path prompt ↔ repo: `parser.py`→`backend/parser/csv_parser.py`,
+`system_prompt.txt`→`_v4.txt`, font non in `static/` ma in `assets/fonts/` (base64, no Google Fonts).
+
+### FASE 2 — 3 fix (solo `ui/telemetry.py`, un fix alla volta, `py_compile` dopo ciascuno)
+1. `ticksuffix="°"→"°C"` (uniformità tick/annotazione/tooltip).
+2. Legenda SOTTO il grafico (`y=-0.20`, `t`30→16/`b`48→88, `title_standoff=6`) → no overlap col box `x unified`.
+3. Heatmap ancorata alla scocca (`_BODY_LEFT/RIGHT_X`, `_FRONT/REAR_AXLE_Y`; `_heat_corner_svg` centro-ruota).
+Anteprime PNG generate via `kaleido` (installato SOLO nel `.venv` locale, gitignored): line chart, gauge, heatmap.
+
+### FASE 3 — espansione (tutte e 4 le voci, rischio zero, colonne CSV esistenti)
+- **Tabella giro-per-giro** ordinabile (`_laps_table_df` + `st.dataframe`): giro · consumo · 4 temp · 4 press.
+- **Proiezione giri rimanenti** (`project_remaining_laps`, sola lettura, FUORI dalla fuel-logic protetta).
+- **Feed cross-check** (`_cross_check_items` deterministico + `_gigi_diagnosi_summary` che riusa
+  `console_response` da `session_state`, **zero LLM**).
+- **Toggle °C/°F** e **raw/smoothed** sul line chart (`_temp_line_fig(unit, smoothed)`, `_to_unit`, `_smooth_series`).
+- `ui/demo_data.HOT_PRESS_SERIES` (8 giri/gomma): **ultimo giro == valori dei gauge**, garantito da `assert` → coerenza.
+
+### File protetti
+Nessuno toccato. `agent.py`, parser, prompt, logica gauge/fuel invariati; la proiezione carburante è
+una funzione nuova e separata, non tocca la strategia protetta.
+
+### Verifica
+`py_compile` OK (telemetry/demo_data); import intera catena UI OK; runtime: unità C/F (limite 95°C↔203°F,
+range convertiti), smoothing 3-punti, tabella 8×10 con press ultimo-giro = gauge, proiezione 20L/3.2=6.2,
+cross-check (Post.DX 105°C crit + retro sotto finestra warn), riuso diagnosi Gigi. Doc: INC-008 aperto+risolto,
+riga stale ERR-02/04 rimossa da `AVVIO_RAPIDO.md`, README aggiornato.
+
+**Decisione:** ☑ Mantenuto. Commit su `restyle-ui`, merge `--ff-only` su `main`, push di entrambi (dopo «ok push»).
+Backlog rimasto: stile tasti login; Sidebar/Setup/Dashboard rimandati a fasi successive; video demo di backup da registrare.

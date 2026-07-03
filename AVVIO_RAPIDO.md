@@ -103,8 +103,12 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
 ## In sospeso (promemoria)
 
 - Rivedere lo stile dei **tasti del login** (`styles/login.css`, sezione "FASE 6").
-- Decisioni dati da confermare: **ERR-02** (finestra pressioni a caldo) e
-  **ERR-04** (pressione media Dashboard) — vedi `SPEC_ERRATA.md`.
+- Backlog restyle: **Sidebar** (collapse), **Setup** (colore pressioni), **Dashboard**
+  (routing bottoni) — rimandati a una fase successiva.
+- **Video demo di backup** ancora da registrare (rischio già costato punti).
+
+> ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /
+> `INCIDENTS.md`). Telemetria: 3 fix + espansione fatti il 03/07 (TELEMETRIA-UPGRADE-1).
 
 ## File da NON committare (già in `.gitignore`)
 

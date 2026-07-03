@@ -19,7 +19,8 @@ ui/                    # package di presentazione (restyle UI/UX)
   router.py            #   dispatch pagine (Dashboard · Engineer Console · Telemetria · Setup)
   sidebar.py / nav.py  #   navigazione
   dashboard.py         #   hero + card metriche (sorgente: demo_data)
-  telemetry.py         #   line chart temp + 4 gauge pressioni + heatmap (Plotly/SVG)
+  telemetry.py         #   line chart temp (toggle °C/°F, raw/smoothed) + 4 gauge + heatmap;
+                       #   tabella giro-per-giro, proiezione giri, feed cross-check (Plotly/SVG)
   console.py           #   Engineer Console "Gigi": analisi 4 card + chat + demo-mode
   setup_view.py        #   5 tab setup ACC (slider funzionali)
   demo_data.py         #   SORGENTE DATI DEMO UNICA (coerenza tra le schermate)
