@@ -1080,3 +1080,18 @@ popolata → Telemetria → Setup senza analisi → Engineer Console con ⚙ ANA
 stessa console), checklist funzionale allineata. Non un incident → nessun INC.
 
 **Backlog residuo:** video demo di backup (task utente, non-code).
+
+---
+
+## 04/07 — Giro a schermo (verifica visiva) + nuova richiesta backlog
+
+Utente: «facciamo un giro a schermo insieme» → guida passo-passo (login → …). **Passo 1 (login)
+verificato OK** dall'utente (font/hero/badge/bottone Google a posto). Poi richiesta:
+«aggiungi alla checklist che vorrei rifare per bene le schermate aggiungendo magari mini
+animazioni o roba simile per abbellire, che non siano troppo eccessive». Registrata come voce di
+**backlog** in `AVVIO_RAPIDO.md` (In sospeso): "Restyle fine schermate + micro-animazioni
+discrete" (fade/slide al load, hover soft, transizioni leggere; niente effetti eccessivi; dentro
+il design system; nessun file protetto). **Da pianificare** (mostrare piano prima di costruire).
+Non eseguita ora — solo annotata.
+
+**Backlog residuo:** micro-animazioni schermate (DA PIANIFICARE) · video demo di backup (non-code).

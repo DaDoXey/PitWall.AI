@@ -126,6 +126,12 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
   `docs/demo_checklist.md` (smoke test OK). Allineato lo **script** all'app reale (8 giri non 5;
   analisi in Engineer Console con «⚙ ANALIZZA», non nel Setup; niente chat separata; retrotreno
   raccontato sui dati a caldo). Solo `.md`, nessun codice toccato.
+- **Restyle "fine" schermate + micro-animazioni (DA FARE)** — rifinire per bene tutte le
+  schermate aggiungendo **micro-animazioni discrete** (es. fade-in/slide dei blocchi al load,
+  hover soft su card/bottoni, transizioni leggere) per abbellire senza esagerare. Vincoli:
+  **niente effetti eccessivi/distraenti**, restare nel design system cockpit (accento `#E8002D`,
+  font self-hosted), zero regressioni su leggibilità/performance e nessun file protetto toccato.
+  Richiesta utente 04/07 durante il giro a schermo. → da pianificare (mostrare piano prima).
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
 > ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /
