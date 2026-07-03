@@ -959,4 +959,26 @@ center` sul contenitore flex della sidebar → stack **centrato verticalmente** 
 sopra/sotto (niente fasce vuote sbilanciate); (3) gap voci a `0.6rem` (spaziatura uniforme). Overflow
 hidden / header banda-zero / compattazione padding invariati. Non un incident (polish) → nessun INC.
 
-**Backlog residuo:** Setup (colore pressioni), Dashboard (routing bottoni), video demo di backup.
+---
+
+## 03/07 — Setup: colore/evidenziazione pressioni
+
+Utente: «andiamo col setup» → task backlog "colore pressioni". Metodo: analisi Setup
+(`ui/setup_view.py` `_slider`), scelta criterio con l'utente (AskUserQuestion → «Finestra
+ottimale ACC»). **Discrepanza trovata** analizzando `ui/demo_data.py`: esisteva già una
+finestra a freddo documentata `26.0–27.0` psi (commento su cui si regge la storia demo:
+posteriori 25.7/25.5 sotto finestra). La finestra `26.5–27.5` che avevo proposto NON
+coincideva → segnalata all'utente, che ha scelto di **allineare a `26.0–27.0`** (coerenza
+progetto). **Implementazione (solo layer presentazionale, nessun file protetto):**
+- `ui/demo_data.py`: nuova costante tunable `COLD_PRESS_WINDOW=(26.0,27.0)` +
+  `COLD_PRESS_AMBER_MARGIN=0.6`. `modules/setup_params.py` intatto.
+- `ui/setup_view.py`: helper `_pressure_status_color(value)` (verde in finestra, ambra entro
+  il margine, rosso oltre — soglie da demo_data). In `_slider`, per `key` che inizia con
+  `tire_press_`, il valore prende il colore di stato + pallino ● accanto al numero; gli altri
+  parametri invariati (bianco / rosso-suggerito-Gigi). In `_render_tyres`, legenda compatta
+  sotto "PRESSIONI". Tutti stili inline → nessuna nuova CSS (niente problemi di cache).
+Verifica: `py_compile` OK; smoke test classificatore (25.3→rosso, 25.5/25.7→ambra,
+26.0–27.0→verde, 27.5→ambra, 27.7→rosso; demo COLD: ant.=verde, post.=ambra). Colore calcolato
+sul valore corrente → si aggiorna muovendo lo slider. Non un incident (feature UI) → nessun INC.
+
+**Backlog residuo:** Dashboard (routing bottoni), video demo di backup.

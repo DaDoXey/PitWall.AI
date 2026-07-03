@@ -108,8 +108,10 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
   altezza naturale **centrato verticalmente** (`justify-content:center`), gap uniforme `0.6rem`.
   Tolto il fill forzato (`min-height:100vh`/`space-between`) che tagliava l'Esci in fondo.
   CSS ora si ricarica su modifica (cache per mtime in `css_loader.py`). Collapse/box sessione invariati.
-- Backlog restyle: **Setup** (colore pressioni), **Dashboard** (routing bottoni)
-  — rimandati a una fase successiva.
+- ~~Setup (colore pressioni)~~ → **fatto il 03/07**: i 4 valori pressione si colorano vs
+  finestra ottimale a freddo (verde `26.0–27.0`, ambra ±0.6, rosso oltre) con pallino ● +
+  legenda. Soglie tunable in `ui/demo_data.py` (`COLD_PRESS_WINDOW`). `setup_params.py` intatto.
+- Backlog restyle: **Dashboard** (routing bottoni) — rimandato a una fase successiva.
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
 > ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /

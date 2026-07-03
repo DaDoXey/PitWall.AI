@@ -73,6 +73,14 @@ HOT_PRESS_WINDOW = (28.5, 30.0)   # psi (finestra operativa GT3 a caldo)
 # rende esplicita la causa "pressioni retrotreno impostate troppo basse".
 COLD_PRESSURES = {"fl": 26.5, "fr": 26.5, "rl": 25.7, "rr": 25.5}
 
+# Finestra pressione a FREDDO ottimale (psi) — usata SOLO dal layer presentazionale
+# del Setup per colorare i 4 valori pressione (verde in finestra, ambra entro il
+# margine, rosso oltre). Allineata alla finestra a freddo documentata sopra
+# (26.0–27.0): coerente con la storia demo (post. 25.7/25.5 = sotto finestra).
+# Soglie tunable in un punto solo.
+COLD_PRESS_WINDOW = (26.0, 27.0)      # psi (verde)
+COLD_PRESS_AMBER_MARGIN = 0.6         # psi oltre il bordo → ambra; oltre ancora → rosso
+
 # Pressione media (a caldo) per la card Dashboard.
 # Coerente con i 4 gauge: media aritmetica dei 4 valori HOT.
 PRESS_AVG_HOT = round(sum(HOT_PRESSURES.values()) / 4, 1)   # → 28.6

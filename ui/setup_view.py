@@ -25,6 +25,21 @@ from modules.setup_params import get_params_for_car, get_all_params_flat
 # ─────────────────────────────────────────────
 # SLIDER (presentazionale) — legge i range dal modulo dati, scrive in session_state
 # ─────────────────────────────────────────────
+def _pressure_status_color(value: float) -> str:
+    """Colore stato di una pressione a freddo (psi) vs finestra ottimale.
+
+    Verde se in finestra, ambra entro il margine dal bordo, rosso oltre. Soglie
+    da demo_data (COLD_PRESS_WINDOW / COLD_PRESS_AMBER_MARGIN), tunable in un punto.
+    """
+    lo, hi = dd.COLD_PRESS_WINDOW
+    m = dd.COLD_PRESS_AMBER_MARGIN
+    if lo <= value <= hi:
+        return c.STATUS_OK
+    if (lo - m) <= value <= (hi + m):
+        return c.STATUS_WARN
+    return c.STATUS_ERROR
+
+
 def _slider(params: dict, key: str, target=None):
     """Renderizza uno slider ACC: riga nome+valore + slider nativo (label nascosta).
 
@@ -60,8 +75,17 @@ def _slider(params: dict, key: str, target=None):
     else:
         disp = str(int(current))
 
-    # Valore bianco di default; rosso SOLO sui parametri suggeriti da Gigi (FASE 6.2).
-    val_color = "#E8002D" if key in dd.SUGGESTED_PARAMS else "#FFFFFF"
+    # Colore del valore:
+    #  - pressioni (tire_press_*) → colore di STATO vs finestra ottimale a freddo
+    #    (verde/ambra/rosso) + pallino ● dello stesso colore accanto al numero;
+    #  - altri parametri → bianco di default, rosso SOLO se suggerito da Gigi (FASE 6.2).
+    is_pressure = key.startswith("tire_press_")
+    if is_pressure:
+        val_color = _pressure_status_color(current)
+        dot = ' <span style="font-size:0.7rem;">●</span>'
+    else:
+        val_color = "#E8002D" if key in dd.SUGGESTED_PARAMS else "#FFFFFF"
+        dot = ""
 
     # Riga nome (mono, muted) + valore — stili inline, nessun selettore interno.
     target.markdown(
@@ -70,7 +94,7 @@ def _slider(params: dict, key: str, target=None):
         f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.66rem;'
         f'letter-spacing:0.08em;color:#999;text-transform:uppercase;">{p["label"]}</span>'
         f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.82rem;'
-        f'font-weight:600;color:{val_color};">{disp}{unit}</span>'
+        f'font-weight:600;color:{val_color};">{disp}{unit}{dot}</span>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -97,6 +121,16 @@ def _group(title: str) -> None:
 # ─────────────────────────────────────────────
 def _render_tyres(params: dict, setup: dict) -> None:
     _group("PRESSIONI")
+    # Legenda colore (finestra ottimale a freddo, soglie da demo_data).
+    _lo, _hi = dd.COLD_PRESS_WINDOW
+    st.markdown(
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.6rem;'
+        'letter-spacing:0.04em;color:#666;margin:-0.15rem 0 0.25rem 0;">'
+        f'<span style="color:{c.STATUS_OK};">●</span> ottimale {_lo:.1f}–{_hi:.1f} psi&emsp;'
+        f'<span style="color:{c.STATUS_WARN};">●</span> limite&emsp;'
+        f'<span style="color:{c.STATUS_ERROR};">●</span> fuori finestra</div>',
+        unsafe_allow_html=True,
+    )
     c1, c2 = st.columns(2)
     setup["tire_press_fl"] = _slider(params, "tire_press_fl", c1)
     setup["tire_press_fr"] = _slider(params, "tire_press_fr", c2)
