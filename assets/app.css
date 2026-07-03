@@ -1111,3 +1111,19 @@ section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
 .pw-sb-footer .pw-sb-ver { color: #555555 !important; }
 .pw-sb-footer a { color: #777777 !important; text-decoration: none !important; }
 .pw-sb-footer a:hover { color: #E8002D !important; }
+
+/* ==============================================
+   DASHBOARD — card metriche native (card + bottone uniti).
+   Scope: SOLO i container con key `pw-dash-card-*` (st.container(border,key=)).
+   Il box lo dà il container Streamlit; qui lo vestiamo in stile cockpit e teniamo
+   il bottone dentro, così ogni metrica è un blocco unico (niente più bottoni staccati).
+   ============================================== */
+[class*="st-key-pw-dash-card-"] {
+    background: var(--bg-surface, #111111) !important;
+    border: 1px solid #222222 !important;
+    border-radius: 12px !important;
+    padding: 16px 18px !important;
+    height: 100% !important;              /* colonne di pari altezza → bottoni allineati */
+}
+/* Nota su 2 righe fisse: con testi di lunghezza diversa i 3 bottoni restano in linea. */
+.pw-dash-card-note { min-height: 2.4em; }

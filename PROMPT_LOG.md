@@ -981,4 +981,27 @@ Verifica: `py_compile` OK; smoke test classificatore (25.3→rosso, 25.5/25.7→
 26.0–27.0→verde, 27.5→ambra, 27.7→rosso; demo COLD: ant.=verde, post.=ambra). Colore calcolato
 sul valore corrente → si aggiorna muovendo lo slider. Non un incident (feature UI) → nessun INC.
 
-**Backlog residuo:** Dashboard (routing bottoni), video demo di backup.
+---
+
+## 03/07 — Dashboard: card + bottone uniti
+
+Utente: «procedi con l'analisi della Dashboard». Analisi: il **routing** dei bottoni era già
+implementato e funzionante (`ui/dashboard.py` → `nav.go_to`, confermato dal PROMPT_LOG punto 4.2),
+quindi la voce di backlog risultava già evasa a livello funzionale. **Vero punto debole (UX):** le 3
+card metriche erano in un **iframe** (`components.html`) e i bottoni "Apri" stavano **staccati** sotto,
+in una riga separata — un bottone dentro l'iframe non può navigare (iframe isolato da Streamlit).
+Scelta utente (AskUserQuestion → «Unire card + bottone»). **Fix (nessun file protetto, nessun dato
+modificato):**
+- `ui/dashboard.py`: rimosso l'iframe delle card (`_cards_html`); `_metric_card` → `_metric_card_inner`
+  (contenuto senza box) + `_metric_cards()` data-driven (inner + btn + target). In `render()`,
+  `st.columns(3)` e per ogni card `st.container(border=True, key="pw-dash-card-<k>")` con dentro il
+  markdown **e** il `st.button` nativo → `nav.go_to`. Mapping **invariato** (Temp→Telemetria ·
+  Pressione→Setup · Consumo→Engineer Console). Card "Chiedi a Gigi" lasciata com'è (CTA full-width).
+  Gli SVG (sparkline/window-bar) sono inline puri → renderizzano nel doc principale coi font iniettati.
+- `assets/app.css`: blocco scoped `[class*="st-key-pw-dash-card-"]` (sfondo #111, bordo #222, radius 12,
+  padding, `height:100%` per colonne di pari altezza) + `.pw-dash-card-note{min-height:2.4em}` per
+  allineare i 3 bottoni. Selettore scoped alla sola classe key.
+Verifica: `py_compile` OK; test import → 3 card, mapping corretto, `_cards_html` rimosso, hook CSS
+presenti. Non un incident (UX polish) → nessun INC.
+
+**Backlog residuo:** video demo di backup (task utente, non-code).
