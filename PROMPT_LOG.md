@@ -826,3 +826,17 @@ riga stale ERR-02/04 rimossa da `AVVIO_RAPIDO.md`, README aggiornato.
 
 **Decisione:** ☑ Mantenuto. Commit su `restyle-ui`, merge `--ff-only` su `main`, push di entrambi (dopo «ok push»).
 Backlog rimasto: stile tasti login; Sidebar/Setup/Dashboard rimandati a fasi successive; video demo di backup da registrare.
+
+### Addendum — Stile tasti login: bottone Google cockpit (03/07/2026)
+
+**Messaggi:** utente «visto tutto, puoi procedere» → scelta guidata backlog = **"Stile tasti login"** →
+scelta guidata direzione = **"Bottone Google in stile cockpit"** → «ok push».
+
+**Intervento (solo `styles/login.css`, `pages/login.py` INTATTO — login sempre funzionante):**
+`.pw-google-btn` da chiaro (`#f5f5f5`/Inter) a **cockpit dark**: superficie `--bg-tertiary`,
+bordo `--border`, font JetBrains Mono, testo `--text-secondary` attenuato (segnala "non attivo"),
+logo `opacity 0.9`, hover con accenno di bordo rosso; resta `cursor:not-allowed` e tag "· IN ARRIVO ·".
+Motivazione: era l'unico elemento chiaro in una login tutta scura → stonava. Nessun file protetto toccato.
+
+**Verifica:** `py_compile pages/login.py` OK; mockup prima/dopo generato. Item backlog "stile tasti login"
+→ **CHIUSO** (spuntato in `AVVIO_RAPIDO.md`). Backlog residuo: Sidebar/Setup/Dashboard, video demo.

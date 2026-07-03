@@ -102,7 +102,8 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
 
 ## In sospeso (promemoria)
 
-- Rivedere lo stile dei **tasti del login** (`styles/login.css`, sezione "FASE 6").
+- ~~Stile tasti del login~~ → **fatto il 03/07**: bottone Google riportato in stile
+  cockpit dark (`styles/login.css`, `.pw-google-btn`).
 - Backlog restyle: **Sidebar** (collapse), **Setup** (colore pressioni), **Dashboard**
   (routing bottoni) — rimandati a una fase successiva.
 - **Video demo di backup** ancora da registrare (rischio già costato punti).

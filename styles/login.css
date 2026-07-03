@@ -150,7 +150,10 @@
   background: var(--border);
 }
 
-/* Bottone "Accedi con Google" — PREDISPOSTO, non attivo (stato "in arrivo") */
+/* Bottone "Accedi con Google" — PREDISPOSTO, non attivo (stato "in arrivo").
+   Stile cockpit dark, coerente coi tasti Quick Login: superficie scura, bordo
+   tenue, testo chiaro attenuato, tag rosso. (Prima era chiaro #f5f5f5 e stonava
+   con il tema scuro della login.) */
 .pw-google-btn {
   display: flex;
   align-items: center;
@@ -158,22 +161,28 @@
   gap: 10px;
   width: 100%;
   padding: 11px 18px;
-  background: #f5f5f5;
-  border: 1px solid #d0d0d0;
+  background: var(--bg-tertiary);        /* #1a1a1a */
+  border: 1px solid var(--border);
   border-radius: 6px;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
   font-weight: 500;
-  color: #3a3a3a;
-  opacity: 0.55;            /* attenuato: non ancora attivo */
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);          /* chiaro ma attenuato → segnala "non attivo" */
   cursor: not-allowed;
   user-select: none;
+  transition: border-color 0.15s ease;
+}
+/* Hover: accenno di bordo rosso → suggerisce "in arrivo" senza renderlo attivo */
+.pw-google-btn:hover {
+  border-color: rgba(232, 0, 45, 0.45);
 }
 
 .pw-google-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  opacity: 0.9;            /* il logo colorato non deve "urlare" su fondo scuro */
 }
 
 .pw-google-tag {
