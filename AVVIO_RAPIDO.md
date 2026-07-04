@@ -126,6 +126,9 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
   `docs/demo_checklist.md` (smoke test OK). Allineato lo **script** all'app reale (8 giri non 5;
   analisi in Engineer Console con «⚙ ANALIZZA», non nel Setup; niente chat separata; retrotreno
   raccontato sui dati a caldo). Solo `.md`, nessun codice toccato.
+- ~~Giro a schermo (verifica visiva)~~ → **fatto il 04/07** (locale): login, Dashboard, Telemetria,
+  Setup, Console verificati insieme, tutto OK. In `docs/demo_checklist.md` spuntati i punti
+  verificati; restano aperti solo deploy sveglio, API live, no-fetch-Google (DevTools), responsive 768px.
 - **Restyle "fine" schermate + micro-animazioni (DA FARE)** — rifinire per bene tutte le
   schermate aggiungendo **micro-animazioni discrete** (es. fade-in/slide dei blocchi al load,
   hover soft su card/bottoni, transizioni leggere) per abbellire senza esagerare. Vincoli:

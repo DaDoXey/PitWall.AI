@@ -1095,3 +1095,20 @@ il design system; nessun file protetto). **Da pianificare** (mostrare piano prim
 Non eseguita ora — solo annotata.
 
 **Backlog residuo:** micro-animazioni schermate (DA PIANIFICARE) · video demo di backup (non-code).
+
+---
+
+## 04/07 — Giro a schermo completato (verifica visiva OK)
+
+Utente ha completato con me il giro guidato a schermo (locale): «va tutto bene» a ogni passo →
+**Login, Dashboard, Telemetria, Setup, Engineer Console tutti verificati OK**. In particolare
+confermati a video i fix di sessione: grafici Dashboard arricchiti, unità °C/legenda/heatmap
+Telemetria (INC-005/008), colore pressioni + legenda Setup, ".AI" rosso e "Esci" non tagliato
+(INC-007/sidebar), upload non troncato (INC-006), Console 4 card + ⚙ ANALIZZA + interattività chip.
+**Aggiornata `docs/demo_checklist.md`:** spuntati [x] i punti verificati (login, render schermate,
+console, font-no-flash, stile dark, plotly leggibili); lasciati [ ] con nota quelli NON controllati
+in questo giro (deploy sveglio, API live end-to-end, no-fetch-Google via DevTools, responsive 768px)
+— report fedele, niente spunte non verificate. Solo `.md`, nessun codice.
+
+**Backlog residuo:** micro-animazioni schermate (DA PIANIFICARE) · verifiche finali su deploy
+(sveglio, API live, DevTools no-Google-fonts, 768px) · video demo di backup (non-code).

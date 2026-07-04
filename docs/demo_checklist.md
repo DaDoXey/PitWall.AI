@@ -79,20 +79,25 @@
 
 ## 2. Checklist pre-esame (da spuntare la sera prima)
 
+> ✅ **Giro a schermo del 04/07 (locale):** login, Dashboard, Telemetria, Setup e Console
+> verificati insieme — tutto OK. Restano da spuntare solo i punti che NON abbiamo controllato
+> a quel giro (evidenziati sotto): deploy sveglio, API live, no-fetch-Google via DevTools,
+> responsive 768px, e la sezione Backup/Sicurezza.
+
 ### Funzionale
-- [ ] Deploy raggiungibile e **sveglio** (apri il link 10 min prima — Streamlit Cloud va in sleep).
-- [ ] **`ANTHROPIC_API_KEY`** valida e con credito (testa una analisi reale end-to-end).
-- [ ] Login quick-DEV funziona.
-- [ ] Dashboard/Telemetria/heatmap renderizzano (dati demo-mode) senza errori.
+- [ ] Deploy raggiungibile e **sveglio** (apri il link 10 min prima — Streamlit Cloud va in sleep). *(da fare sul deploy)*
+- [ ] **`ANTHROPIC_API_KEY`** valida e con credito (testa una analisi reale end-to-end). *(da fare — giro fatto in demo-mode)*
+- [x] Login quick-DEV funziona. *(04/07)*
+- [x] Dashboard/Telemetria/heatmap renderizzano (dati demo-mode) senza errori. *(04/07)*
 - [ ] *(Opzionale)* Upload `test_session.csv` nel Setup mostra il messaggio «CSV letto: 5 giri…».
-- [ ] Engineer Console → **«⚙ ANALIZZA»** (o un chip) restituisce le **4 sezioni** senza errori.
-- [ ] Cambiando chip/testo nella Console il report cambia (interattività demo).
+- [x] Engineer Console → **«⚙ ANALIZZA»** (o un chip) restituisce le **4 sezioni** senza errori. *(04/07)*
+- [x] Cambiando chip/testo nella Console il report cambia (interattività demo). *(04/07)*
 
 ### Visivo (la verifica rimandata di tutte le fasi 1–6!)
-- [ ] Font corretti (Orbitron/Inter/JetBrains) — **niente flash** di font di sistema.
-- [ ] Nessun fetch a Google Fonts (DevTools → Network, filtra "fonts.google").
-- [ ] Card metriche, sparkline, gauge gomme, report 4 sezioni: stile coerente dark.
-- [ ] Grafici plotly leggibili (assi/griglia/legenda).
+- [x] Font corretti (Orbitron/Inter/JetBrains) — **niente flash** di font di sistema. *(04/07)*
+- [ ] Nessun fetch a Google Fonts (DevTools → Network, filtra "fonts.google"). *(da verificare con DevTools)*
+- [x] Card metriche, sparkline, gauge gomme, report 4 sezioni: stile coerente dark. *(04/07)*
+- [x] Grafici plotly leggibili (assi/griglia/legenda). *(04/07)*
 - [ ] Prova a **restringere la finestra** (responsive 768px): niente overflow rotto.
 
 ### Backup (piano B)
