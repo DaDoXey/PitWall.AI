@@ -344,9 +344,15 @@ def render() -> None:
     # Toggle demo-mode + quick-chips
     top_l, top_r = st.columns([3, 1])
     with top_r:
-        dm = st.toggle("Demo-mode", value=flags.demo_mode(), key="demo_mode_toggle",
-                       help="Cache offline pre-validata: la demo non dipende dalla rete.")
-        flags.set_demo_mode(dm)
+        if flags.live_allowed():
+            dm = st.toggle("Demo-mode", value=flags.demo_mode(), key="demo_mode_toggle",
+                           help="Cache offline pre-validata: la demo non dipende dalla rete.")
+            flags.set_demo_mode(dm)
+        else:
+            # Deploy pubblico: toggle bloccato su ON → protegge la API key.
+            st.toggle("Demo-mode", value=True, disabled=True, key="demo_mode_toggle",
+                      help="Live-mode disabilitato in deploy")
+            st.caption("Live-mode disabilitato in deploy")
     with top_l:
         st.markdown(
             '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.62rem;'
