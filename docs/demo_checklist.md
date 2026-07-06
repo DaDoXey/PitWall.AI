@@ -99,9 +99,8 @@
 
 ### Visivo (la verifica rimandata di tutte le fasi 1–6!)
 - [x] Font corretti (Orbitron/Inter/JetBrains) — **niente flash** di font di sistema. *(04/07)*
-- [ ] Nessun fetch a Google Fonts (DevTools → Network, filtra "fonts.google"). *(da verificare con DevTools)*
-  *(Pre-verificato lato codice 06/07: **0 riferimenti esterni** a font in tutto il repo; woff2 embeddati base64
-  in `css_loader`. Resta solo la conferma visiva in DevTools.)*
+- [x] Nessun fetch a Google Fonts — **DevTools → Network: 0 richieste `fonts.google`**. *(deploy 06/07)*
+  *(Confermato anche lato codice: 0 riferimenti esterni a font; woff2 embeddati base64 in `css_loader`.)*
 - [x] Card metriche, sparkline, gauge gomme, report 4 sezioni: stile coerente dark. *(04/07)*
 - [x] Grafici plotly leggibili (assi/griglia/legenda). *(04/07)*
 - [ ] Prova a **restringere la finestra** (responsive 768px): niente overflow rotto.
