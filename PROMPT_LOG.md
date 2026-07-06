@@ -1183,3 +1183,10 @@ iniettato inline da `login.py:14`). `prefers-reduced-motion` invariato.
 **Verifica:** graffe 216/216, 4 keyframe; injection app.css confermata inline; testid `stElementContainer`/
 `stMainBlockContainer` presenti nel bundle Streamlit. Nota per l'utente: **hard-refresh** (Ctrl+Shift+R)
 e attendere il redeploy Cloud; la transizione è più evidente **cambiando pagina**.
+
+**Esito (06/07):** dopo il fix il fade **ancora non si vedeva** nemmeno post-reboot dell'app. Causa reale
+individuata: l'utente aveva **"Effetti di animazione" DISATTIVATO in Windows 11** → il browser attiva
+`prefers-reduced-motion: reduce`, che il nostro guard rispetta azzerando ogni animazione. Riattivata
+l'impostazione + hard-refresh → **fade visibile, confermato dall'utente ✅**. Il guard resta (accessibilità
+corretta). Task micro-animazioni **CHIUSA**. Lezione: quando le animazioni "non si vedono" e il CSS è
+iniettato, sospettare l'impostazione reduced-motion dell'OS prima di riscrivere codice.
