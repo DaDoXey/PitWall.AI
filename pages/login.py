@@ -2,6 +2,7 @@ import streamlit as st
 import uuid
 from auth_config import is_oauth_configured
 from db_auth import init_db, create_or_update_user
+from ui import demo_data as dd  # sorgente dati demo (modulo puro, nessuna dipendenza Streamlit)
 
 init_db()
 
@@ -76,6 +77,9 @@ with _mid:
             st.session_state.user_email = "demo@pitwall.ai"
             st.session_state.user_name = "Demo Pilot"
             st.session_state["gigi_chat"] = []  # chat azzerata a ogni login (come il DB)
+            # Coerenza demo: retrotreno a freddo SOTTO finestra (storia sovrasterzo).
+            st.session_state["setup_tire_press_rl"] = dd.COLD_PRESSURES["rl"]
+            st.session_state["setup_tire_press_rr"] = dd.COLD_PRESSURES["rr"]
             st.switch_page("app.py")
 
     with col_custom:
@@ -99,6 +103,9 @@ with _mid:
                 st.session_state.user_email = email
                 st.session_state.user_name = name
                 st.session_state["gigi_chat"] = []  # chat azzerata a ogni login (come il DB)
+                # Coerenza demo: retrotreno a freddo SOTTO finestra (storia sovrasterzo).
+                st.session_state["setup_tire_press_rl"] = dd.COLD_PRESSURES["rl"]
+                st.session_state["setup_tire_press_rr"] = dd.COLD_PRESSURES["rr"]
                 st.switch_page("app.py")
             else:
                 st.error("Compila tutti i campi (email e nome).")
