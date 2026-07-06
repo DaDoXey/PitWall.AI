@@ -26,3 +26,7 @@ Thumbs.db
 
 # VS Code
 .vscode/
+
+# Report/valutazioni personali — locali, NON su GitHub
+REPORT_VALUTAZIONE_*.md
+_local/
