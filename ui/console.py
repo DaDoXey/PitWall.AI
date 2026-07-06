@@ -361,23 +361,23 @@ def render() -> None:
                 pending = chip
 
     # Input in linea + bottone ANALIZZA (evidente e collegato a Gigi).
+    # st.form: l'analisi parte SOLO al submit (click ANALIZZA o Enter nel campo);
+    # il blur (es. click sul toggle demo-mode) NON fa submit → niente chiamate involontarie.
     st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
-    in_col, btn_col = st.columns([4, 1])
-    with in_col:
-        typed = st.text_input(
-            "Descrivi il problema",
-            key="console_input",
-            placeholder="Descrivi il problema in pista… (es. «L'auto scivola dietro in accelerazione»)",
-            label_visibility="collapsed",
-        )
-    with btn_col:
-        analyze = st.button("⚙ ANALIZZA", key="btn_analyze", type="primary",
-                            use_container_width=True)
-    # Invio col bottone o con Enter, ma SOLO se il testo è nuovo rispetto all'ultimo
-    # analizzato (così un chip non viene sovrascritto dal testo residuo al rerun).
-    # I chip hanno comunque priorità (pending già valorizzato).
-    last_input = st.session_state.get("console_last_input", "")
-    if not pending and typed.strip() and (analyze or typed.strip() != last_input):
+    with st.form("console_form", clear_on_submit=False):
+        in_col, btn_col = st.columns([4, 1])
+        with in_col:
+            typed = st.text_input(
+                "Descrivi il problema",
+                key="console_input",
+                placeholder="Descrivi il problema in pista… (es. «L'auto scivola dietro in accelerazione»)",
+                label_visibility="collapsed",
+            )
+        with btn_col:
+            analyze = st.form_submit_button("⚙ ANALIZZA", type="primary",
+                                            use_container_width=True)
+    # I chip hanno priorità (pending già valorizzato). Da testo libero: solo su submit.
+    if not pending and analyze and typed.strip():
         pending = typed.strip()
 
     if pending:
@@ -386,7 +386,6 @@ def render() -> None:
         st.session_state["console_question"] = pending
         st.session_state["console_response"] = resp
         st.session_state["console_source"] = src
-        st.session_state["console_last_input"] = typed.strip()  # blocca i ri-trigger
         st.rerun()
 
     # Domanda corrente
