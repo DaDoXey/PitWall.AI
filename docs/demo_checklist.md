@@ -86,19 +86,28 @@
 
 ### Funzionale
 - [ ] Deploy raggiungibile e **sveglio** (apri il link 10 min prima — Streamlit Cloud va in sleep). *(da fare sul deploy)*
-- [ ] **`ANTHROPIC_API_KEY`** valida e con credito (testa una analisi reale end-to-end). *(da fare — giro fatto in demo-mode)*
+- [ ] **`ANTHROPIC_API_KEY`** valida e con credito (testa una analisi reale end-to-end). *(da fare)*
+  **Come testarla live:** (1) chiave nei **Secrets** di Streamlit Cloud (Manage app → Settings → Secrets);
+  (2) in Engineer Console **spegni il toggle «Demo-mode»**; (3) scrivi una domanda **non-demo** (uno scenario
+  demo torna comunque la cache) → **⚙ ANALIZZA**. Infra pronta (`agent.py`, cascade-fallback, key da `st.secrets`).
 - [x] Login quick-DEV funziona. *(04/07)*
 - [x] Dashboard/Telemetria/heatmap renderizzano (dati demo-mode) senza errori. *(04/07)*
 - [ ] *(Opzionale)* Upload `test_session.csv` nel Setup mostra il messaggio «CSV letto: 5 giri…».
+  *(Pre-verificato lato codice 06/07: `setup_view.py:296` emette il messaggio; `test_session.csv` = 5 giri.)*
 - [x] Engineer Console → **«⚙ ANALIZZA»** (o un chip) restituisce le **4 sezioni** senza errori. *(04/07)*
 - [x] Cambiando chip/testo nella Console il report cambia (interattività demo). *(04/07)*
 
 ### Visivo (la verifica rimandata di tutte le fasi 1–6!)
 - [x] Font corretti (Orbitron/Inter/JetBrains) — **niente flash** di font di sistema. *(04/07)*
 - [ ] Nessun fetch a Google Fonts (DevTools → Network, filtra "fonts.google"). *(da verificare con DevTools)*
+  *(Pre-verificato lato codice 06/07: **0 riferimenti esterni** a font in tutto il repo; woff2 embeddati base64
+  in `css_loader`. Resta solo la conferma visiva in DevTools.)*
 - [x] Card metriche, sparkline, gauge gomme, report 4 sezioni: stile coerente dark. *(04/07)*
 - [x] Grafici plotly leggibili (assi/griglia/legenda). *(04/07)*
 - [ ] Prova a **restringere la finestra** (responsive 768px): niente overflow rotto.
+  *(06/07: `app.css` ha già `@media` 1100/768px; **aggiunto breakpoint responsive alla login**
+  `styles/login.css` 768px→hero 44px e 430px→hero 32px, così "PITWALL●AI" non sfora su schermi stretti.
+  Resta la conferma visiva sul deploy.)*
 
 ### Backup (piano B)
 - [ ] **Registra un video** della demo completa che funziona (mp4, 1080p) — da proiettare se rete/API cadono.

@@ -1190,3 +1190,33 @@ individuata: l'utente aveva **"Effetti di animazione" DISATTIVATO in Windows 11*
 l'impostazione + hard-refresh → **fade visibile, confermato dall'utente ✅**. Il guard resta (accessibilità
 corretta). Task micro-animazioni **CHIUSA**. Lezione: quando le animazioni "non si vedono" e il CSS è
 iniettato, sospettare l'impostazione reduced-motion dell'OS prima di riscrivere codice.
+
+---
+
+## 06/07 — Verifiche finali deploy (pre-verifica codice + fix responsive login)
+
+**Data:** 06/07/2026 · branch `main` · modello claude-opus-4-8 (Claude Code)
+
+**Messaggi:** utente «passiamo alle verifiche finali sul deploy» → analisi dei punti aperti in
+`docs/demo_checklist.md` → «procedi col fix responsive login e aggiorna la checklist».
+
+**Pre-verifica lato codice (read-only) dei punti aperti:**
+- **No fetch Google Fonts** ✅ — grep intero repo: 0 riferimenti a `fonts.googleapis`/`gstatic`/`<link>` font/
+  `@import`; woff2 embeddati base64 in `assets/css_loader.py`. (Resta conferma DevTools sul deploy.)
+- **CSV upload «5 giri»** ✅ — `ui/setup_view.py:296` emette «CSV letto: {laps} giri · consumo medio…»;
+  `backend/data/test_session.csv` = header + 5 righe = 5 giri.
+- **API live** ✅ infra — `agent.py` (`ANTHROPIC_API_KEY`, modello default `claude-haiku-4-5`, cascade-fallback);
+  key da `st.secrets`/env (`console.py:214`). Per testarla live: Secrets su Cloud + toggle «Demo-mode» OFF
+  (`console.py:347`) + domanda non-demo (una demo torna cache via `_is_demo_prompt`) → ⚙ ANALIZZA.
+- **Responsive** ⚠️→fix — `app.css` aveva già `@media` 1100/768px; **`styles/login.css` non aveva media query**
+  e l'hero 56px fisso poteva sforare su schermi stretti.
+
+**Intervento (solo `styles/login.css`, nessun file protetto, logica auth invariata):** aggiunti due
+breakpoint — `@media (max-width:768px)` (hero 56→44px, letter-spacing 6→4, ruler 260→200, card padding
+ridotto) e `@media (max-width:430px)` (hero →32px, sub 11px, ruler 150). Così "PITWALL●AI" non va mai in
+overflow. `docs/demo_checklist.md` aggiornato con le pre-verifiche (annotazioni oneste: `[x]` solo il
+già-verificato, note "pre-verificato lato codice / resta conferma sul deploy" sugli altri).
+
+**Verifica:** login.css graffe 55/55, 3 `@media`; nessun file `.py` toccato. Restano da spuntare sul deploy
+(gruppo B, azioni utente nel browser): deploy sveglio, API live end-to-end, DevTools no-Google, resize 768px,
+backup (video/screenshot) e sicurezza (.env). **Decisione:** ☑ Mantenuto; push su `main`+`restyle-ui`.

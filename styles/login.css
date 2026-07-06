@@ -325,3 +325,21 @@
     animation: none !important;
   }
 }
+
+/* ==============================================
+   RESPONSIVE — l'hero 56px è fisso: su finestre strette (tablet/telefono)
+   andrebbe in overflow. Qui lo si scala per gradi così "PITWALL●AI" non
+   sfora mai. La card è già centrata (max-width:420px, margin auto).
+   ============================================== */
+@media (max-width: 768px) {
+  .pw-hero { padding: 28px 0 4px 0; }
+  .pw-hero-title { font-size: 44px; letter-spacing: 4px; }
+  .pw-ruler { width: 200px; }
+  .login-card { padding: 36px 24px; }
+}
+@media (max-width: 430px) {
+  .pw-hero-title { font-size: 32px; letter-spacing: 2px; }
+  .pw-hero-sub { font-size: 11px; letter-spacing: 2px; }
+  .pw-ruler { width: 150px; }
+  .login-card { padding: 28px 18px; }
+}
