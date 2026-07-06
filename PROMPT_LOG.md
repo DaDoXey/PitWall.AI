@@ -1159,4 +1159,27 @@ Non è un incidente (polish, non bug) → **nessun INC**. Backlog `AVVIO_RAPIDO.
 il nodo, un click può far ripartire il fade (200ms). Con intensità discreta è impercettibile; se disturba,
 limitare l'animazione ai soli cambi-pagina.
 
-**Decisione:** ☑ Mantenuto. Commit/push su `main` + `restyle-ui` solo dopo «ok push» esplicito (regola git).
+**Decisione:** ☑ Mantenuto. Commit `2f749bc`, push su `main` + `restyle-ui` (nuovo workflow: l'utente
+verifica online → push diretto dopo implementazione approvata, senza «ok push» separato).
+
+### Fix — animazioni non visibili online: selettore fragile (06/07)
+
+**Messaggio utente:** «non vedo nessuna animazione, tutto uguale».
+
+**Diagnosi:** `app.css` è iniettato inline (`app.py:32` → `inject_design_system()`, `include_app_css=True`),
+quindi le regole erano nel DOM. Il problema: il selettore di load-in usava il **figlio diretto**
+`section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div`. Con
+`requirements.txt` a `streamlit>=1.0` **non pinnato**, il deploy gira su una versione più nuova del
+locale (1.57): se c'è un wrapper intermedio, il `>` non aggancia nulla → nessuna animazione. Il fade da
+200ms era anche poco percepibile.
+
+**Fix (solo `assets/app.css`):** riscritto con selettori **robusti su testid stabili** (confermati nel
+bundle): fade-up dell'intero `stMainBlockContainer`/`.block-container` (`pwPageIn` 320ms) + fade-up dei
+singoli `[data-testid="stElementContainer"]` (descendant, non dipende dal nesting) con stagger 45/90/120ms,
+durata 280ms, offset `translateY 10px`. Su cambio pagina gli `stElementContainer` sono nodi nuovi →
+l'animazione riparte = transizione visibile. `login.css` invariato (classi custom già presenti nel DOM,
+iniettato inline da `login.py:14`). `prefers-reduced-motion` invariato.
+
+**Verifica:** graffe 216/216, 4 keyframe; injection app.css confermata inline; testid `stElementContainer`/
+`stMainBlockContainer` presenti nel bundle Streamlit. Nota per l'utente: **hard-refresh** (Ctrl+Shift+R)
+e attendere il redeploy Cloud; la transizione è più evidente **cambiando pagina**.

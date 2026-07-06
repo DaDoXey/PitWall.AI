@@ -1122,24 +1122,33 @@ section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
    (animo i CONTENITORI, mai il contenuto Plotly/iframe).
    ============================================================= */
 @keyframes pwFadeUp {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Entrata dei blocchi top-level dell'area principale, con stagger discreto.
-   Target = figli diretti del vertical-block di primo livello (granularità
-   "blocco logico"): non tocca i blocchi annidati → niente re-fade a cascata. */
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div {
-    animation: pwFadeUp 0.2s ease-out both;
+/* Entrata dell'INTERA area principale a ogni load/cambio-pagina: un fade-up
+   pulito del block-container (selettore stabile, indipendente dal nesting →
+   robusto anche sulla versione di Streamlit del deploy). */
+section[data-testid="stMain"] [data-testid="stMainBlockContainer"],
+section[data-testid="stMain"] .block-container {
+    animation: pwPageIn 0.32s ease-out both;
 }
-/* Stagger: +40ms a blocco, cap al 7° (oltre, entrano insieme → nessuna attesa). */
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(1) { animation-delay: 0ms; }
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(2) { animation-delay: 40ms; }
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(3) { animation-delay: 80ms; }
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(4) { animation-delay: 120ms; }
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(5) { animation-delay: 160ms; }
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(6) { animation-delay: 200ms; }
-section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(n+7) { animation-delay: 240ms; }
+@keyframes pwPageIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade-up dei singoli elementi (stElementContainer = testid STABILE, confermato
+   nel bundle). Selettore descendant → non dipende dal nesting esatto. Su cambio
+   pagina gli elementi sono nodi nuovi → l'animazione riparte = transizione
+   percepibile. Stagger leggero sui primi elementi di ogni gruppo. */
+section[data-testid="stMain"] [data-testid="stElementContainer"] {
+    animation: pwFadeUp 0.28s ease-out both;
+}
+section[data-testid="stMain"] [data-testid="stElementContainer"]:nth-of-type(1) { animation-delay: 0ms; }
+section[data-testid="stMain"] [data-testid="stElementContainer"]:nth-of-type(2) { animation-delay: 45ms; }
+section[data-testid="stMain"] [data-testid="stElementContainer"]:nth-of-type(3) { animation-delay: 90ms; }
+section[data-testid="stMain"] [data-testid="stElementContainer"]:nth-of-type(n+4) { animation-delay: 120ms; }
 
 /* Hover soft — card metriche (lift + bordo accento). Estende la transizione
    esistente (solo border-color) con il transform. */
