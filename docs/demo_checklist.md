@@ -85,11 +85,11 @@
 > responsive 768px, e la sezione Backup/Sicurezza.
 
 ### Funzionale
-- [ ] Deploy raggiungibile e **sveglio** (apri il link 10 min prima — Streamlit Cloud va in sleep). *(da fare sul deploy)*
-- [ ] **`ANTHROPIC_API_KEY`** valida e con credito (testa una analisi reale end-to-end). *(da fare)*
+- [x] Deploy raggiungibile e **sveglio**. *(verificato sul deploy 06/07)*
+- [x] **`ANTHROPIC_API_KEY`** valida — **analisi reale end-to-end OK** (badge `● LIVE` in Console). *(deploy 06/07)*
   **Come testarla live:** (1) chiave nei **Secrets** di Streamlit Cloud (Manage app → Settings → Secrets);
   (2) in Engineer Console **spegni il toggle «Demo-mode»**; (3) scrivi una domanda **non-demo** (uno scenario
-  demo torna comunque la cache) → **⚙ ANALIZZA**. Infra pronta (`agent.py`, cascade-fallback, key da `st.secrets`).
+  demo torna comunque la cache) → **⚙ ANALIZZA**. Il badge sorgente in alto a destra deve dire `● LIVE`.
 - [x] Login quick-DEV funziona. *(04/07)*
 - [x] Dashboard/Telemetria/heatmap renderizzano (dati demo-mode) senza errori. *(04/07)*
 - [ ] *(Opzionale)* Upload `test_session.csv` nel Setup mostra il messaggio «CSV letto: 5 giri…».
