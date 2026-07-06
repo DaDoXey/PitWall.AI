@@ -1258,3 +1258,59 @@ Nessuno toccato (nessuna modifica di codice: solo allineamento Git + questa entr
 
 **Decisione:** ☑ Mantenuto. Fermo qui come richiesto («allinea e poi stop»). Commit/push **non** eseguiti
 (regola git: solo dopo «ok push» esplicito); questa entry di PROMPT_LOG resta come modifica locale non committata.
+
+---
+
+## HOTFIX-1 — 6 criticità Alte pre-esame (da Audit 06/07/2026) · branch `restyle-ui`
+
+**Data:** 06–07/07/2026 · branch `restyle-ui` · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Utente:** incollato il prompt **PROMPT_FASE_HOTFIX-1** (FASE 0 audit read-only → FASE 1 diagnosi/STOP
+   gate → FASE 2–7 esecuzione uno-alla-volta → FASE 8 chiusura). 6 fix; file protetti con STOP gate dedicato.
+2. **Utente:** «ok procedi, FIX-6 opzione B» → via all'esecuzione; FIX-6 = pre-seed nel login (non tocca setup_params).
+3. **Utente:** «ok su FIX-1, procedi con FIX-2» → e così via, un OK per ogni fix (FIX-2, FIX-3, FIX-4).
+4. **Utente:** «ok su FIX-4, ok procedi su agent.py» → autorizzazione esplicita al file protetto per FIX-5.
+5. **Utente:** «ok su FIX-5, procedi con FIX-6 opzione B» → applicata la B.
+6. **Utente:** «ok su FIX-6, procedi con la FASE 8» → chiusura (doc + proposta commit).
+
+### FASE 0 — Audit (read-only)
+Git su `restyle-ui` pulito (`e3381a0`). Baseline `test_parser` **12/12**. `requests` non importato in nessun
+modulo del progetto (solo transitivo di streamlit). Versioni `.venv`: streamlit 1.58.0, anthropic 0.113.0,
+pandas 3.0.3, plotly 6.8.0, python-dotenv 1.2.2 (Python 3.12.10). I 6 problemi tutti confermati nel codice.
+
+### FASE 2–7 — Esecuzione (uno alla volta, `test_parser` 12/12 dopo ciascuno)
+- **FIX-1** `requirements.txt`: pin `==` alle versioni locali; rimosso `requests` (transitivo di streamlit →
+  resta disponibile). ⚠️ da confermare sui log di deploy Cloud al prossimo build.
+- **FIX-2** `ui/console.py`: `with st.spinner("Gigi sta analizzando…")` attorno all'analisi. → INC-009.
+- **FIX-3** `ui/console.py`: input+bottone in `st.form` (submit solo su ANALIZZA/Enter, mai su blur);
+  rimossa la guardia morta `console_last_input`. Trade-off dichiarato: con form l'input si legge al submit. → INC-009.
+- **FIX-4** `ui/flags.py`+`ui/console.py`+`.env.example`: `PITWALL_ALLOW_LIVE` (default 0) + `live_allowed()`;
+  demo-mode forzata sul deploy, toggle `disabled` con caption. Protegge la API key. → INC-010.
+- **FIX-5** `agent.py` (**file protetto — autorizzato «ok procedi su agent.py»**): `timeout=30.0`
+  (`call_claude` + `chat_with_gigi`), cascata 4→2 modelli, messaggio d'errore generico (dettagli solo su
+  `log_incident`). → INC-009.
+- **FIX-6 opzione B** `pages/login.py`: pre-seed `setup_tire_press_rl/rr = 25.7/25.5` da `dd.COLD_PRESSURES`
+  su entrambi i rami di login → nel Setup il retrotreno parte "sotto finestra" (ambra), coerente con la storia
+  sovrasterzo. **`modules/setup_params.py` INTATTO** (default 26.8 preservati): scelta B per non toccare la
+  fonte di verità dei range.
+
+### File protetti
+Solo `agent.py` (FIX-5, con autorizzazione esplicita). `modules/setup_params.py`, parser, prompt di sistema,
+logica gauge/fuel: **non toccati**. Nessun selettore CSS wildcard/interno introdotto.
+
+### Verifica
+`py_compile` OK su tutti i file toccati (incl. `pages/login.py`); import dei moduli toccati + dipendenze OK;
+`test_parser` **12/12** dopo ogni fix. Nota: `import app`/`import pages.login` "a freddo" sollevano
+`NoSessionContext` su `switch_page` — **pre-esistente** (verificato con `git stash`), è solo l'effetto di
+importare l'entrypoint Streamlit fuori da una sessione, non un errore introdotto dai fix. Doc: INC-009 e
+INC-010 aperti+risolti in `INCIDENTS.md`.
+
+### Esito
+6 file modificati (+70/−43 ca.): `requirements.txt`, `ui/console.py`, `ui/flags.py`, `.env.example`,
+`agent.py`, `pages/login.py`. FIX-1…FIX-6 applicati; nessun fix saltato. Restano da confermare a schermo
+dall'utente (`streamlit run app.py`): spinner, no-auto-submit su blur, toggle bloccato in deploy, pressioni
+retrotreno ambra nel Setup.
+
+**Decisione:** ☑ Mantenuto. **Commit/push NON eseguiti** — attendo «ok push» (regola git). Proposti 6 commit
+(uno per fix) nel messaggio di chiusura FASE 8.

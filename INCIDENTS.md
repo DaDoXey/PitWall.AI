@@ -372,7 +372,94 @@ tooltip e una legenda non devono mai condividere la stessa fascia del grafico.
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 03/07/2026 (INC-003…INC-008)*
+## INC-009 — Engineer Console: percezione freeze + auto-submit involontario + cascata API senza timeout
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-009 |
+| Data rilevamento | 06/07/2026 (audit pre-esame) |
+| Severità | Alta (demo d'esame) |
+| Stato | RISOLTO |
+| File coinvolti | `ui/console.py`, `agent.py` |
+
+### Sintomo
+Con demo-mode OFF (LLM reale) la Engineer Console poteva "congelarsi": nessun
+feedback durante l'analisi (spinner assente, header Streamlit "Running…" nascosto
+dal CSS), attese lunghissime, e talvolta chiamate API partite senza che l'utente
+avesse premuto ANALIZZA (bastava togliere il focus dal campo di testo).
+
+### Causa
+1. **Nessuno spinner** attorno a `get_console_analysis()` (`ui/console.py`): la
+   chiamata sincrona non dava alcun segnale di attività.
+2. **Auto-submit su blur** (`ui/console.py`): la condizione
+   `(analyze or typed.strip() != last_input)` faceva partire l'analisi a ogni
+   rerun in cui il testo differiva dall'ultimo — inclusi i rerun da blur (es.
+   click sul toggle demo-mode) → chiamate LLM involontarie.
+3. **Cascata API senza timeout** (`agent.py`): client Anthropic senza `timeout`
+   (default fino a ~10 min/chiamata) + cascata di 4 modelli × 2 tentativi = fino a
+   8 chiamate sincrone → radice del freeze. Il messaggio d'errore esponeva inoltre
+   i dettagli tecnici all'utente finale.
+
+### Fix Applicato
+1. `with st.spinner("Gigi sta analizzando…")` attorno all'analisi.
+2. Input+bottone dentro `st.form("console_form")`: l'analisi parte SOLO al submit
+   (click ANALIZZA o Enter nel campo); il blur non fa submit. Rimossa la guardia
+   ora inutile `console_last_input`. Chip e flusso demo invariati.
+3. `agent.py` (file protetto, modifica autorizzata): `timeout=30.0` sul client
+   (`call_claude` e `chat_with_gigi`); `models_to_try` ridotto a 2
+   (`CLAUDE_MODEL` + `claude-sonnet-4-6`); messaggio d'errore generico
+   ("⚠️ Servizio temporaneamente non disponibile. Riprova tra poco."), i dettagli
+   restano solo su `log_incident`.
+
+### Verifica
+`py_compile` + import OK; `test_parser` 12/12; demo-mode continua a servire la
+cache offline senza toccare `agent.py`.
+
+### Lezione Appresa
+Ogni operazione sincrona che può durare va accompagnata da feedback visibile e da
+un timeout esplicito; un input libero non deve mai auto-inviarsi su un evento
+collaterale (blur) — `st.form` rende il submit esplicito.
+
+---
+
+## INC-010 — API key esposta sul deploy pubblico (toggle demo-mode disattivabile da chiunque)
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-010 |
+| Data rilevamento | 06/07/2026 (audit pre-esame) |
+| Severità | Alta (sicurezza / costo) |
+| Stato | RISOLTO |
+| File coinvolti | `ui/flags.py`, `ui/console.py`, `.env.example` |
+
+### Sintomo
+Sul deploy pubblico (`pitwall-ai-dado.streamlit.app`) chiunque poteva spegnere il
+toggle "Demo-mode" e far partire chiamate LLM reali con la MIA `ANTHROPIC_API_KEY`
+(nessun rate limiting; fino a più chiamate per prompt) → rischio consumo credito.
+
+### Causa
+`flags.demo_mode()` era liberamente disattivabile dal toggle in `ui/console.py`,
+senza distinzione tra ambiente locale/esame e deploy pubblico.
+
+### Fix Applicato
+Nuova env var `PITWALL_ALLOW_LIVE` (default `0`) + helper `flags.live_allowed()`.
+Quando la live non è consentita, `demo_mode()` ritorna SEMPRE `True` (cache forzata)
+e il toggle in `ui/console.py` è reso `disabled` con caption "Live-mode disabilitato
+in deploy". In locale / demo d'esame si imposta `PITWALL_ALLOW_LIVE=1` per riabilitare
+il toggle e la LLM reale. `.env.example` aggiornato con la variabile documentata.
+
+### Verifica
+Smoke: default → `live_allowed=False`, `demo_mode()=True`; con `=1` → `live_allowed=True`.
+`py_compile` + import OK; `test_parser` 12/12.
+
+### Lezione Appresa
+Le risorse a pagamento (API key) vanno protette per default sull'ambiente pubblico:
+il comportamento "sicuro" (demo forzata) è il default, quello "aperto" (LLM reale)
+è un'attivazione esplicita via env var, mai lasciata alla UI accessibile a tutti.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 06/07/2026 (INC-003…INC-010)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |
