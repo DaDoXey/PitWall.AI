@@ -1220,3 +1220,41 @@ già-verificato, note "pre-verificato lato codice / resta conferma sul deploy" s
 **Verifica:** login.css graffe 55/55, 3 `@media`; nessun file `.py` toccato. Restano da spuntare sul deploy
 (gruppo B, azioni utente nel browser): deploy sveglio, API live end-to-end, DevTools no-Google, resize 768px,
 backup (video/screenshot) e sicurezza (.env). **Decisione:** ☑ Mantenuto; push su `main`+`restyle-ui`.
+
+---
+
+## 06/07 — Allineamento secondo PC (fast-forward) + verifica integrità
+
+**Data:** 06/07/2026 (ripresa lavori su questo PC) · branch `restyle-ui`/`main` · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Setup/metodo (status):** leggere per intero prompt log + breakdown + progetto, verificare discordanze,
+   controllare allineamento Git con `origin`, elaborare il prossimo passo, esporre il piano e attendere
+   approvazione; non inventare/costruire. Subtask iniziale: nessuna.
+2. **Utente (scelta guidata prossimo passo):** **«Allinea e poi stop»** — eseguire il fast-forward pull su
+   `main`+`restyle-ui`, verifica integrità, poi fermarsi (nessun task di codice aperto).
+
+### Diagnosi (sola lettura, pre-azione)
+Questo PC era **8 commit indietro** rispetto a `origin` (lavoro del 06/07 fatto dall'altro PC e già pushato):
+micro-animazioni (`2f749bc`) + fix "non visibili"/chiusura (`3a50322`,`ae6cac1`, causa reale = reduced-motion
+OS disattivato in Win11, poi confermato ✅), fix responsive login (`fdd5b1e`), verifiche finali deploy
+(`cb37668`,`0f88aa4`,`ecee4f7`), gitignore report personali (`c587064`). Working tree locale pulito → nessun
+commit locale da preservare. Nessun'altra discordanza fra i file. README già accurato (04/07): non serve toccarlo.
+
+### Interventi eseguiti
+- **Allineamento Git:** `git pull --ff-only` su `restyle-ui` e `main` → entrambi da `fbb157f` a `c587064`,
+  `0/0` col remoto, working tree pulito. Nessun dato perso (solo avanzamento).
+- **Verifica integrità stato 06/07:** `py_compile` OK (app + `ui/*` + `modules/*` + parser/manager +
+  `pages/login.py` + `css_loader.py`); smoke-import catena UI (11 moduli) OK; sanity CSS: `app.css` graffe
+  216/216, `login.css` 55/55, guard `prefers-reduced-motion` presente in entrambi.
+
+### Stato backlog
+Tutto il backlog di **codice** risulta CHIUSO (micro-animazioni era l'ultimo task, chiuso il 06/07).
+Residuo **non-code:** video demo di backup + alcuni check browser-side del `demo_checklist` (screenshot,
+`.env` non in condivisione schermo). ERR-01…05 e INC-001…008 tutti RISOLTI.
+
+### File protetti
+Nessuno toccato (nessuna modifica di codice: solo allineamento Git + questa entry di log).
+
+**Decisione:** ☑ Mantenuto. Fermo qui come richiesto («allinea e poi stop»). Commit/push **non** eseguiti
+(regola git: solo dopo «ok push» esplicito); questa entry di PROMPT_LOG resta come modifica locale non committata.
