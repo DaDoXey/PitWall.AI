@@ -1112,3 +1112,51 @@ in questo giro (deploy sveglio, API live end-to-end, no-fetch-Google via DevTool
 
 **Backlog residuo:** micro-animazioni schermate (DA PIANIFICARE) · verifiche finali su deploy
 (sveglio, API live, DevTools no-Google-fonts, 768px) · video demo di backup (non-code).
+
+---
+
+## 06/07 — Micro-animazioni discrete (tutte le schermate)
+
+**Data:** 06/07/2026 · branch `main` (locale allineato dopo pull) · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Setup/metodo (status):** leggere per intero prompt log + breakdown + progetto, verificare
+   discordanze, controllare allineamento Git con `origin`, esporre il piano e attendere approvazione;
+   non inventare/costruire. Subtask iniziale: nessuna, attendere comando.
+2. Utente: «Procedi con l'analisi».
+3. Utente: «Approvo Passo 1 + 2, procedi» → allineamento Git + aggiornamento memoria persistente.
+4. Utente: «procedi» → preparazione piano micro-animazioni.
+5. **Scelta guidata (AskUserQuestion):** intensità = **Discreta**, ambito = **Tutte le schermate**.
+6. Utente: «Confermo il piano, procedi con l'implementazione».
+
+### Passo preliminare — Allineamento Git
+Locale (`main` e `restyle-ui`) era **16 commit dietro** `origin` (lavoro 03–04/07 dall'altro PC:
+TELEMETRIA-UPGRADE-1, login Google, sidebar, colore pressioni Setup, grafici Dashboard, doc,
+demo checklist, giro a schermo). Fast-forward pulito `376880b → fbb157f`, `0/0`, tree clean,
+`py_compile`/import OK. Memoria persistente aggiornata (nuova `pitwall-status`, indice + branch-merge).
+
+### Intervento — micro-animazioni (SOLO CSS, zero file protetti, zero `.py`)
+- `assets/app.css` (Dashboard/Telemetria/Setup/Console): `@keyframes pwFadeUp` (opacity 0→1 +
+  `translateY 8px→0`, 200ms ease-out) applicato ai **figli diretti del vertical-block di primo
+  livello** in `section[data-testid="stMain"]` (sidebar esclusa), con **stagger** nth-child
+  (+40ms, cap `n+7` a 240ms). Hover soft: `.pw-metric-card` lift `-2px` + bordo accento; bottoni
+  area principale con transizione morbida colore/bordo + micro-press `translateY(1px)` all'`:active`.
+- `styles/login.css`: la login carica solo font+token (non app.css) → keyframe locali. `pwLoginFadeUp`
+  (fade-up 10px, 350ms) su hero title/ruler/sub/tagline con stagger (0/80/160/240ms); `pwTraceIn`
+  (fade a opacity 0.18) sulla traccia telemetria. **Guard `prefers-reduced-motion` aggiunto qui**
+  (in app.css era già presente e copre i nuovi keyframe col selettore `*`/`!important`).
+
+**Coerenza design system:** solo classi custom / selettori scoped a `stMain`, nessun wildcard;
+accento `#E8002D`, font self-hosted; grafici Plotly/iframe **non toccati** (animo i contenitori).
+`pages/login.py` e logica auth **invariati** (priorità #1 login sempre funzionante).
+
+### Verifica
+Import catena UI OK; `css_loader` rilegge il nuovo CSS (`pwFadeUp` presente → cache mtime funziona);
+graffe bilanciate (app.css 215/215, login.css 45/45); keyframe totali coerenti (app.css 3, login.css 2).
+Non è un incidente (polish, non bug) → **nessun INC**. Backlog `AVVIO_RAPIDO.md` spuntato.
+
+**Rischio noto (da confermare a schermo):** Streamlit ri-renderizza a ogni interazione — se re-inserisce
+il nodo, un click può far ripartire il fade (200ms). Con intensità discreta è impercettibile; se disturba,
+limitare l'animazione ai soli cambi-pagina.
+
+**Decisione:** ☑ Mantenuto. Commit/push su `main` + `restyle-ui` solo dopo «ok push» esplicito (regola git).

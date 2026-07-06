@@ -1111,3 +1111,51 @@ section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
 .pw-sb-footer .pw-sb-ver { color: #555555 !important; }
 .pw-sb-footer a { color: #777777 !important; text-decoration: none !important; }
 .pw-sb-footer a:hover { color: #E8002D !important; }
+
+/* =============================================================
+   MICRO-ANIMAZIONI — restyle "fine" schermate (intensità: DISCRETA)
+   Solo presentazione. Fade-in + slide leggero dei blocchi dell'area
+   PRINCIPALE al load (sidebar esclusa: scoping a stMain) + hover soft
+   su card/bottoni. NB: il blocco @media (prefers-reduced-motion) più
+   sopra neutralizza tutto questo (selettore * con !important) per chi
+   ha ridotto il movimento. Nessun file protetto, nessun grafico toccato
+   (animo i CONTENITORI, mai il contenuto Plotly/iframe).
+   ============================================================= */
+@keyframes pwFadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Entrata dei blocchi top-level dell'area principale, con stagger discreto.
+   Target = figli diretti del vertical-block di primo livello (granularità
+   "blocco logico"): non tocca i blocchi annidati → niente re-fade a cascata. */
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div {
+    animation: pwFadeUp 0.2s ease-out both;
+}
+/* Stagger: +40ms a blocco, cap al 7° (oltre, entrano insieme → nessuna attesa). */
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(1) { animation-delay: 0ms; }
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(2) { animation-delay: 40ms; }
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(3) { animation-delay: 80ms; }
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(4) { animation-delay: 120ms; }
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(5) { animation-delay: 160ms; }
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(6) { animation-delay: 200ms; }
+section[data-testid="stMain"] .block-container > div[data-testid="stVerticalBlock"] > div:nth-child(n+7) { animation-delay: 240ms; }
+
+/* Hover soft — card metriche (lift + bordo accento). Estende la transizione
+   esistente (solo border-color) con il transform. */
+.pw-metric-card {
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.pw-metric-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Hover/press soft — bottoni dell'area principale (sidebar ha già le sue
+   regole). Transizione morbida su colore + micro-press all'active. */
+section[data-testid="stMain"] [data-testid="stButton"] > button {
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+section[data-testid="stMain"] [data-testid="stButton"] > button:active {
+    transform: translateY(1px);
+}

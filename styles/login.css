@@ -291,3 +291,37 @@
   height: 100%;
   display: block;
 }
+
+/* ==============================================
+   MICRO-ANIMAZIONI login (intensità: DISCRETA) — fade-up hero + trace
+   La login carica solo font+token (NON app.css), quindi keyframe e guard
+   reduced-motion vivono qui. Solo classi custom, nessun selettore interno
+   Streamlit / wildcard. Logica auth invariata.
+   ============================================== */
+@keyframes pwLoginFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pwTraceIn {
+  from { opacity: 0; }
+  to   { opacity: 0.18; }   /* stesso target opacity di .pw-telemetry-trace */
+}
+
+/* Hero in ingresso, con stagger discreto (title → ruler → sub → tagline). */
+.pw-hero-title   { animation: pwLoginFadeUp 0.35s ease-out both; }
+.pw-ruler        { animation: pwLoginFadeUp 0.35s ease-out 0.08s both; }
+.pw-hero-sub     { animation: pwLoginFadeUp 0.35s ease-out 0.16s both; }
+.pw-hero-tagline { animation: pwLoginFadeUp 0.35s ease-out 0.24s both; }
+/* Traccia telemetria: fade-in tenue, leggermente dopo l'hero. */
+.pw-telemetry-trace { animation: pwTraceIn 0.8s ease-out 0.30s both; }
+
+/* Accessibilità: nessun movimento se l'utente ha ridotto le animazioni. */
+@media (prefers-reduced-motion: reduce) {
+  .pw-hero-title,
+  .pw-ruler,
+  .pw-hero-sub,
+  .pw-hero-tagline,
+  .pw-telemetry-trace {
+    animation: none !important;
+  }
+}

@@ -129,12 +129,13 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
 - ~~Giro a schermo (verifica visiva)~~ → **fatto il 04/07** (locale): login, Dashboard, Telemetria,
   Setup, Console verificati insieme, tutto OK. In `docs/demo_checklist.md` spuntati i punti
   verificati; restano aperti solo deploy sveglio, API live, no-fetch-Google (DevTools), responsive 768px.
-- **Restyle "fine" schermate + micro-animazioni (DA FARE)** — rifinire per bene tutte le
-  schermate aggiungendo **micro-animazioni discrete** (es. fade-in/slide dei blocchi al load,
-  hover soft su card/bottoni, transizioni leggere) per abbellire senza esagerare. Vincoli:
-  **niente effetti eccessivi/distraenti**, restare nel design system cockpit (accento `#E8002D`,
-  font self-hosted), zero regressioni su leggibilità/performance e nessun file protetto toccato.
-  Richiesta utente 04/07 durante il giro a schermo. → da pianificare (mostrare piano prima).
+- ~~Restyle "fine" schermate + micro-animazioni~~ → **fatto il 06/07** (intensità *discreta*,
+  tutte le schermate): fade-in + slide leggero (`translateY 8px`, 200ms) dei blocchi dell'area
+  principale con **stagger** (+40ms, cap al 7°), hover soft su card/bottoni (lift 2px + micro-press).
+  Login: fade-up hero con stagger + fade-in traccia telemetria. Solo CSS (`assets/app.css`,
+  `styles/login.css`), nessun file `.py`/protetto, grafici Plotly non toccati (animo i contenitori).
+  `prefers-reduced-motion` rispettato (guard in entrambi i file). **Da verificare a schermo** il
+  comportamento del fade sui rerun Streamlit (se disturba → limitare ai soli cambi-pagina).
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
 > ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /
