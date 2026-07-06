@@ -1314,3 +1314,21 @@ retrotreno ambra nel Setup.
 
 **Decisione:** ☑ Mantenuto. **Commit/push NON eseguiti** — attendo «ok push» (regola git). Proposti 6 commit
 (uno per fix) nel messaggio di chiusura FASE 8.
+
+### Push + verifica a schermo (07/07/2026)
+Utente «ok push, FIX-2 e FIX-3 separati» → 7 commit (uno per fix + doc). Poiché FIX-2/3/4 vivevano nello stesso
+`ui/console.py`, il file è stato ricostruito per stati progressivi (spinner → form → toggle) committando a ogni
+stadio; stato finale verificato **identico** al lavorato (`diff` vuoto vs backup) prima del commit FIX-4. Commit:
+`b293e80` (deps) · `10207f2` (spinner) · `cf70d00` (form) · `aadd9f6` (live-mode) · `f7c2316` (agent) ·
+`45b0a00` (setup) · `8a3e92f` (doc). Push su `restyle-ui` + `main` (ff-only), entrambi `0/0` con origin.
+
+**Giro di verifica locale (`streamlit run app.py`, HEAD `8a3e92f`), confermato dall'utente a schermo:**
+- **Login → Demo Pilot** OK (pre-seed FIX-6 avviene qui).
+- **Engineer Console:** spinner "Gigi sta analizzando…" visibile (FIX-2); Enter/⚙ ANALIZZA analizzano, il blur
+  NON fa partire nulla (FIX-3); toggle **Demo-mode bloccato/disabled** (FIX-4).
+- **Setup → Gomme:** pressioni RL/RR **25.7/25.5 in ambra ●** "sotto finestra" (FIX-6).
+- FIX-1 (pin deps) e FIX-5 (timeout/cascata agent) non hanno riscontro visivo in demo-mode → validati a codice
+  (`pip install` pulito, `test_parser` 12/12). Server di test chiuso a fine giro.
+
+**Esito:** HOTFIX-1 chiuso e verificato. Backlog residuo: **video demo di backup** (manuale) + conferma log
+build sul redeploy Cloud (FIX-1).
