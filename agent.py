@@ -111,7 +111,7 @@ def validate_output(response: str) -> bool:
 
 def call_claude(user_input: str, api_key: str, model_name: str) -> str:
     """Chiamata a Claude con un modello specifico."""
-    client = anthropic.Anthropic(api_key=api_key, base_url="https://api.anthropic.com")
+    client = anthropic.Anthropic(api_key=api_key, base_url="https://api.anthropic.com", timeout=30.0)
     message = client.messages.create(
 
         model=model_name,
@@ -153,12 +153,11 @@ def get_ai_response(
 
     errors = []
 
-    # Lista ordinata di modelli Anthropic da provare in cascata in caso di errori (es. 404)
+    # Lista ordinata di modelli Anthropic da provare in cascata in caso di errori (es. 404).
+    # Ridotta a 2 per contenere il numero massimo di chiamate sincrone (evita il freeze).
     models_to_try = [
-        CLAUDE_MODEL,              # 1. Modello scelto/configurato da utente
-        "claude-haiku-4-5",        # 2. Haiku 4.5 (veloce ed economico)
-        "claude-sonnet-4-6",       # 3. Sonnet 4.6 (qualità superiore)
-        "claude-3-5-haiku-latest", # 4. Haiku 3.5 (ultimo fallback legacy)
+        CLAUDE_MODEL,          # 1. Modello configurato (default claude-haiku-4-5)
+        "claude-sonnet-4-6",   # 2. Fallback qualità superiore
     ]
 
 
@@ -187,16 +186,11 @@ def get_ai_response(
             errors.append(f"Modello {model} fallito: {exc}")
             log_incident(f"Errore chiamata Claude ({model}): {exc}")
 
-    log_incident("Tutti i modelli Anthropic hanno fallito.")
+    # I dettagli tecnici restano solo negli incident log (già registrati sopra),
+    # non vengono esposti all'utente finale.
+    log_incident(f"Tutti i modelli Anthropic hanno fallito. Dettagli: {'; '.join(errors)}")
 
-    # Restituisce i dettagli dell'errore all'utente per permettere il debug online
-    err_details = "\n".join(f"- {err}" for err in errors)
-    return (
-        "⚠️ **Errore nella generazione del consiglio con Anthropic.**\n\n"
-        "Tutti i tentativi con i modelli disponibili sono falliti. Dettagli tecnici:\n\n"
-        f"{err_details}\n\n"
-        "Verifica che la tua ANTHROPIC_API_KEY sia corretta, attiva e disponga di credito sufficiente."
-    )
+    return "⚠️ Servizio temporaneamente non disponibile. Riprova tra poco."
 
 
 # ─────────────────────────────────────────────
@@ -233,7 +227,7 @@ def chat_with_gigi(messages: list, api_key: str, context: str = "", model_name: 
     if context.strip():
         system_prompt += f"\n\n[CONTESTO SESSIONE]\n{context.strip()}"
 
-    client = anthropic.Anthropic(api_key=api_key, base_url="https://api.anthropic.com")
+    client = anthropic.Anthropic(api_key=api_key, base_url="https://api.anthropic.com", timeout=30.0)
     try:
         with client.messages.stream(
             model=model,
