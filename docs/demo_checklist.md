@@ -103,10 +103,9 @@
   *(Confermato anche lato codice: 0 riferimenti esterni a font; woff2 embeddati base64 in `css_loader`.)*
 - [x] Card metriche, sparkline, gauge gomme, report 4 sezioni: stile coerente dark. *(04/07)*
 - [x] Grafici plotly leggibili (assi/griglia/legenda). *(04/07)*
-- [ ] Prova a **restringere la finestra** (responsive 768px): niente overflow rotto.
-  *(06/07: `app.css` ha già `@media` 1100/768px; **aggiunto breakpoint responsive alla login**
-  `styles/login.css` 768px→hero 44px e 430px→hero 32px, così "PITWALL●AI" non sfora su schermi stretti.
-  Resta la conferma visiva sul deploy.)*
+- [x] **Responsive 768px (e più stretto): nessun overflow** su login/Dashboard/Telemetria/Setup. *(deploy 06/07)*
+  *(06/07: `app.css` ha `@media` 1100/768px; **aggiunto breakpoint alla login** `styles/login.css`
+  768px→hero 44px e 430px→hero 32px, così "PITWALL●AI" non sfora su schermi stretti.)*
 
 ### Backup (piano B)
 - [ ] **Registra un video** della demo completa che funziona (mp4, 1080p) — da proiettare se rete/API cadono.
