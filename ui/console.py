@@ -381,7 +381,8 @@ def render() -> None:
         pending = typed.strip()
 
     if pending:
-        resp, src = get_console_analysis(pending)
+        with st.spinner("Gigi sta analizzando…"):
+            resp, src = get_console_analysis(pending)
         st.session_state["console_question"] = pending
         st.session_state["console_response"] = resp
         st.session_state["console_source"] = src
