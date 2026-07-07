@@ -499,7 +499,51 @@ più contesti.
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 07/07/2026 (INC-003…INC-011)*
+## INC-012 — Bug latenti chiusi in pulizia HOTFIX-3 (auth, classificazione demo, vision)
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-012 |
+| Data rilevamento | 06/07/2026 (audit) · risolto 07/07/2026 |
+| Severità | Bassa (latenti: non osservati in demo, chiusi proattivamente) |
+| Stato | RISOLTO |
+| File coinvolti | `db_auth.py`, `ui/console.py`, `modules/vision_parser.py`, `ui/setup_view.py` |
+
+### Sintomo (potenziale)
+1. **Auth:** `create_or_update_user` usava `INSERT OR REPLACE` → ad ogni login il
+   `created_at` veniva resettato; inoltre il Custom Login genera un `user_id` nuovo
+   ad ogni accesso e, con la stessa email, un upsert su `user_id` avrebbe potuto
+   violare il vincolo `UNIQUE(email)` (rischio `IntegrityError`). Timestamp naive
+   (senza timezone), non allineati alla convenzione UTC di `agent.py`.
+2. **Console:** `_is_demo_prompt` faceva match bidirezionale (`norm in demo_norm`) →
+   input brevissimi ("auto", "dietro", perfino 1 lettera) classificati come prompt
+   demo anche con demo-mode OFF.
+3. **Vision (dietro flag OFF):** `parse_setup_from_image` inviava gli upload con
+   `media_type="image/png"` fisso → un JPEG dichiarato PNG poteva essere rifiutato.
+
+### Causa
+Codice scritto per il percorso "felice" senza coprire i casi limite; in demo-mode
+(default) nessuno di questi percorsi è attivo, quindi i bug erano latenti.
+
+### Fix Applicato
+1. `db_auth.create_or_update_user`: upsert per **email** con due query (lookup →
+   UPDATE che preserva `user_id`/`created_at`, altrimenti INSERT); timestamp
+   `datetime.now(timezone.utc)`. Version-independent (nessun `ON CONFLICT`).
+   Verificato su DB temporaneo: Demo 2× → `created_at` invariato, `last_login`
+   aggiornato; Custom stessa email 2× → nessun crash.
+2. `ui/console._is_demo_prompt`: tenuto solo il verso utile `demo_norm in norm`
+   (copre l'uguaglianza esatta). Demo-mode invariato (routing serve comunque la cache).
+3. `modules/vision_parser.parse_setup_from_image(..., media_type=None)` + passaggio
+   di `media_type=img.type` da `ui/setup_view._screenshot_upload`. Feature resta OFF.
+
+### Lezione Appresa
+Anche i percorsi non attivi in demo vanno chiusi quando mappati: identità utente su
+chiave naturale (email), timestamp timezone-aware, classificatori abbastanza stretti
+da non catturare input generici, e MIME dell'upload propagato invece che assunto.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 07/07/2026 (INC-003…INC-012)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |

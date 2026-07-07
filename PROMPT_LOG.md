@@ -1430,6 +1430,60 @@ annotato nella memoria persistente `pitwall-status` (candidato HOTFIX-3).
 
 ---
 
+## HOTFIX-3 — Priorità Basse / pulizia (da Audit 06/07/2026) · branch `restyle-ui`
+
+**Data:** 07/07/2026 · branch `restyle-ui` · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Utente:** incollato `PROMPT_FASE_HOTFIX-3` (FASE 0 audit → FASE 1 diagnosi/STOP → FASE 2-9 esecuzione
+   uno-alla-volta → FASE 10 chiusura). 8 fix; FUORI SCOPE: RF-04/storico, a11y/responsive, riorg. cartelle.
+2. **Utente:** «ok procedi, FIX-8a MIT, frontend mantieni».
+3. **Utente:** OK progressivi (FIX-1…6), «tutto identico» allo smoke test a schermo.
+4. **Utente:** «no, rimanda per dopo» su FIX-7 (agent.py, file protetto).
+
+### FASE 0 — Audit (read-only)
+Git `restyle-ui` pulito, `0/0` (`40e32c5`). Baseline `test_parser` **12/12**. SQLite locale 3.49.1. Grep dead-code:
+`placeholder_panel` (0 usi), `create_session`/`update_session_activity` (0 usi), `check_and_warn` (1 uso interno),
+`import re` in agent.py (0 usi di `re.`), `chat_with_gigi` (usata da `app_legacy` → NON morta). CI non
+verificabile in locale (`gh` assente → check utente su GitHub Actions).
+
+### FASE 2-9 — Esecuzione (uno alla volta, `test_parser` 12/12 dopo ciascuno, smoke a schermo «identico»)
+- **FIX-1** dead code: rimossi `ui/components.placeholder_panel` e `db_auth.create_session`/
+  `update_session_activity` (tabella `sessions` in `init_db` intatta + commento). → INC-012 non (hygiene).
+- **FIX-2** `db_auth.create_or_update_user`: upsert per **email** a due query (preserva `user_id`/`created_at`,
+  evita violazione `UNIQUE(email)` del Custom Login) + timestamp UTC. Verificato su DB temp. → **INC-012**.
+- **FIX-3** `ui/console._is_demo_prompt`: rimosso il verso permissivo `norm in demo_norm` (input brevi non più
+  classificati demo). Demo-mode invariato. → **INC-012**.
+- **FIX-4** `ui/demo_data.py`: `assert` di coerenza → check esplicito `raise ValueError` (resiste a `-O`).
+- **FIX-5** `modules/vision_parser.parse_setup_from_image(..., media_type=None)` + `setup_view` passa
+  `media_type=img.type` (feature dietro flag OFF). → **INC-012**.
+- **FIX-6** `backend/database/manager.py`: estratto helper `_row_to_session` (dedup ~-10 righe nette),
+  commenti sugli `except` silenziosi dei getter, nota thread-safety su `check_same_thread=False`.
+- **FIX-7** `agent.py` (FILE PROTETTO): **RIMANDATO** su richiesta utente. Diff proposto e agli atti:
+  rimuovere `import re` (0 usi) + wrapper `check_and_warn` (→ `check_context_size` diretto); **`chat_with_gigi`
+  da MANTENERE** (usata da `app_legacy`, canale chat roadmap) con solo un commento. Da fare in sessione dedicata.
+- **FIX-8** decisioni repo: **LICENSE MIT** creato (© 2026 Edoardo Ferlito) + sezione Licenza nel README;
+  `frontend/` **mantenuta** (scaffold placeholder) con README chiarito.
+
+### File protetti
+`agent.py` **NON toccato** (FIX-7 rimandato). Parser, prompt di sistema, `setup_params.py`, logica gauge/fuel:
+invariati. Nessun cambiamento visibile a video (confermato dall'utente: «tutto identico»).
+
+### Verifica
+`py_compile`/import OK su tutti i file toccati; `test_parser` **12/12** dopo ogni fix; smoke su DB temporaneo
+per FIX-2 (Demo 2× created_at invariato; Custom 2× no crash) e FIX-6 (getter con stesse chiavi); routing/classifi-
+cazione FIX-3 PASS; import `-O` per FIX-4; firma vision FIX-5. Doc: **INC-012** (bug latenti FIX-2/3/5) aperto+risolto.
+
+### Esito
+7 fix applicati (FIX-1…6, FIX-8), **FIX-7 rimandato**. File: `ui/components.py`, `db_auth.py`, `ui/console.py`,
+`ui/demo_data.py`, `modules/vision_parser.py`, `ui/setup_view.py`, `backend/database/manager.py`, `LICENSE` (nuovo),
+`README.md`, `frontend/README.md` + doc (`INCIDENTS.md` INC-012, questo log).
+
+**Decisione:** ☑ Mantenuto. **Commit/push NON eseguiti** — attendo «ok push». Commit proposti (uno per fix) nel
+messaggio di chiusura FASE 10.
+
+---
+
 ## 07/07 — Allineamento doc post-HOTFIX-1 (README env + AVVIO_RAPIDO)
 
 **Data:** 07/07/2026 · branch `restyle-ui`/`main` (allineati a `9a184ea`) · modello claude-opus-4-8 (Claude Code)
