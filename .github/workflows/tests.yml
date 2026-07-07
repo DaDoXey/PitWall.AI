@@ -1,0 +1,37 @@
+name: tests
+
+on:
+  push:
+    branches: [restyle-ui, main]
+  pull_request:
+    branches: [restyle-ui, main]
+
+jobs:
+  parser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run parser tests
+        run: |
+          # NB: backend/tests/test_parser.py stampa i risultati ma NON chiama
+          # sys.exit → l'exit code e' sempre 0. Qui deriviamo il PASS/FAIL
+          # dall'output, senza modificare il file di test.
+          python backend/tests/test_parser.py | tee parser_output.txt
+          if grep -q "❌" parser_output.txt; then
+            echo "::error::Test parser falliti"
+            exit 1
+          fi
+          if ! grep -q "✅ Tutti i test superati" parser_output.txt; then
+            echo "::error::Riga di successo assente nell'output del test parser"
+            exit 1
+          fi
