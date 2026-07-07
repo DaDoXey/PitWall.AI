@@ -459,7 +459,47 @@ il comportamento "sicuro" (demo forzata) è il default, quello "aperto" (LLM rea
 
 ---
 
-*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 06/07/2026 (INC-003…INC-010)*
+## INC-011 — Engineer Console demo: refuso numerico pressioni + routing keyword errato
+
+| Campo | Dettaglio |
+|---|---|
+| ID | INC-011 |
+| Data rilevamento | 06/07/2026 (audit) · risolto 07/07/2026 |
+| Severità | Media (demo d'esame — output errato ma non blocca) |
+| Stato | RISOLTO |
+| File coinvolto | `ui/console.py` |
+
+### Sintomo
+1. Nella cache demo (`DEMO_RESPONSE`, `DEMO_TYRES`) la Correzione Setup diceva
+   «pressioni posteriori **+1.0 psi · 25.5 → 26.5**», citando un solo valore mentre a
+   freddo le due posteriori sono diverse (RL 25.7, RR 25.5): il numero era incoerente
+   con i dati demo di `ui/demo_data.py`.
+2. Una domanda sulle temperature contenente la parola «anteriore» (es. «temperatura
+   anteriore alta») veniva instradata alla risposta **sottosterzo** invece che a quella
+   **gomme**.
+
+### Causa
+1. Testo scritto sul solo valore RR, senza distinguere RL/RR (refuso di stesura).
+2. In `_DEMO_ROUTES` la route sottosterzo includeva la keyword generica `"anteriore"`,
+   che intercettava anche input su temperature/gomme (la route sottosterzo è la prima
+   della lista → vinceva sul match successivo `"temperatur"`).
+
+### Fix Applicato (solo cache demo — struttura a 4 sezioni invariata)
+1. Riformulato in modo coerente con entrambe le gomme: «**+1.0 psi · RL 25.7 → 26.7 ·
+   RR 25.5 → 26.5**» (nuovi valori dentro la finestra a freddo 26.0–27.0).
+2. Rimossa la keyword `"anteriore"` dalla route sottosterzo (restano `sottosterz`,
+   `sotto sterz`, `non gira`, `va largo`); nessun riordino delle route. Smoke test:
+   «temperatura anteriore alta» → risposta **gomme** ✅; i 4 chip instradano corretti.
+
+### Lezione Appresa
+I dati citati nelle risposte cache vanno derivati dalla sorgente demo (mai valori
+"a memoria"); e le keyword di routing devono essere abbastanza specifiche da non
+rubare il match ad altri scenari — una parola generica come «anteriore» appartiene a
+più contesti.
+
+---
+
+*INCIDENTS compilato il 19/05/2026 — PitWall.AI MVP · agg. 07/07/2026 (INC-003…INC-011)*
 
 ---
 | 2026-06-04 08:27 UTC | Test incident log |

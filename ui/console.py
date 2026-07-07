@@ -38,7 +38,7 @@ Causa primaria: **pressioni posteriori troppo basse** → la gomma lavora fuori 
 Causa secondaria: **precarico differenziale basso**, che rende il retrotreno nervoso in apertura gas.
 
 ## Correzione Setup Consigliata
-Pressione gomme posteriori (a freddo) **+1.0 psi · 25.5 → 26.5**, per riportarle in finestra a caldo.
+Pressioni gomme posteriori (a freddo) **+1.0 psi · RL 25.7 → 26.7 · RR 25.5 → 26.5**, per riportarle in finestra a caldo.
 In subordine, alza il **precarico differenziale · 60 → 75 Nm** per stabilizzare la trazione.
 Una modifica per volta: parti dalle pressioni.
 
@@ -90,7 +90,7 @@ La **Post.DX tocca i 105°C**, oltre il limite finestra di 95°C, mentre le altr
 **Pressioni posteriori sotto la finestra a caldo** (28.2 / 28.0 psi, finestra 28.5–30.0): la gomma flette e scalda in modo anomalo, soprattutto la destra, caricata dalle curve di Monza.
 
 ## Correzione Setup Consigliata
-Pressione gomme posteriori (a freddo) **+1.0 psi · 25.5 → 26.5**, per riportarle in finestra a caldo e abbassare la temperatura.
+Pressioni gomme posteriori (a freddo) **+1.0 psi · RL 25.7 → 26.7 · RR 25.5 → 26.5**, per riportarle in finestra a caldo e abbassare la temperatura.
 
 ## Note Aggiuntive
 - Verifica che la Post.DX scenda sotto i 100°C dopo la modifica.
@@ -113,7 +113,7 @@ Sposta il bilanciamento freni in avanti **Brake Bias · 58.0% → 58.5–59.0%**
 
 # (parole chiave) → testo. Ordine = priorità di match. Default = scenario sovrasterzo.
 _DEMO_ROUTES = [
-    (("sottosterz", "sotto sterz", "non gira", "va largo", "anteriore"), DEMO_UNDERSTEER),
+    (("sottosterz", "sotto sterz", "non gira", "va largo"), DEMO_UNDERSTEER),
     (("carburant", "benzina", "fuel", "consum", "strategia"), DEMO_FUEL),
     (("gomm", "pneumatic", "tyre", "temperatur", "termic"), DEMO_TYRES),
     (("fren", "brake", "bilanciament", "staccata", "bloccagg"), DEMO_BRAKES),
