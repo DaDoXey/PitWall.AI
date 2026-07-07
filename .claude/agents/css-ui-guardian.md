@@ -1,6 +1,6 @@
 ---
 name: css-ui-guardian
-description: Controlla che le modifiche a CSS/UI di PitWall rispettino 'zero cambiamenti visibili' e non introducano wildcard o nuovi selettori interni Streamlit. Usa dopo edit a assets/app.css, ui/*, styles/*. Solo report.
+description: Usa PROATTIVAMENTE dopo OGNI modifica a assets/app.css, ui/*, styles/* di PitWall. Controlla 'zero cambiamenti visibili', niente wildcard ne' nuovi selettori interni Streamlit. Solo report.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

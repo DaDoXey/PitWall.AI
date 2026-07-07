@@ -66,6 +66,24 @@ protegge la API key; la Console serve una risposta-cache a 4 sezioni.
 · `verifier` · `css-ui-guardian`. Sono **read-only**: propongono, le modifiche le applica il
 thread principale (può editare file **non** protetti dopo l'ok; i protetti restano gated).
 
+### Invocazione mirata (per output focalizzato)
+Instrada ogni compito all'agente giusto e riporta **solo** il suo output, conciso e strutturato.
+Gli agenti scattano **da soli**: (a) `verifier`/`css-ui-guardian`/`doc-sync` hanno `description`
+proattive; (b) l'hook `post_edit_router` (PostToolUse) inietta un promemoria appena si tocca
+l'area di competenza (codice .py → verifier, UI/CSS → css-ui-guardian, doc → doc-sync), con
+dedup di 10 min. L'utente **non** deve selezionarli; può comunque forzarli a parole
+("usa l'agente <nome>…").
+
+| Trigger tipico | Agente | Output atteso |
+|---|---|---|
+| "verifica" / dopo ogni fix | `verifier` | `test_parser` X/12, py_compile, file protetti sì/no, verdetto |
+| "cerca codice morto" | `dead-code-hunter` | lista simbolo→`file:riga`, prova, rischio falso positivo |
+| "coerenza doc" / pre-consegna | `doc-sync` | incoerenze doc↔doc / doc↔codice + correzione proposta |
+| "rischi CSS/UI" / dopo edit UI | `css-ui-guardian` | wildcard / nuovi selettori Streamlit / regressioni visive |
+| "audit HOTFIX" / nuovi fix | `hotfix4-auditor` | candidati ordinati per valore/rischio + piano |
+
+Regola d'oro: **un agente per compito**; il thread principale sintetizza, non ripete i dump.
+
 ## Skill
 
 `/hotfix` — avvia un ciclo di fix col workflow standard (status → piano → STOP gate →

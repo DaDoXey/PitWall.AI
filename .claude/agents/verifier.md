@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: Esegue la baseline di verifica di PitWall (test_parser 12/12, py_compile, nessun file protetto toccato). Usa dopo ogni fix e prima di proporre un commit. Read-only + esecuzione test.
+description: Usa PROATTIVAMENTE dopo OGNI modifica a file .py di PitWall e prima di ogni commit. Esegue la baseline di verifica (test_parser 12/12, py_compile, nessun file protetto toccato). Read-only + esecuzione test.
 tools: Bash, Read, Grep, Glob
 model: haiku
 ---

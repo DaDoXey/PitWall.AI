@@ -10,8 +10,8 @@ import subprocess
 
 project = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
 
-# 1. cleanup marker di sblocco
-for marker in (".unlock-protected", ".unlock-git"):
+# 1. cleanup marker di sblocco + stato promemoria (non sopravvivono tra sessioni)
+for marker in (".unlock-protected", ".unlock-git", ".reminder-state.json"):
     path = os.path.join(project, ".claude", marker)
     if os.path.exists(path):
         try:

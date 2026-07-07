@@ -37,3 +37,4 @@ runtime_logs/*.md
 # Marker di sblocco transienti degli hook (mai committare)
 .claude/.unlock-protected
 .claude/.unlock-git
+.claude/.reminder-state.json

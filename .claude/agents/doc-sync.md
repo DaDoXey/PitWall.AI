@@ -1,6 +1,6 @@
 ---
 name: doc-sync
-description: Verifica la coerenza tra la documentazione di PitWall (PROMPT_LOG, INCIDENTS, README, SPEC_ERRATA) e tra doc e codice. Usa dopo una tornata di fix o prima di consegnare. Solo report.
+description: Usa PROATTIVAMENTE dopo modifiche a PROMPT_LOG/INCIDENTS/README/SPEC_ERRATA/AVVIO_RAPIDO di PitWall o prima di consegnare. Verifica coerenza doc<->doc e doc<->codice. Solo report.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
