@@ -33,3 +33,7 @@ _local/
 
 # Log di runtime di agent.py — NON sono la documentazione d'esame
 runtime_logs/*.md
+
+# Marker di sblocco transienti degli hook (mai committare)
+.claude/.unlock-protected
+.claude/.unlock-git
