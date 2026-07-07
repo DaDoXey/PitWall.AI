@@ -33,7 +33,7 @@ mostrava 26.2 / 26.0, cioè SOTTO il valore a freddo: impossibile).
 nessun valore visibile della telemetria cambia (gauge, heatmap, media 28.6,
 finestra), la narrativa "retrotreno scarico" è preservata e la causa diventa più
 esplicita (freddo retro sotto la finestra a freddo 26.0–27.0). L'advice cache di
-Gigi (`ui/console.py`) è stato risincronizzato: posteriori a freddo **+1.0 · 25.5→26.5**.
+Gigi (`ui/console.py`) è stato risincronizzato: posteriori a freddo **+1.0 · RL 25.7→26.7 · RR 25.5→26.5** (rev. HOTFIX-2, 07/07/2026: entrambe le gomme esplicitate).
 → **FASE 2.1 CHIUSA.**
 
 **Nessuna trasformazione automatica** freddo→caldo viene applicata: i valori a

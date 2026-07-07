@@ -79,7 +79,7 @@ Per un long run, sali a una **mappa più economica · ECU Map 1 → 2** se la po
 Carburante = giri × 3.2 L + 1 giro di margine.
 
 ## Note Aggiuntive
-- Gara da 20 giri: 20 × 3.2 = 64 L + ~3.2 L di riserva ≈ **68 L**.
+- Gara da 20 giri: 20 × 3.2 = 64 L + ~3.2 L di riserva ≈ **67 L**.
 - Ridurre il pattinamento in trazione (TC) limita anche i consumi.
 """
 
