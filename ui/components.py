@@ -78,16 +78,6 @@ def page_header(title: str, subtitle: str = "") -> str:
     )
 
 
-def placeholder_panel(message: str) -> str:
-    """Pannello vuoto per pagine non ancora implementate (Fase 1)."""
-    return (
-        f'<div style="background:{BG_SURFACE};border:1px dashed {BORDER_STRONG};'
-        'border-radius:10px;padding:48px 24px;text-align:center;">'
-        f'<div style="font-family:{FONT_MONO};font-size:0.8rem;letter-spacing:0.12em;'
-        f'color:{TEXT_MUTED};text-transform:uppercase;">{message}</div></div>'
-    )
-
-
 def _smooth_path(coords) -> str:
     """Path 'd' morbido (Catmull-Rom → cubiche di Bézier) per una lista di punti.
 
