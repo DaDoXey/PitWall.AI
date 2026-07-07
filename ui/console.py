@@ -219,8 +219,13 @@ def _api_key() -> str:
 
 
 def _is_demo_prompt(prompt: str) -> bool:
+    # Vero solo se l'utente ha scritto (almeno) l'intero prompt demo. Eliminato il
+    # verso permissivo `norm in demo_norm`: una sottostringa breve come "auto" o
+    # "dietro" non deve più essere classificata come prompt demo (rilevante con
+    # demo-mode OFF). In demo-mode il routing serve comunque la cache: nulla cambia a video.
     norm = re.sub(r"[^a-z]", "", (prompt or "").lower())
-    return re.sub(r"[^a-z]", "", DEMO_PROMPT.lower()) in norm or norm in re.sub(r"[^a-z]", "", DEMO_PROMPT.lower())
+    demo_norm = re.sub(r"[^a-z]", "", DEMO_PROMPT.lower())
+    return demo_norm in norm
 
 
 def get_console_analysis(prompt: str):
