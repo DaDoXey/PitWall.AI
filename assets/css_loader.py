@@ -3,8 +3,11 @@
 Inietta UNA sola volta:
   - i font self-hosted (woff2) come @font-face base64 → nessuna chiamata a
     Google Fonts a runtime (niente flash/latenza), affidabile su Streamlit Cloud;
-  - i token del design system (assets/design_system.css);
-  - l'attributo data-theme="dark" sul documento.
+  - i token del design system (assets/design_system.css).
+
+Il tema dark è il default: i token vivono sotto `[data-theme="dark"], :root` in
+design_system.css, quindi `:root` li applica sempre senza bisogno di settare
+l'attributo data-theme (il blocco `[data-theme="light"]` resta dormiente).
 
 Streamlit non serve i file in assets/ come static affidabili in deploy, quindi
 i woff2 vengono embeddati in base64: l'unico approccio che regge su Cloud.
@@ -109,7 +112,3 @@ def inject_design_system(include_app_css: bool = True) -> None:
     """
     style = _base_style() + (_app_style() if include_app_css else "")
     st.markdown("<style>" + style + "</style>", unsafe_allow_html=True)
-    st.markdown(
-        "<script>document.documentElement.setAttribute('data-theme','dark');</script>",
-        unsafe_allow_html=True,
-    )

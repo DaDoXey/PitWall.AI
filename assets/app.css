@@ -140,9 +140,10 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stSidebar"] .block-container {
     padding-top: 1.5rem;
 }
-[data-testid="stSidebar"] * {
-    color: var(--text) !important;
-}
+/* NB: niente wildcard `[data-testid="stSidebar"] *` — vietato dalle regole di
+   progetto. Il testo bianco è già mirato dove serve: bottoni nav (righe ~298-316)
+   e testo generico p/label/span (righe ~424-430). Il chrome (logo, box sessione)
+   porta i propri colori inline. */
 .sidebar-title {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
