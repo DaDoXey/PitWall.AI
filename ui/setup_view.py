@@ -322,7 +322,8 @@ def _screenshot_upload() -> None:
             try:
                 from modules.vision_parser import parse_setup_from_image, summarize_parsed_setup
                 with st.spinner("Analisi screenshot in corso…"):
-                    result = parse_setup_from_image(img.getvalue(), api_key=api_key)
+                    result = parse_setup_from_image(img.getvalue(), api_key=api_key,
+                                                    media_type=img.type)
                 st.session_state["vision_params"] = result.get("params", {})
                 st.session_state["vision_summary"] = summarize_parsed_setup(result)
                 st.success(f"Riconosciuti {len(result.get('params', {}))} parametri.")

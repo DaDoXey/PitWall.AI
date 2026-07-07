@@ -74,6 +74,7 @@ def image_to_base64(image_path: str) -> tuple[str, str]:
 def parse_setup_from_image(
     image_source,  # path str oppure bytes (da Streamlit file_uploader)
     api_key: str,
+    media_type: str | None = None,  # MIME dell'upload; usato solo se image_source è bytes
 ) -> dict:
     """
     Invia uno screenshot ACC all'API Claude Vision e restituisce
@@ -82,6 +83,8 @@ def parse_setup_from_image(
     Parametri:
         image_source : path al file locale O bytes da st.file_uploader
         api_key      : Anthropic API key
+        media_type   : MIME dell'immagine (es. UploadedFile.type di Streamlit);
+                       usato solo con bytes, altrimenti default "image/png"
 
     Restituisce:
         {
@@ -96,7 +99,7 @@ def parse_setup_from_image(
     # Gestione input: bytes da Streamlit o path su disco
     if isinstance(image_source, (bytes, bytearray)):
         image_data = base64.standard_b64encode(image_source).decode("utf-8")
-        media_type = "image/png"  # default per upload Streamlit
+        media_type = media_type or "image/png"  # MIME dell'upload se fornito, altrimenti default
     else:
         image_data, media_type = image_to_base64(image_source)
 
