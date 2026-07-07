@@ -1393,6 +1393,41 @@ in cascata CSS (vedi FIX-4) e dipendenza `[data-theme]` in `design_system.css`.
 **Decisione:** ☑ Mantenuto. **Commit/push NON eseguiti** — attendo «ok push» (regola git). Commit proposti (uno
 per fix) nel messaggio di chiusura FASE 9.
 
+### Push HOTFIX-2 + azioni FIX-1 (07/07/2026)
+Utente «ok push, commit separati» → 7 commit separati (`0587756` deps · `0157fe2` console/INC-011 ·
+`d39943c` css · `252ba36` readme · `2c2f564` errata · `772ca27` ci · `9844723` log), push su
+`restyle-ui` + `main` (ff-only), `0/0` con origin. Poi «aggiorna la memoria» → creata `pitwall-status`.
+Azioni manuali FIX-1: **`.env` locale FATTO da me** (aggiunte le 2 var, verificate via dotenv); Streamlit
+Secrets **restano all'utente** (no accesso alla dashboard).
+
+---
+
+## 07/07 — Revisione generale (read-only) + 3 fix minori
+
+**Data:** 07/07/2026 · branch `restyle-ui` · modello claude-opus-4-8 (Claude Code)
+
+**Messaggi:** utente «HOTFIX-3 più tardi; ora fammi una revisione generale di TUTTO, trova errori/imprecisioni»
+→ poi «procedi con A [correggi le 3 minori] e annota il punto 1 per HOTFIX-3».
+
+**Revisione (sola lettura):** core sano — tutti i `.py` compilano, `test_parser` 12/12, catena import OK
+(`app NoSessionContext` = noto effetto d'import fuori sessione). Deps: 5 import attivi = 5 pinnati. Dati demo
+coerenti (fuel somma 25.6=totale; assert gauge↔serie; temp max 88/90/95/105; media 28.6 ERR-04). DB non
+tracciati e gitignored. README module-map: file esistenti. Banner storici presenti. Nessun valore stale nei
+doc attivi (26.8/27.0–27.8 solo nel log storico + spec v3 col banner).
+
+**Trovati:** 1 punto sostanziale (`agent.py:34` default `MAX_OUTPUT_TOKENS=2048` vs INC-001 min. 2500 —
+file protetto → annotato per HOTFIX-3) + 3 imprecisioni minori doc/testo.
+
+**Fix (opzione A — solo doc/testo, nessun file protetto):**
+- `SPEC_ERRATA.md` ERR-01: advice Gigi stale «25.5→26.5» → «RL 25.7→26.7 · RR 25.5→26.5» (allineato a FIX-3).
+- `.env.example`: rimosso `OPENAI_API_KEY` (nessun modulo attivo usa OpenAI — residuo v2).
+- `ui/console.py` DEMO_FUEL: «≈68 L» → «≈67 L» (64+3.2=67.2). Struttura 4 sezioni invariata.
+
+**Verifica:** `py_compile ui/console.py` OK; `test_parser` **12/12**. Non incidenti (doc/testo). Punto #1
+annotato nella memoria persistente `pitwall-status` (candidato HOTFIX-3).
+
+**Decisione:** ☑ Mantenuto. **Commit/push NON eseguiti** — attendo «ok push».
+
 ---
 
 ## 07/07 — Allineamento doc post-HOTFIX-1 (README env + AVVIO_RAPIDO)
