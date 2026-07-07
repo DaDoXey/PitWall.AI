@@ -101,3 +101,7 @@ modificano. Le correzioni ai soli dati demo di presentazione sono tracciate in
 | `AVVIO_RAPIDO.md` | **Attuale** — guida operativa (lavorare da un secondo PC). |
 | `PitWall_AI_Technical_Spec_v3.md` | Storico — superato da v4. |
 | `README_EXTENSION.md` | Storico — pianificazione migrazione v2 (riconciliata, ma superata dal restyle). |
+
+## Licenza
+
+Distribuito con licenza **MIT** — vedi [`LICENSE`](LICENSE). © 2026 Edoardo Ferlito.
