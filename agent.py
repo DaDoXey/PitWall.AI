@@ -5,7 +5,6 @@ Compatibile con il contesto esteso (setup completo + CSV + feedback).
 """
 
 import os
-import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -31,7 +30,8 @@ def get_env_var(name: str, default: str = "") -> str:
     return os.getenv(name, default)
 
 
-MAX_OUTPUT_TOKENS = int(get_env_var("PITWALL_MAX_OUTPUT_TOKENS", "2048"))
+# INC-001: 2500 è il minimo sicuro per l'output completo a 4 sezioni.
+MAX_OUTPUT_TOKENS = int(get_env_var("PITWALL_MAX_OUTPUT_TOKENS", "2500"))
 MAX_INPUT_TOKENS  = int(get_env_var("PITWALL_MAX_INPUT_TOKENS", "8000"))
 
 LOG_PATH    = get_env_var("PITWALL_PROMPT_LOG_PATH", "PROMPT_LOG.md")
@@ -122,13 +122,6 @@ def call_claude(user_input: str, api_key: str, model_name: str) -> str:
     return message.content[0].text
 
 
-def check_and_warn(user_input: str) -> tuple[bool, int]:
-    """
-    Verifica dimensione contesto e restituisce (ok, estimated_tokens).
-    """
-    return check_context_size(user_input)
-
-
 def get_ai_response(
     user_input: str,
     api_key: str,
@@ -142,7 +135,7 @@ def get_ai_response(
     anthropic_key = api_key
 
     # Controllo dimensione contesto
-    context_ok, estimated_tokens = check_and_warn(user_input)
+    context_ok, estimated_tokens = check_context_size(user_input)
     if not context_ok and show_warning:
         import streamlit as st
         st.warning(
