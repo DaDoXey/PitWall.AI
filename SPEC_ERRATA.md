@@ -100,3 +100,57 @@ l'LLM ragiona entro 200.
 prompt protetto → `modules/setup_params.py` riga 206 ora **`min:20, max:200, step:10`**
 (default 60, in range). Nessun file protetto toccato (`system_prompt_v4.txt` era già a
 20–200). Divergenza risolta. **Stato: RISOLTO.**
+
+---
+
+## ERR-06 — Prompt di sistema protetto EFFETTIVO: `system_prompt_v4.txt`
+
+**Scostamento:** la Spec v3 §9 indica come artefatto protetto `prompts/system_prompt.txt`.
+Nella repo reale esistono più prompt e il riferimento della spec non è quello caricato:
+- `prompts/system_prompt_v4.txt` — **è quello effettivamente caricato** da `agent.py`
+  (fonte di verità dei range ACC per i consigli dell'LLM);
+- `backend/prompts/system_prompt.txt` (v3) — presente ma **non caricato da nessun modulo**;
+- `prompts/chat_system_prompt.txt` — prompt del canale chat di Gigi.
+
+**Decisione:** si dichiara `prompts/system_prompt_v4.txt` come **successore e artefatto
+protetto effettivo** (v4 supera v3). Va trattato come file protetto (nessuna riscrittura
+senza STOP gate). `backend/prompts/system_prompt.txt` resta come reperto storico v3, non
+attivo. **Stato: DOCUMENTATO** (allineamento documentale, nessun file di prompt toccato).
+
+---
+
+## ERR-07 — Gap funzionali del branch restyle: RF-04 e storico SQLite non raggiungibili in UI
+
+**Scostamento:** due funzioni descritte nella spec risultano implementate SOLO nel monolite
+`app_legacy.py`, che **non è importato** dalla shell/router attuale (`app.py` → `ui/`):
+- **RF-04 — calcolo carburante deterministico** (giri × consumo + margine);
+- **storico sessioni SQLite** (`backend/database/manager.py`, salvataggio/lettura sessioni).
+
+Nella UI **deployata** (branch restyle) queste non sono quindi raggiungibili: la Strategia
+carburante è illustrata via risposta-cache demo (Engineer Console) e la Telemetria offre una
+proiezione giri di sola lettura, fuori dalla fuel-logic protetta; lo storico non è esposto.
+
+**Decisione:** è uno **scope consapevole della demo d'esame** (priorità: demo blindata e
+coerente, non copertura funzionale completa). Recupero previsto **post-esame** (roadmap):
+ricablare RF-04 e lo storico dalle basi già presenti in `app_legacy.py`/`backend/` dentro le
+pagine `ui/`, dietro feature-flag, senza toccare la logica fuel/gauge protetta.
+**Stato: DOCUMENTATO** (dichiarazione di scope; nessuna modifica di codice).
+
+---
+
+## ERR-08 — Range precarico differenziale: tre valori in circolazione
+
+**Scostamento:** per il precarico differenziale coesistono tre riferimenti:
+- Spec v3 / prompt v3: **20–100 Nm**;
+- Prompt v4 (`system_prompt_v4.txt`) + `modules/setup_params.py`: **20–200 Nm** (stato attuale,
+  cfr. ERR-05 già chiuso);
+- Dato ACC reale (BMW M4 GT3): fino a **20–300 Nm**.
+
+**Decisione (committente, opzione A):** si **documenta e mantiene 20–200 Nm** come range di
+riferimento del progetto — **ceiling conservativo** rispetto al 300 reale, ma coerente con il
+prompt protetto v4 e con lo slider UI già allineato (ERR-05). Vantaggio: nessuna modifica a
+file protetti/params, nessuna riapertura di ERR-05; l'LLM e la UI ragionano sullo stesso range.
+Limite accettato: più stretto del dato ACC reale (300). Un'eventuale estensione a 20–300
+andrà in una **sessione dedicata con STOP gate** sui file prompt/params protetti.
+**Stato: DOCUMENTATO** (solo documentazione; `system_prompt_v4.txt` e `setup_params.py` NON
+toccati in questa sessione).
