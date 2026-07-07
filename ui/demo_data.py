@@ -100,7 +100,9 @@ HOT_PRESS_SERIES = {
     "rr": [27.2, 27.4, 27.6, 27.7, 27.8, 27.9, 28.0, 28.0],
 }
 # Coerenza: l'ultimo valore di ogni serie coincide con HOT_PRESSURES.
-assert all(HOT_PRESS_SERIES[p][-1] == HOT_PRESSURES[p] for p in HOT_PRESSURES)
+# Check esplicito (non `assert`: resta attivo anche con python -O).
+if not all(HOT_PRESS_SERIES[p][-1] == HOT_PRESSURES[p] for p in HOT_PRESSURES):
+    raise ValueError("demo_data: HOT_PRESS_SERIES non coerente con HOT_PRESSURES")
 
 # ─────────────────────────────────────────────
 # CARBURANTE — consumo per giro (L), "stabile" attorno a 3.2
