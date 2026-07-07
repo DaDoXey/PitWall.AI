@@ -1332,3 +1332,38 @@ stadio; stato finale verificato **identico** al lavorato (`diff` vuoto vs backup
 
 **Esito:** HOTFIX-1 chiuso e verificato. Backlog residuo: **video demo di backup** (manuale) + conferma log
 build sul redeploy Cloud (FIX-1).
+
+---
+
+## 07/07 — Allineamento doc post-HOTFIX-1 (README env + AVVIO_RAPIDO)
+
+**Data:** 07/07/2026 · branch `restyle-ui`/`main` (allineati a `9a184ea`) · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Setup/metodo (status):** leggere per intero PROMPT_LOG + INCIDENTS + AVVIO_RAPIDO + README + progetto,
+   verificare discordanze, controllare allineamento Git con `origin`, esporre il piano e attendere approvazione;
+   non inventare/costruire. Subtask iniziale: nessuna.
+2. **Utente:** «procedi con 1 e 2» → approvato il piano di allineamento doc (README env + AVVIO_RAPIDO).
+
+### Status a inizio sessione
+Git: `main` == `restyle-ui` == `origin/*` a `9a184ea`, tree clean, `0/0` (questo PC **non** indietro).
+Baseline `test_parser` **12/12**. HOTFIX-1 chiuso/verificato il 07/07. ERR-01…05 e INC-001…010 tutti RISOLTI.
+Backlog di codice: CHIUSO. Residuo non-code: video demo di backup + conferma log build Cloud (FIX-1).
+
+### Discordanza trovata (analisi codice ↔ doc)
+`PITWALL_ALLOW_LIVE` (introdotta da FIX-4/INC-010) è nel codice (`ui/flags.py`, `ui/console.py:347`) e in
+`.env.example` ma **mancava nella tabella "Variabili d'ambiente" del README**; la voce `PITWALL_DEMO_MODE`
+non rifletteva che la live è ora gated. `AVVIO_RAPIDO.md` "In sospeso" non registrava HOTFIX-1. Nessuna
+discordanza di codice/dati (PROMPT_LOG/INCIDENTS/breakdown/repo coerenti).
+
+### Interventi (solo `.md`, nessun file protetto, nessun codice)
+1. `README.md`: aggiunta riga `PITWALL_ALLOW_LIVE` (default 0 = demo forzata/API protetta; 1 = riabilita live)
+   alla tabella env; nota `PITWALL_DEMO_MODE` chiarita (ignorata quando la live è OFF).
+2. `AVVIO_RAPIDO.md`: spuntato HOTFIX-1 nel promemoria "In sospeso"; range INC aggiornato a INC-001…010.
+
+### Verifica
+Coerenza descrizione ↔ `ui/flags.py` (semantica `live_allowed()`/`demo_mode()` verificata sul sorgente).
+`test_parser` **12/12** (invariato: nessun codice toccato). Non un incident (doc) → nessun INC.
+
+**Decisione:** ☑ Mantenuto. Commit/push su `main`+`restyle-ui` solo dopo «ok push» esplicito (regola git);
+questa entry resta come modifica locale non committata.

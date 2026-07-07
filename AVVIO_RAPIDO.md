@@ -136,10 +136,16 @@ git checkout main && git merge --ff-only restyle-ui && git push origin main
   `styles/login.css`), nessun file `.py`/protetto, grafici Plotly non toccati (animo i contenitori).
   `prefers-reduced-motion` rispettato (guard in entrambi i file). **Da verificare a schermo** il
   comportamento del fade sui rerun Streamlit (se disturba → limitare ai soli cambi-pagina).
+- ~~HOTFIX-1 (6 criticità Alte pre-esame)~~ → **fatto e verificato a schermo il 07/07**:
+  spinner Gigi (FIX-2), no auto-submit su blur via `st.form` (FIX-3), toggle Demo-mode
+  bloccato in deploy dietro `PITWALL_ALLOW_LIVE` (FIX-4/INC-010), timeout 30s + cascata a 2
+  modelli in `agent.py` (FIX-5), pre-seed pressioni retro 25.7/25.5 al login (FIX-6), deps
+  pinnate `==` (FIX-1). Resta da confermare solo il **log build sul redeploy Cloud** (FIX-1).
 - **Video demo di backup** ancora da registrare (rischio già costato punti).
 
-> ERR-01…ERR-05 e INC-001…INC-008 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /
+> ERR-01…ERR-05 e INC-001…INC-010 risultano **RISOLTI** (vedi `SPEC_ERRATA.md` /
 > `INCIDENTS.md`). Telemetria: 3 fix + espansione fatti il 03/07 (TELEMETRIA-UPGRADE-1).
+> HOTFIX-1 chiuso il 07/07 (INC-009/INC-010).
 
 ## File da NON committare (già in `.gitignore`)
 

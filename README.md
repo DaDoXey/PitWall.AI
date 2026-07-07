@@ -76,7 +76,8 @@ Per la modalità demo non è necessaria una chiave API: la console serve la risp
 |---|---|---|
 | `ANTHROPIC_API_KEY` | — | Chiave Claude (analisi "live" e lettura screenshot). |
 | `LLM_MODEL` | `claude-haiku-4-5` | Modello usato da `agent.py`. |
-| `PITWALL_DEMO_MODE` | `1` (ON) | Console serve sempre la cache (demo blindata). |
+| `PITWALL_ALLOW_LIVE` | `0` (OFF) | Consente di spegnere la demo-mode e usare la LLM reale. Con `0` la demo-mode è **forzata ON** (toggle bloccato) → protegge la API key sul deploy pubblico. Metti `1` in locale / nei Secrets d'esame per riabilitare la live. |
+| `PITWALL_DEMO_MODE` | `1` (ON) | Default della demo-mode quando la live è consentita (`PITWALL_ALLOW_LIVE=1`); se la live è OFF questo valore è ignorato e la cache è sempre servita. |
 | `PITWALL_SHOW_INPUTS` | `0` (OFF) | Mostra selettori auto/pista + upload nel Setup. |
 | `FEATURE_SCREENSHOT` | `0` (OFF) | Abilita la lettura setup da screenshot (altrimenti stub). |
 
