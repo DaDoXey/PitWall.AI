@@ -1335,6 +1335,66 @@ build sul redeploy Cloud (FIX-1).
 
 ---
 
+## HOTFIX-2 — 7 priorità Medie (da Audit 06/07/2026) · branch `restyle-ui`
+
+**Data:** 07/07/2026 · branch `restyle-ui` · modello claude-opus-4-8 (Claude Code)
+
+### Catalogo messaggi di questa iterazione
+1. **Utente:** incollato `PROMPT_FASE_HOTFIX-2` (FASE 0 audit read-only → FASE 1 diagnosi/STOP gate →
+   FASE 2–8 esecuzione uno-alla-volta → FASE 9 chiusura). 7 fix medi; FIX-4 CSS il più a rischio visivo.
+2. **Utente:** «ok procedi, FIX-4 opzione A, FIX-6 opzione A» → via all'esecuzione con le decisioni prese.
+3. **Utente:** «procedi con FIX-5» dopo verifica a schermo di FIX-3.
+4. **Utente:** «procedi va tutto bene» (FIX-3) e conferma FIX-4 → poi FIX-5.
+
+### FASE 0 — Audit (read-only)
+Git `restyle-ui` pulito, `0/0` (allineato post-HOTFIX-1 a `e54dfc5`). Baseline `test_parser` **12/12**.
+`agent.py` conferma HOTFIX-1: timeout 30s (114/230), cascata 2 modelli (158-160), messaggio errore generico
+(193) → **FIX-2 già coperto, saltato**. Env log path già letti da `agent.py:37-38`. Trovate discordanze reali
+in cascata CSS (vedi FIX-4) e dipendenza `[data-theme]` in `design_system.css`.
+
+### FASE 2–9 — Esecuzione (uno alla volta, `test_parser` 12/12 dopo ciascuno)
+- **FIX-1** `runtime_logs/.gitkeep` + `.env.example` (`PITWALL_PROMPT_LOG_PATH`/`PITWALL_INCIDENTS_PATH`) +
+  `.gitignore` (`runtime_logs/*.md`). I log runtime di `agent.py` non sporcano più i doc d'esame. Config, zero codice.
+- **FIX-2** SALTATO (già in HOTFIX-1).
+- **FIX-3** `ui/console.py`: (a) refuso pressioni retro «25.5→26.5» → «**RL 25.7→26.7 · RR 25.5→26.5**»
+  (in `DEMO_RESPONSE` e `DEMO_TYRES`, valori in finestra 26.0–27.0); (b) rimossa keyword `"anteriore"` dalla
+  route sottosterzo → «temperatura anteriore alta» ora dà **gomme**. → **INC-011**. Verificato a schermo dall'utente.
+- **FIX-4 opzione A** (CSS, il più delicato): (a) rimosso il **wildcard** `[data-testid="stSidebar"] *` da
+  `assets/app.css` (il bianco è già mirato: bottoni nav 298-316, testo generico 424-430); (b) `.AI` `!important`
+  **lasciato intatto** (opzione A: contrasta la regola 424-430, non solo il wildcard → rimuoverlo lo renderebbe
+  grigio); (c) rimosso lo **script `data-theme` morto** da `assets/css_loader.py` (i token dark restano via
+  `:root`) + docstring allineata. Effetto voluto: header «● Sessione Attiva» torna verde. Verificato a schermo.
+- **FIX-5** `README.md`: sezione Design system riformulata onesta (componenti custom inline senza selettori
+  interni/wildcard; il chrome usa un set circoscritto di `data-testid` → deps pinnate).
+- **FIX-6 opzione A** `SPEC_ERRATA.md`: **ERR-06** (prompt protetto effettivo = `system_prompt_v4.txt`),
+  **ERR-07** (gap RF-04 + storico SQLite solo in `app_legacy.py`, scope demo), **ERR-08** (precarico: doc
+  mantenuto a **20–200**, ceiling conservativo; estensione a 300 in sessione dedicata). Solo doc.
+- **FIX-7** `.github/workflows/tests.yml`: CI minima (push/PR su `restyle-ui`/`main`, Python 3.11,
+  `pip install -r requirements.txt`, run test parser). Il test non fa `sys.exit` → lo step deriva PASS/FAIL
+  dall'output (`grep ❌` / assenza riga `✅`), **senza modificare il file di test**. Verificabile solo dopo il push.
+
+### File protetti
+**Nessuno toccato.** `agent.py`, parser, prompt di sistema, `setup_params.py`, logica gauge/fuel invariati
+(FIX-6 su ERR-08 è solo documentale). **Rimosso** un selettore wildcard (nessuno introdotto).
+
+### Verifica
+`py_compile`/import OK sui file toccati; `test_parser` **12/12** dopo ogni fix; routing demo smoke-test PASS
+(4 chip + «temperatura anteriore alta» → gomme); graffe `app.css` 215/215; `runtime_logs/*.md` ignorato
+(`git check-ignore`); logica CI simulata (PASS→exit 0, `❌`→exit 1). FIX-3 e FIX-4 confermati a schermo dall'utente.
+
+### Esito
+7 fix: FIX-1/3/4/5/6/7 applicati, FIX-2 saltato (già coperto). File: `.env.example`, `.gitignore`,
+`runtime_logs/.gitkeep`, `ui/console.py`, `assets/app.css`, `assets/css_loader.py`, `README.md`,
+`SPEC_ERRATA.md`, `.github/workflows/tests.yml`, + doc (`INCIDENTS.md` INC-011, questo log).
+
+**Azioni manuali da ricordare all'utente:** (1) aggiungere al `.env` locale `PITWALL_PROMPT_LOG_PATH` e
+`PITWALL_INCIDENTS_PATH`; (2) aggiungerle negli **Streamlit Secrets** del deploy.
+
+**Decisione:** ☑ Mantenuto. **Commit/push NON eseguiti** — attendo «ok push» (regola git). Commit proposti (uno
+per fix) nel messaggio di chiusura FASE 9.
+
+---
+
 ## 07/07 — Allineamento doc post-HOTFIX-1 (README env + AVVIO_RAPIDO)
 
 **Data:** 07/07/2026 · branch `restyle-ui`/`main` (allineati a `9a184ea`) · modello claude-opus-4-8 (Claude Code)
