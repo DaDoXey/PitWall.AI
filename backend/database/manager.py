@@ -75,6 +75,28 @@ def backfill_suggested_psi(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def _row_to_session(row: sqlite3.Row) -> Dict[str, Any]:
+    """Mappa una riga della tabella `sessions` nel dict di sessione.
+
+    Usato da get_recent_sessions e get_sessions_filtered (stesso schema di ritorno).
+    """
+    return {
+        "session_id": row["session_id"],
+        "timestamp": row["timestamp"],
+        "car": row["car"],
+        "track": row["track"],
+        "conditions": row["conditions"],
+        "temp_ambient": row["temp_ambient"],
+        "temp_track": row["temp_track"],
+        "psi_input": json.loads(row["psi_input"]) if row["psi_input"] else None,
+        "psi_suggested": json.loads(row["psi_suggested"]) if row["psi_suggested"] else None,
+        "feedback_text": row["feedback_text"],
+        "llm_response": row["llm_response"],
+        "csv_present": bool(row["csv_present"]),
+        "screenshot_presente": bool(row["screenshot_presente"]),
+    }
+
+
 class SessionDatabase:
     """Gestisce lo storico delle sessioni ACC in SQLite."""
 
@@ -92,7 +114,10 @@ class SessionDatabase:
         
         # Assicura che il percorso sia assoluto
         self.db_path = self.db_path.resolve()
-        # check_same_thread=False consente l'uso da più thread (Streamlit requirement)
+        # check_same_thread=False consente l'uso da più thread (Streamlit requirement).
+        # NOTA: connessione condivisa senza lock → NON thread-safe per scritture
+        # concorrenti. Prima di ricollegare questo modulo al flusso multi-utente,
+        # aggiungere un threading.Lock o una connessione-per-operazione.
         self.connection = sqlite3.connect(str(self.db_path), check_same_thread=False, timeout=5.0)
         self.connection.row_factory = sqlite3.Row
 
@@ -187,27 +212,8 @@ class SessionDatabase:
             (limit,),
         )
         rows = cursor.fetchall()
-        sessions: List[Dict[str, Any]] = []
-        for row in rows:
-            sessions.append(
-                {
-                    "session_id": row["session_id"],
-                    "timestamp": row["timestamp"],
-                    "car": row["car"],
-                    "track": row["track"],
-                    "conditions": row["conditions"],
-                    "temp_ambient": row["temp_ambient"],
-                    "temp_track": row["temp_track"],
-                    "psi_input": json.loads(row["psi_input"]) if row["psi_input"] else None,
-                    "psi_suggested": json.loads(row["psi_suggested"]) if row["psi_suggested"] else None,
-                    "feedback_text": row["feedback_text"],
-                    "llm_response": row["llm_response"],
-                    "csv_present": bool(row["csv_present"]),
-                    "screenshot_presente": bool(row["screenshot_presente"]),
-                }
-            )
-        return sessions
-    
+        return [_row_to_session(row) for row in rows]
+
     def get_sessions_filtered(self, car: Optional[str] = None, track: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
         """Recupera sessioni con filtri opzionali per auto e tracciato."""
         try:
@@ -227,27 +233,9 @@ class SessionDatabase:
 
             cursor = self.connection.execute(query, params)
             rows = cursor.fetchall()
-            sessions: List[Dict[str, Any]] = []
-            for row in rows:
-                sessions.append(
-                    {
-                        "session_id": row["session_id"],
-                        "timestamp": row["timestamp"],
-                        "car": row["car"],
-                        "track": row["track"],
-                        "conditions": row["conditions"],
-                        "temp_ambient": row["temp_ambient"],
-                        "temp_track": row["temp_track"],
-                        "psi_input": json.loads(row["psi_input"]) if row["psi_input"] else None,
-                        "psi_suggested": json.loads(row["psi_suggested"]) if row["psi_suggested"] else None,
-                        "feedback_text": row["feedback_text"],
-                        "llm_response": row["llm_response"],
-                        "csv_present": bool(row["csv_present"]),
-                        "screenshot_presente": bool(row["screenshot_presente"]),
-                    }
-                )
-            return sessions
+            return [_row_to_session(row) for row in rows]
         except Exception:
+            # tabella/colonne assenti o DB non collegato → nessuna sessione da mostrare
             return []
     
     def get_unique_cars(self) -> List[str]:
@@ -258,6 +246,7 @@ class SessionDatabase:
             )
             return [row[0] for row in cursor.fetchall()]
         except Exception:
+            # tabella/colonne assenti o DB non collegato → nessun filtro disponibile
             return []
     
     def get_unique_tracks(self) -> List[str]:
@@ -268,6 +257,7 @@ class SessionDatabase:
             )
             return [row[0] for row in cursor.fetchall()]
         except Exception:
+            # tabella/colonne assenti o DB non collegato → nessun filtro disponibile
             return []
 
     def close(self) -> None:
