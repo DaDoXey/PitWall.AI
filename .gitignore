@@ -30,3 +30,6 @@ Thumbs.db
 # Report/valutazioni personali — locali, NON su GitHub
 REPORT_VALUTAZIONE_*.md
 _local/
+
+# Log di runtime di agent.py — NON sono la documentazione d'esame
+runtime_logs/*.md

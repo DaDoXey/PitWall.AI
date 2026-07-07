@@ -1,0 +1,2 @@
+# Cartella per i log di runtime di agent.py (append PROMPT_LOG/INCIDENTS).
+# I .md qui dentro sono ignorati da git (vedi .gitignore): NON sono la documentazione d.esame.
