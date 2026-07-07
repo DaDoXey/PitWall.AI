@@ -44,9 +44,12 @@ app_legacy.py          # monolite precedente, preservato VERBATIM (logica fuel/g
 
 ### Design system
 Tema dark "cockpit": palette accento `#E8002D`, font **Orbitron / Inter / JetBrains Mono**
-self-hosted (woff2 base64, nessun fetch a Google Fonts). I componenti custom usano
-`st.components.v1.html()` con stili **inline** e font base64 (affidabilità su Cloud);
-nessun selettore interno di Streamlit, nessun wildcard.
+self-hosted (woff2 base64, nessun fetch a Google Fonts). I **componenti custom** (iframe
+`st.components.v1.html()`) sono autosufficienti: solo stili **inline** e font base64, senza
+selettori interni di Streamlit né wildcard. Il **chrome dell'app** (`assets/app.css`) stila
+invece l'header, la sidebar e i widget nativi con un set circoscritto di selettori
+`data-testid` di Streamlit (nessun wildcard): poiché questi attributi possono cambiare tra
+versioni, le dipendenze sono **pinnate** in `requirements.txt`.
 
 ### Demo-mode
 La Engineer Console serve di default una **risposta-cache pre-validata** a 4 sezioni
