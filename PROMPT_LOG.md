@@ -1516,3 +1516,41 @@ Coerenza descrizione ↔ `ui/flags.py` (semantica `live_allowed()`/`demo_mode()`
 
 **Decisione:** ☑ Mantenuto. Commit/push su `main`+`restyle-ui` solo dopo «ok push» esplicito (regola git);
 questa entry resta come modifica locale non committata.
+
+---
+
+## 07/07 — Infrastruttura agenti/guardrail + HOTFIX-4
+
+**Data:** 07/07/2026 · branch `restyle-ui`/`main` (base `2031b33`) · modello claude-opus-4-8 (Claude Code)
+
+### Contesto
+Su richiesta utente, installata un'**infrastruttura project-scoped** (commit `2031b33`) che si carica a ogni
+sessione dentro `PitWall.AI/`: `CLAUDE.md` (regole/mappa/igiene token), `.claude/hooks/` (guardrail:
+`guard_protected`, `guard_git`, `guard_css`, `session_start`), `.claude/agents/` (`hotfix4-auditor`,
+`dead-code-hunter`, `doc-sync`, `verifier`, `css-ui-guardian`, read-only), skill `/hotfix`. Sblocco gate via
+`.claude/.unlock-protected` | `.unlock-git` (gitignored, azzerati a inizio sessione).
+
+### Audit HOTFIX-4 (read-only)
+Eseguito `hotfix4-auditor` (via general-purpose, agenti nativi attivi dalla sessione successiva). Esito:
+3 micro-fix accorpabili su `agent.py` + 1 fix doc non protetto. Scoperta nuova: nel path `app_legacy.py`
+l'`import agent` (riga 18) **precede** `load_dotenv()` (riga 27) → `MAX_OUTPUT_TOKENS` si fissa a 2048 prima
+del caricamento di `.env` (la UI restyle importa `agent` lazy dopo `load_dotenv`, quindi prendeva 4000).
+
+### Interventi
+1. **FIX-1** (`agent.py:34`, FILE PROTETTO, STOP gate «ok procedi» + token a 2500): default
+   `PITWALL_MAX_OUTPUT_TOKENS` **2048 → 2500** (allinea a **INC-001**, min. sicuro output a 4 sezioni).
+   Chiude la contraddizione code↔doc.
+2. **FIX-2** (`agent.py:8`): rimosso `import re` (0 usi).
+3. **FIX-3** (`agent.py`): rimossa `check_and_warn` (pass-through) → call site usa `check_context_size`
+   diretto. `chat_with_gigi` **mantenuto** (usato da `app_legacy.py:1154,1174`).
+4. **FIX-4** (`.env.example`, non protetto): documentate 5 env-var usate ma assenti — `LLM_MODEL`,
+   `PITWALL_CHAT_MAX_TOKENS`, `PITWALL_DEMO_MODE`, `PITWALL_SHOW_INPUTS`, `FEATURE_SCREENSHOT`.
+
+### Verifica
+`py_compile agent.py` OK; `import agent` → `MAX_OUTPUT_TOKENS = 2500`, `check_and_warn` assente,
+`chat_with_gigi` presente; `test_parser` **12/12**. Nessun uso residuo di `check_and_warn`/`re.` nel repo.
+Zero cambiamenti visibili (demo-mode serve la cache). Marker `.unlock-protected` creato per il gate e
+rimosso a fine fix.
+
+**Decisione:** ☑ Mantenuto. Commit/push solo dopo «ok push» esplicito. Commit proposti (uno per fix) nel
+messaggio di chiusura.
