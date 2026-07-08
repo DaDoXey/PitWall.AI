@@ -165,13 +165,21 @@ def get_ai_response(
             # Primo tentativo con questo modello
             response = call_claude(user_input, anthropic_key, model)
             if validate_output(response):
-                log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model, auto, tracciato)
+                # M3: un errore di I/O del log NON deve invalidare una risposta già valida
+                # (altrimenti finirebbe nel except sotto → fallback a pagamento inutile).
+                try:
+                    log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model, auto, tracciato)
+                except Exception:
+                    pass
                 return response
-            
+
             # Secondo tentativo (retry) con lo stesso modello
             response = call_claude(user_input, anthropic_key, model)
             if validate_output(response):
-                log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model, auto, tracciato)
+                try:
+                    log_token_usage(estimated_tokens, MAX_OUTPUT_TOKENS, model, auto, tracciato)
+                except Exception:
+                    pass
                 return response
             
             errors.append(f"Modello {model}: Output generato ma incompleto (sezioni mancanti).")

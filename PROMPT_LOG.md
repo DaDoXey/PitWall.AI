@@ -1554,3 +1554,35 @@ rimosso a fine fix.
 
 **Decisione:** ☑ Mantenuto. Commit/push solo dopo «ok push» esplicito. Commit proposti (uno per fix) nel
 messaggio di chiusura.
+
+---
+
+## 08/07 — HOTFIX-5 (3 findings MEDI dalla deep-review)
+
+**Data:** 08/07/2026 · branch `restyle-ui` (base `d1514b8`) · modello claude-opus-4-8 (Claude Code)
+
+### Contesto
+Deep-review a 3 lenti dell'08/07 (vedi `REPORT_HOTFIX-5.md`): 0 critici, 0 alti, **3 MEDI** + 9 BASSI.
+Su decisione utente l'HOTFIX-5 include **solo i 3 MEDI**; i BASSI restano backlog. «ok procedi» dato per i
+file protetti (M3 su `agent.py`).
+
+### Interventi (un fix alla volta, verifica prima del successivo)
+1. **M1 — coerenza `max_tokens`** (doc/.env, `agent.py` non toccato): `.env.example`
+   `PITWALL_MAX_OUTPUT_TOKENS` **4000 → 2500** (allineato al default del codice); in `Spec_v4.md` la dicitura
+   "2500 è il massimo" → "**2500 è il minimo sicuro** per l'output a 4 sezioni" (coerente col commento di
+   `agent.py:33` e con INC-001). Chiude la contraddizione 4000 vs 2500-min vs 2500-max.
+2. **M2 — Spec v4 declassata a "Storico"**: nella tabella "quale documento è valido" del `README.md` v4 passa
+   da "Attuale" a "Storico" (stack LLM OpenAI/GPT-4o rimosso, oggi solo Anthropic); banner ⚠️ in testa a
+   `Spec_v4.md` che rimanda a README + `agent.py` per lo stack attuale.
+3. **M3 — logging non invalida più una risposta valida** (`agent.py`, FILE PROTETTO, gate «ok procedi»):
+   in `get_ai_response` le due chiamate a `log_token_usage()` (dopo `validate_output`) sono avvolte in
+   `try/except: pass`. Prima un errore di I/O del log (path non scrivibile in live-mode) veniva catturato dal
+   generico `except Exception` → risposta scartata → fallback `claude-sonnet-4-6` = 2ª chiamata a pagamento.
+
+### Verifica
+`py_compile agent.py` OK · `test_parser` **12/12** · nessun file protetto inatteso · numeri `demo_data.py`
+intatti · zero cambiamenti visibili (demo-mode serve la cache). Marker `.unlock-protected` creato per il gate
+M3 e rimosso a fine fix.
+
+**Decisione:** ☑ Mantenuto. HOTFIX-5 committato (3 commit, uno per fix) e pushato su `restyle-ui` dopo
+«ok push». Tooling `.claude/` resta locale (non pushato). BASSI B1–B9 restano backlog.
