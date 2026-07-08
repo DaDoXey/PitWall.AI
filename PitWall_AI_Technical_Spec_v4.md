@@ -460,7 +460,7 @@ pytest>=8.0.0
    documentare i risultati nel PROMPT_LOG.
 3. Per l'iterazione sul system prompt, usare Claude.ai (piano gratuito)
    prima di testare via API.
-4. max_tokens=2500 è il massimo — impostato dopo fix INC-001 (era 1500).
+4. max_tokens=2500 è il minimo sicuro per l'output completo a 4 sezioni — impostato dopo fix INC-001 (era 1500).
    Non aumentare ulteriormente senza necessità.
 
 **Costo totale stimato MVP (sviluppo + test):** < $2.00
