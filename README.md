@@ -97,7 +97,7 @@ modificano. Le correzioni ai soli dati demo di presentazione sono tracciate in
 | Documento | Stato |
 |---|---|
 | `README.md` (questo file) | **Attuale** — stato del progetto post-restyle. |
-| `PitWall_AI_Technical_Spec_v4.md` | **Attuale** — specifica tecnica post-building di riferimento. |
+| `PitWall_AI_Technical_Spec_v4.md` | Storico — architettura di riferimento, ma lo **stack LLM è superato** (documenta OpenAI/GPT-4o, ormai rimosso: il codice usa solo Anthropic). Per lo stack attuale vedi questo README + `agent.py`. |
 | `AVVIO_RAPIDO.md` | **Attuale** — guida operativa (lavorare da un secondo PC). |
 | `PitWall_AI_Technical_Spec_v3.md` | Storico — superato da v4. |
 | `README_EXTENSION.md` | Storico — pianificazione migrazione v2 (riconciliata, ma superata dal restyle). |

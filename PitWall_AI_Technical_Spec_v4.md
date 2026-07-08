@@ -1,5 +1,10 @@
 # PitWall.AI — Specifica Tecnica v4 (Post-Building, Consolidata)
 
+> ⚠️ **Documento storico — stack LLM superato.** Questa specifica descrive uno stack
+> con OpenAI/GPT-4o mini e il pacchetto `openai`, **rimosso dal codice**: PitWall usa oggi
+> **solo Anthropic** (default `claude-haiku-4-5`, fallback `claude-sonnet-4-6`). Architettura e
+> flussi restano validi come riferimento; per lo stack LLM attuale vedi `README.md` e `agent.py`.
+
 **Repository:** https://github.com/DaDoXey/PitWall.AI.git
 
 | Campo | Valore |
