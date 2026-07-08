@@ -1584,5 +1584,7 @@ file protetti (M3 su `agent.py`).
 intatti · zero cambiamenti visibili (demo-mode serve la cache). Marker `.unlock-protected` creato per il gate
 M3 e rimosso a fine fix.
 
-**Decisione:** ☑ Mantenuto. HOTFIX-5 committato (3 commit, uno per fix) e pushato su `restyle-ui` dopo
-«ok push». Tooling `.claude/` resta locale (non pushato). BASSI B1–B9 restano backlog.
+**Decisione:** ☑ Mantenuto. HOTFIX-5 committato (3 commit, uno per fix — `8f3f732` M1, `3cca850` M2,
+`18b4f18` M3) e pushato su `restyle-ui` dopo «ok push». Poi `main` allineato con `git merge --ff-only
+restyle-ui` + push: `main` == `restyle-ui` == `origin/*` a **`18b4f18`** (deploy Streamlit Cloud aggiornato).
+Tooling `.claude/` resta locale (non pushato). BASSI B1–B9 restano backlog.
